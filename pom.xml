@@ -22,10 +22,25 @@
         </dependency>
 
         <dependency>
-        	<groupId>org.gost19.pacahon.client</groupId>
-        	<artifactId>pacahon-client</artifactId>
-        	<version>0.1-SNAPSHOT</version>
+    	    <groupId>org.gost19.pacahon.client</groupId>
+    	    <artifactId>pacahon-client</artifactId>
+    	    <version>0.1-SNAPSHOT</version>
         </dependency>
+
+
+        <dependency>
+    	    <groupId>ru.magnetosoft.bigarchive.server</groupId>
+            <artifactId>big-archive-server-kernel-base</artifactId>
+    	    <version>0.16.22-SNAPSHOT</version>
+        </dependency>
+        
+        
+        <dependency>
+            <groupId>ru.magnetosoft.bigarchive.client.web</groupId>
+            <artifactId>big-archive-client-web-objects</artifactId>
+            <version>0.14.75-SNAPSHOT</version>
+        </dependency>
+                                                                                                            
 
 	</dependencies>
 

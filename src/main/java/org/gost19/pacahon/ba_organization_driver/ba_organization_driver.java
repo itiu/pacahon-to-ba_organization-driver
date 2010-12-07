@@ -28,10 +28,10 @@ public class ba_organization_driver
 	/**
 	 * Конструктор.
 	 */
-	public ba_organization_driver (String endpoint_pretending_organization)
+	public ba_organization_driver(String endpoint_pretending_organization)
 	{
 		pacahon_client = new PacahonClient(endpoint_pretending_organization);
-		ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "NewUserManager.constructor");		
+		ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "NewUserManager.constructor");
 	}
 
 	/**
@@ -85,6 +85,54 @@ public class ba_organization_driver
 		}
 	} // end getDepartmentByUid()
 
+	public Department getDepartmentById(String uid, String locale) throws Exception
+	{
+		try
+		{
+			Model node = ModelFactory.createDefaultModel();
+			node.setNsPrefixes(predicates.getPrefixs());
+
+			// выберем нижеперечисленные предикаты из субьекта с заданным uid
+			// swrc:name@[localeName]
+			// gost19:parentDepartment
+
+			Resource r_department = node.createResource(predicates.zdb + "doc_" + uid);
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+
+			Model result = pacahon_client.get(ticket, node, "NewOrganizationComponentImpl.getDepartmentById");
+			Department dep = null;
+
+			if (result != null)
+			{
+				dep = new Department();
+
+				ExtendedIterator<Triple> it = result.getGraph().find(null, Node.createURI(predicates.swrc + "name"),
+						null);
+				if (it.hasNext())
+				{
+					Triple tt = it.next();
+					dep.setName((String) tt.getObject().getLiteral().getValue());
+				}
+				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "parentDepartment"), null);
+				if (it.hasNext())
+				{
+					Triple tt = it.next();
+					String val = (String) tt.getObject().getLiteral().getValue();
+					val = val.substring("zdb:dep_".length(), val.length());
+					dep.setId(val);
+				}
+			}
+
+			return dep;
+		} catch (Exception ex)
+		{
+			throw new IllegalStateException("Cannot get department", ex);
+		}
+	}
+
 	/**
 	 * {@inheritDoc} @@@
 	 */
@@ -127,7 +175,6 @@ public class ba_organization_driver
 		}
 
 	} // end getDepartmentUidByUserUid()
-
 
 	/**
 	 * Получение уникального идентификатора пользователя по имени учетной записи.
@@ -178,7 +225,6 @@ public class ba_organization_driver
 			throw new Exception("Cannot get user", ex);
 		}
 	} // end getUserUidByLogin()
-
 
 	/**
 	 * Найти пользователя по уникальному идентификатору.
