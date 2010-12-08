@@ -55,6 +55,31 @@
                                 </configuration>
                         </plugin>
                 </plugins>
+
+
+ <extensions>
+        <extension>
+          <groupId>org.apache.maven.wagon</groupId>
+          <artifactId>wagon-webdav</artifactId>
+          <version>1.0-beta-2</version>
+        </extension>
+      </extensions>
+
        </build>
+
+<distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>172.17.4.67</id>
+            <name>172.17.4.67-releases</name>
+            <url>dav:http://172.17.4.67:8081/artifactory/libs-releases-local</url>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>172.17.4.67</id>
+            <name>172.17.4.67-snapshots</name>
+            <url>dav:http://172.17.4.67:8081/artifactory/libs-snapshots-local</url>
+        </snapshotRepository>
+</distributionManagement>
 
 </project>

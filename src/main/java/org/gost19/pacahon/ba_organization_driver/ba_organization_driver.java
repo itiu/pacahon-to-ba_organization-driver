@@ -1,5 +1,9 @@
 package org.gost19.pacahon.ba_organization_driver;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.gost19.pacahon.client.PacahonClient;
 import org.gost19.pacahon.client.predicates;
 import org.omg.CORBA.UserException;
@@ -7,12 +11,15 @@ import org.omg.CORBA.UserException;
 import ru.magnetosoft.objects.organization.Department;
 import ru.magnetosoft.objects.organization.User;
 
+import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
@@ -37,7 +44,7 @@ public class ba_organization_driver
 	/**
 	 * {@inheritDoc} @@@
 	 */
-	public Department getDepartmentByUid(String uid, String localeName, String from) throws Exception
+	public Department getDepartmentByUid(String uid, String locale, String from) throws Exception
 	{
 		try
 		{
@@ -59,23 +66,7 @@ public class ba_organization_driver
 
 			if (result != null)
 			{
-				dep = new Department();
-
-				ExtendedIterator<Triple> it = result.getGraph().find(null, Node.createURI(predicates.swrc + "name"),
-						null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					dep.setName((String) tt.getObject().getLiteral().getValue());
-				}
-				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "parentDepartment"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					String val = (String) tt.getObject().getLiteral().getValue();
-					val = val.substring("zdb:dep_".length(), val.length());
-					dep.setId(val);
-				}
+				dep = getDepartmentFromGraph (result.getGraph(), locale, from);
 			}
 
 			return dep;
@@ -178,6 +169,88 @@ public class ba_organization_driver
 		}
 	} // end getUserUidByLogin()
 
+	private Department getDepartmentFromGraph (Graph gg, String locale, String from)
+	{
+		Department dep = new Department();
+
+		ExtendedIterator<Triple> it = gg.find(null, Node.createURI(predicates.swrc + "name"),
+				null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			dep.setName((String) tt.getObject().getLiteral().getValue());
+		}
+		it = gg.find(null, Node.createURI(predicates.gost19 + "parentDepartment"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			String val = (String) tt.getObject().getLiteral().getValue();
+			val = val.substring("zdb:dep_".length(), val.length());
+			dep.setId(val);
+		}
+		return dep;
+	}
+	
+	
+	private User getUserFromGraph (Graph gg, String locale, String from)
+	{
+		User usr = new User();
+
+		ExtendedIterator<Triple> it = gg.find(null,
+				Node.createURI(predicates.swrc + "firstName"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setFirstName((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(null, Node.createURI(predicates.swrc + "lastName"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setLastName((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(null, Node.createURI(predicates.gost19 + "middleName"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setMiddleName((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(null, Node.createURI(predicates.gost19 + "domainName"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setLogin((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(null, Node.createURI(predicates.swrc + "email"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setEmail((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(null, Node.createURI(predicates.docs19 + "position"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setPosition((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(null, Node.createURI(predicates.docs19 + "department"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			String val = (String) tt.getObject().getLiteral().getValue();
+			val = val.substring("zdb:dep_".length(), val.length());
+
+//			usr.setDepartment(getDepartmentByUid(val, locale, from));
+		}
+		return usr;
+	}
+	
 	public User getUserByLogin(String login, String locale, String from) throws Exception
 	{
 
@@ -214,8 +287,59 @@ public class ba_organization_driver
 			User usr = null;
 
 			if (result != null)
+			{				
+				usr = getUserFromGraph (result.getGraph(), locale, from);
+			}
+
+			return usr;
+		} catch (Exception ex)
+		{
+			throw new IllegalStateException("Cannot get user", ex);
+		}
+
+	}
+
+	public List<User> getUsersByName(String tokens, String locale, boolean withEmail, boolean withActive, String from)
+			throws Exception
+	{
+		try
+		{
+			List<User> res = new ArrayList<User>();
+
+			Model node = ModelFactory.createDefaultModel();
+			node.setNsPrefixes(predicates.getPrefixs());
+
+			// выберем нижеперечисленные предикаты из субьекта с заданными uids
+
+			// gost19:department
+			// firstName->swrc:firstName@[localeName]
+			// surname->swrc:middlename@[localeName]
+			// domainName->docs19:login
+			// email->swrc:email
+			// post->docs19:position@[localeName]
+			// secondName->swrc:lastName@[localeName]
+
+			Resource r_department = node.createResource(predicates.query + "any");
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
+					node.createLiteral("[" + tokens + "]"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "domainName"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "email"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+
+			Model result = pacahon_client.get(ticket, node, from);
+
+			if (result != null)
 			{
-				usr = new User();
+				User usr = new User();
 
 				ExtendedIterator<Triple> it = result.getGraph().find(null,
 						Node.createURI(predicates.swrc + "firstName"), null);
@@ -243,7 +367,7 @@ public class ba_organization_driver
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setLogin((String) tt.getObject().getLiteral().getValue());
+					usr.setDomainName((String) tt.getObject().getLiteral().getValue());
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "email"), null);
@@ -257,7 +381,7 @@ public class ba_organization_driver
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setPosition((String) tt.getObject().getLiteral().getValue());
+					usr.setPost((String) tt.getObject().getLiteral().getValue());
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
@@ -266,15 +390,124 @@ public class ba_organization_driver
 					Triple tt = it.next();
 					String val = (String) tt.getObject().getLiteral().getValue();
 					val = val.substring("zdb:dep_".length(), val.length());
-
-					usr.setDepartment(getDepartmentByUid(val, locale, from));
+					usr.setDepartment(getDepartmentByUserUid(usr.getId(), locale, from));
 				}
+				res.add(usr);
 			}
 
-			return usr;
+			return res;
 		} catch (Exception ex)
 		{
-			throw new IllegalStateException("Cannot get user", ex);
+			throw new Exception("Cannot get users", ex);
+		}
+	}
+
+	public List<User> getUsersByUids(Collection<String> ids, String locale, String from) throws Exception
+	{
+		try
+		{
+			List<User> res = new ArrayList<User>();
+
+			Model node = ModelFactory.createDefaultModel();
+			node.setNsPrefixes(predicates.getPrefixs());
+
+			// выберем нижеперечисленные предикаты из субьекта с заданными uids
+
+			// gost19:department
+			// firstName->swrc:firstName@[localeName]
+			// surname->swrc:middlename@[localeName]
+			// domainName->docs19:login
+			// email->swrc:email
+			// post->docs19:position@[localeName]
+			// secondName->swrc:lastName@[localeName]
+
+			StringBuffer sb = new StringBuffer();
+			sb.append("\"[");
+			boolean first = true;
+			for (String id : ids)
+			{
+				if (!first)
+					sb.append(",");
+
+				sb.append("zdb:doc_");
+				sb.append(id);
+				first = false;
+			}
+			sb.append("\"]");
+
+			Resource r_department = node.createResource(sb.toString());
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "domainName"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "email"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+
+			Model result = pacahon_client.get(ticket, node, from);
+
+			ResIterator subj_it = result.listSubjects();
+			User usr = new User ();
+			while (subj_it.hasNext())
+			{
+				Resource ss = subj_it.next();
+
+				Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc,"firstName"));
+				usr.setFirstName((String) pp.getLiteral().getValue());
+
+				pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc,"lastName"));
+				usr.setLastName((String) pp.getLiteral().getValue());
+
+//				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "middleName"), null);
+//				if (it.hasNext())
+//				{
+//					Triple tt = it.next();
+//					usr.setMiddleName((String) tt.getObject().getLiteral().getValue());
+//				}
+//
+//				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "domainName"), null);
+//				if (it.hasNext())
+//				{
+//					Triple tt = it.next();
+//					usr.setDomainName((String) tt.getObject().getLiteral().getValue());
+//				}
+
+//				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "email"), null);
+//				if (it.hasNext())
+//				{
+//					Triple tt = it.next();
+//					usr.setEmail((String) tt.getObject().getLiteral().getValue());
+//				}
+
+//				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "position"), null);
+//				if (it.hasNext())
+//				{
+//					Triple tt = it.next();
+//					usr.setPost((String) tt.getObject().getLiteral().getValue());
+//				}
+
+//				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
+//				if (it.hasNext())
+//				{
+//					Triple tt = it.next();
+//					String val = (String) tt.getObject().getLiteral().getValue();
+//					val = val.substring("zdb:dep_".length(), val.length());
+//					usr.setDepartment(getDepartmentByUserUid(usr.getId(), locale, from));
+//				}
+				res.add(usr);
+			}
+
+			return res;
+		} catch (Exception ex)
+		{
+			throw new Exception("Cannot get users", ex);
 		}
 
 	}
@@ -434,6 +667,36 @@ public class ba_organization_driver
 			throw new IllegalStateException("Cannot get department", ex);
 		}
 	}
+/*
+	public List<Department> getDepartmentsByIds(Collection<String> ids, String locale, String from) throws Exception
+{
+		try
+		{
+			List<Department> res = new ArrayList<Department>();
 
+			Model node = ModelFactory.createDefaultModel();
+			node.setNsPrefixes(predicates.getPrefixs());
+
+			StringBuffer sb = new StringBuffer();
+			sb.append("\"[");
+			boolean first = true;
+			for (String id : ids)
+			{
+				if (!first)
+					sb.append(",");
+
+				sb.append("zdb:doc_");
+				sb.append(id);
+				first = false;
+			}
+			sb.append("\"]");
+
+			Resource r_department = node.createResource(sb.toString());
+			
+			dep = getDepartmentFromGraph (result.getGraph(), locale, from);
+			
+}
+*/	
+	
 } // end UserManager
 
