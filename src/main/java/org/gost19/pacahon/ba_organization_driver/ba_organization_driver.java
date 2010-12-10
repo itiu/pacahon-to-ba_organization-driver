@@ -42,8 +42,19 @@ public class ba_organization_driver
 		ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "NewUserManager.constructor");
 	}
 
+	private String correct_locale(String locale)
+	{
+		if (locale == "ru")
+			locale = "Ru";
+		if (locale == "en")
+			locale = "En";
+		return locale;
+	}
+
 	public List<Department> getOrganizationRoots(String locale, String from) throws Exception
 	{
+		locale = correct_locale(locale);
+
 		try
 		{
 			List<Department> res = new ArrayList<Department>();
@@ -64,26 +75,79 @@ public class ba_organization_driver
 			ResIterator subj_it = result.listSubjects();
 			while (subj_it.hasNext())
 			{
-				Department dep = new Department();
 				Resource ss = subj_it.next();
-
-				Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "name"));
-				dep.setName((String) pp.getLiteral().getValue());
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"));
-				dep.setInternalId((String) pp.getLiteral().getValue());
-
-				String id = ss.getLocalName();
-				id = id.substring("doc_".length(), id.length());
-				dep.setId(id);
-
+				Department dep = cResource2Department(ss);
 				res.add(dep);
 			}
 
 			return res;
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get users", ex);
+			throw new Exception("Cannot get department", ex);
+		}
+
+	}
+
+	private Department cResource2Department(Resource ss)
+	{
+		Department dep = new Department();
+
+		Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "name"));
+		if (pp != null)
+			dep.setName((String) pp.getLiteral().getValue(), "ru");
+
+		pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"));
+		if (pp != null)
+			dep.setInternalId((String) pp.getLiteral().getValue());
+
+		pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"));
+		if (pp != null)
+		{
+			String previousId = (String) pp.getLiteral().getValue();
+			previousId = previousId.substring("zdb:dep_".length(), previousId.length());
+			dep.setPreviousId(previousId);
+		}
+
+		String id = ss.getLocalName();
+		id = id.substring("doc_".length(), id.length());
+		dep.setId(id);
+		return dep;
+	}
+
+	public List<Department> getDepartmentsByParentId(String parentId, String locale, boolean withActive, String from)
+			throws Exception
+	{
+		locale = correct_locale(locale);
+
+		try
+		{
+			List<Department> res = new ArrayList<Department>();
+
+			Model node = ModelFactory.createDefaultModel();
+			node.setNsPrefixes(predicates.getPrefixs());
+
+			Resource r_department = node.createResource(predicates.query + "any");
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
+					ResourceFactory.createProperty(predicates.zdb, "dep_" + parentId));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+
+			Model result = pacahon_client.get(ticket, node, from);
+
+			ResIterator subj_it = result.listSubjects();
+			while (subj_it.hasNext())
+			{
+				Resource ss = subj_it.next();
+				Department dep = cResource2Department(ss);
+				res.add(dep);
+			}
+
+			return res;
+		} catch (Exception ex)
+		{
+			throw new Exception("Cannot get department", ex);
 		}
 
 	}
@@ -91,6 +155,8 @@ public class ba_organization_driver
 	public List<User> getUsersByDepartmentId(String departmentId, String locale, boolean withEmail, boolean withActive,
 			String from) throws Exception
 	{
+		locale = correct_locale(locale);
+
 		try
 		{
 			List<User> res = new ArrayList<User>();
@@ -129,22 +195,22 @@ public class ba_organization_driver
 			Model result = pacahon_client.get(ticket, node, from);
 
 			ResIterator subj_it = result.listSubjects();
-			User usr = new User();
 			while (subj_it.hasNext())
 			{
+				User usr = new User();
 				Resource ss = subj_it.next();
 
 				Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"));
 				if (pp != null)
-					usr.setFirstName((String) pp.getLiteral().getValue());
+					usr.setFirstName((String) pp.getLiteral().getValue(), locale);
 
 				pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"));
 				if (pp != null)
-					usr.setLastName((String) pp.getLiteral().getValue());
+					usr.setLastName((String) pp.getLiteral().getValue(), locale);
 
 				pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"));
 				if (pp != null)
-					usr.setMiddleName((String) pp.getLiteral().getValue());
+					usr.setMiddleName((String) pp.getLiteral().getValue(), locale);
 
 				pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "domainName"));
 				if (pp != null)
@@ -156,7 +222,7 @@ public class ba_organization_driver
 
 				pp = ss.getProperty(ResourceFactory.createProperty(predicates.docs19, "position"));
 				if (pp != null)
-					usr.setPost((String) pp.getLiteral().getValue());
+					usr.setPosition((String) pp.getLiteral().getValue(), locale);
 
 				pp = ss.getProperty(ResourceFactory.createProperty(predicates.docs19, "department"));
 				if (pp != null)
@@ -189,6 +255,8 @@ public class ba_organization_driver
 	 */
 	public Department getDepartmentByUid(String uid, String locale, String from) throws Exception
 	{
+		locale = correct_locale(locale);
+
 		try
 		{
 			Model node = ModelFactory.createDefaultModel();
@@ -314,13 +382,15 @@ public class ba_organization_driver
 
 	private Department getDepartmentFromGraph(Graph gg, String locale, String from)
 	{
+		locale = correct_locale(locale);
+
 		Department dep = new Department();
 
 		ExtendedIterator<Triple> it = gg.find(null, Node.createURI(predicates.swrc + "name"), null);
 		if (it.hasNext())
 		{
 			Triple tt = it.next();
-			dep.setName((String) tt.getObject().getLiteral().getValue());
+			dep.setName((String) tt.getObject().getLiteral().getValue(), "ru");
 		}
 		it = gg.find(null, Node.createURI(predicates.gost19 + "parentDepartment"), null);
 		if (it.hasNext())
@@ -335,27 +405,29 @@ public class ba_organization_driver
 
 	private User getUserFromGraph(Graph gg, String locale, String from)
 	{
+		locale = correct_locale(locale);
+
 		User usr = new User();
 
 		ExtendedIterator<Triple> it = gg.find(null, Node.createURI(predicates.swrc + "firstName"), null);
 		if (it.hasNext())
 		{
 			Triple tt = it.next();
-			usr.setFirstName((String) tt.getObject().getLiteral().getValue());
+			usr.setFirstName((String) tt.getObject().getLiteral().getValue(), locale);
 		}
 
 		it = gg.find(null, Node.createURI(predicates.swrc + "lastName"), null);
 		if (it.hasNext())
 		{
 			Triple tt = it.next();
-			usr.setLastName((String) tt.getObject().getLiteral().getValue());
+			usr.setLastName((String) tt.getObject().getLiteral().getValue(), locale);
 		}
 
 		it = gg.find(null, Node.createURI(predicates.gost19 + "middleName"), null);
 		if (it.hasNext())
 		{
 			Triple tt = it.next();
-			usr.setMiddleName((String) tt.getObject().getLiteral().getValue());
+			usr.setMiddleName((String) tt.getObject().getLiteral().getValue(), locale);
 		}
 
 		it = gg.find(null, Node.createURI(predicates.gost19 + "domainName"), null);
@@ -376,7 +448,7 @@ public class ba_organization_driver
 		if (it.hasNext())
 		{
 			Triple tt = it.next();
-			usr.setPosition((String) tt.getObject().getLiteral().getValue());
+			usr.setPosition((String) tt.getObject().getLiteral().getValue(), locale);
 		}
 
 		it = gg.find(null, Node.createURI(predicates.docs19 + "department"), null);
@@ -393,6 +465,7 @@ public class ba_organization_driver
 
 	public User getUserByLogin(String login, String locale, String from) throws Exception
 	{
+		locale = correct_locale(locale);
 
 		try
 		{
@@ -442,6 +515,8 @@ public class ba_organization_driver
 	public List<User> getUsersByName(String tokens, String locale, boolean withEmail, boolean withActive, String from)
 			throws Exception
 	{
+		locale = correct_locale(locale);
+
 		try
 		{
 			List<User> res = new ArrayList<User>();
@@ -486,21 +561,21 @@ public class ba_organization_driver
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setFirstName((String) tt.getObject().getLiteral().getValue());
+					usr.setFirstName((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "lastName"), null);
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setLastName((String) tt.getObject().getLiteral().getValue());
+					usr.setLastName((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "middleName"), null);
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setMiddleName((String) tt.getObject().getLiteral().getValue());
+					usr.setMiddleName((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "domainName"), null);
@@ -521,7 +596,7 @@ public class ba_organization_driver
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setPost((String) tt.getObject().getLiteral().getValue());
+					usr.setPosition((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
@@ -544,6 +619,8 @@ public class ba_organization_driver
 
 	public List<User> getUsersByUids(Collection<String> ids, String locale, String from) throws Exception
 	{
+		locale = correct_locale(locale);
+
 		try
 		{
 			List<User> res = new ArrayList<User>();
@@ -600,10 +677,10 @@ public class ba_organization_driver
 				Resource ss = subj_it.next();
 
 				Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"));
-				usr.setFirstName((String) pp.getLiteral().getValue());
+				usr.setFirstName((String) pp.getLiteral().getValue(), locale);
 
 				pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"));
-				usr.setLastName((String) pp.getLiteral().getValue());
+				usr.setLastName((String) pp.getLiteral().getValue(), locale);
 
 				// it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "middleName"), null);
 				// if (it.hasNext())
@@ -663,8 +740,10 @@ public class ba_organization_driver
 	 * @throws UserException
 	 *             в случае ошибки
 	 */
-	public User selectUserByUidInternal(String uid, String localeName, String from) throws Exception
+	public User selectUserByUidInternal(String uid, String locale, String from) throws Exception
 	{
+		locale = correct_locale(locale);
+
 		try
 		{
 			Model node = ModelFactory.createDefaultModel();
@@ -708,21 +787,21 @@ public class ba_organization_driver
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setFirstName((String) tt.getObject().getLiteral().getValue());
+					usr.setFirstName((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "lastName"), null);
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setLastName((String) tt.getObject().getLiteral().getValue());
+					usr.setLastName((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "middleName"), null);
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setMiddleName((String) tt.getObject().getLiteral().getValue());
+					usr.setMiddleName((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "domainName"), null);
@@ -743,7 +822,7 @@ public class ba_organization_driver
 				if (it.hasNext())
 				{
 					Triple tt = it.next();
-					usr.setPost((String) tt.getObject().getLiteral().getValue());
+					usr.setPosition((String) tt.getObject().getLiteral().getValue(), locale);
 				}
 
 				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
@@ -765,6 +844,8 @@ public class ba_organization_driver
 
 	public Department getDepartmentByUserUid(String uid, String locale, String from) throws Exception
 	{
+		locale = correct_locale(locale);
+
 		try
 		{
 			Model node = ModelFactory.createDefaultModel();
