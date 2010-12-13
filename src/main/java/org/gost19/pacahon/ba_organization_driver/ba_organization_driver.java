@@ -14,9 +14,9 @@ import ru.magnetosoft.objects.organization.User;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
@@ -65,6 +65,8 @@ public class ba_organization_driver
 			Resource r_department = node.createResource(predicates.query + "any");
 			r_department.addProperty(ResourceFactory.createProperty(predicates.rdf, "type"),
 					ResourceFactory.createProperty(predicates.docs19, "organization_card"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "active"),
+					node.createLiteral("true"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
 					ResourceFactory.createProperty(predicates.query, "get"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
@@ -131,6 +133,8 @@ public class ba_organization_driver
 					ResourceFactory.createProperty(predicates.query, "get"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
 					ResourceFactory.createProperty(predicates.zdb, "dep_" + parentId));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "active"),
+					node.createLiteral("true"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
 					ResourceFactory.createProperty(predicates.query, "get"));
 
@@ -156,6 +160,7 @@ public class ba_organization_driver
 			String from) throws Exception
 	{
 		locale = correct_locale(locale);
+		Department dd = getDepartmentByExtId(departmentId, locale, from);
 
 		try
 		{
@@ -191,6 +196,10 @@ public class ba_organization_driver
 					ResourceFactory.createProperty(predicates.zdb, "dep_" + departmentId));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
 					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "active"),
+					node.createLiteral("true"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.rdf, "type"),
+					ResourceFactory.createProperty(predicates.docs19, "employee_card"));
 
 			Model result = pacahon_client.get(ticket, node, from);
 
@@ -227,8 +236,13 @@ public class ba_organization_driver
 				pp = ss.getProperty(ResourceFactory.createProperty(predicates.docs19, "department"));
 				if (pp != null)
 				{
-					RDFNode oo = pp.getObject();
-					usr.setDepartmentId(oo.toString());
+					String pdep = pp.getObject().toString();
+					pdep = pdep.substring("zdb:dep_".length(), pdep.length());
+
+					if (pdep.equals(departmentId))
+						usr.setDepartment(dd);
+					else
+						throw new Exception("o_O parentDepartment != user.department");
 				}
 
 				// it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
@@ -271,6 +285,47 @@ public class ba_organization_driver
 					ResourceFactory.createProperty(predicates.query, "get"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
 					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+
+			Model result = pacahon_client.get(ticket, node, from);
+			Department dep = null;
+
+			if (result != null)
+			{
+				dep = getDepartmentFromGraph(result.getGraph(), locale, from);
+			}
+
+			return dep;
+		} catch (Exception ex)
+		{
+			throw new Exception("Cannot get department", ex);
+		}
+	} // end getDepartmentByUid()
+
+	/**
+	 * {@inheritDoc} @@@
+	 */
+	public Department getDepartmentByExtId(String externalIdentifer, String locale, String from) throws Exception
+	{
+		locale = correct_locale(locale);
+
+		try
+		{
+			Model node = ModelFactory.createDefaultModel();
+			node.setNsPrefixes(predicates.getPrefixs());
+
+			// выберем нижеперечисленные предикаты из субьекта с заданным uid
+			// swrc:name@[localeName]
+			// gost19:parentDepartment
+
+			Resource r_department = node.createResource(predicates.query + "any");
+			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
+					ResourceFactory.createProperty(predicates.query, "get"));
+			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
+					node.createLiteral(externalIdentifer));
 
 			Model result = pacahon_client.get(ticket, node, from);
 			Department dep = null;
@@ -387,10 +442,14 @@ public class ba_organization_driver
 		Department dep = new Department();
 
 		ExtendedIterator<Triple> it = gg.find(null, Node.createURI(predicates.swrc + "name"), null);
-		if (it.hasNext())
+		while (it.hasNext())
 		{
 			Triple tt = it.next();
-			dep.setName((String) tt.getObject().getLiteral().getValue(), "ru");
+			LiteralLabel ll = tt.getObject().getLiteral();
+			if (ll.language().equals("ru"))
+				dep.setName((String) tt.getObject().getLiteral().getValue(), "Ru");
+			if (ll.language().equals("en"))
+				dep.setName((String) tt.getObject().getLiteral().getValue(), "En");
 		}
 		it = gg.find(null, Node.createURI(predicates.gost19 + "parentDepartment"), null);
 		if (it.hasNext())
@@ -400,6 +459,14 @@ public class ba_organization_driver
 			val = val.substring("zdb:dep_".length(), val.length());
 			dep.setId(val);
 		}
+		it = gg.find(null, Node.createURI(predicates.gost19 + "externalIdentifer"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			String val = (String) tt.getObject().getLiteral().getValue();
+			dep.setInternalId(val);
+		}
+
 		return dep;
 	}
 
