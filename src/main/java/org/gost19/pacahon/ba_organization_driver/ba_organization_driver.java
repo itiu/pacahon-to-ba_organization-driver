@@ -78,7 +78,7 @@ public class ba_organization_driver
 			while (subj_it.hasNext())
 			{
 				Resource ss = subj_it.next();
-				Department dep = cResource2Department(ss);
+				Department dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
 				res.add(dep);
 			}
 
@@ -88,32 +88,6 @@ public class ba_organization_driver
 			throw new Exception("Cannot get department", ex);
 		}
 
-	}
-
-	private Department cResource2Department(Resource ss)
-	{
-		Department dep = new Department();
-
-		Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "name"));
-		if (pp != null)
-			dep.setName((String) pp.getLiteral().getValue(), "ru");
-
-		pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"));
-		if (pp != null)
-			dep.setInternalId((String) pp.getLiteral().getValue());
-
-		pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"));
-		if (pp != null)
-		{
-			String previousId = (String) pp.getLiteral().getValue();
-			previousId = previousId.substring("zdb:dep_".length(), previousId.length());
-			dep.setPreviousId(previousId);
-		}
-
-		String id = ss.getLocalName();
-		id = id.substring("doc_".length(), id.length());
-		dep.setId(id);
-		return dep;
 	}
 
 	public List<Department> getDepartmentsByParentId(String parentId, String locale, boolean withActive, String from)
@@ -144,7 +118,7 @@ public class ba_organization_driver
 			while (subj_it.hasNext())
 			{
 				Resource ss = subj_it.next();
-				Department dep = cResource2Department(ss);
+				Department dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
 				res.add(dep);
 			}
 
@@ -206,53 +180,9 @@ public class ba_organization_driver
 			ResIterator subj_it = result.listSubjects();
 			while (subj_it.hasNext())
 			{
-				User usr = new User();
 				Resource ss = subj_it.next();
 
-				Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"));
-				if (pp != null)
-					usr.setFirstName((String) pp.getLiteral().getValue(), locale);
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"));
-				if (pp != null)
-					usr.setLastName((String) pp.getLiteral().getValue(), locale);
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"));
-				if (pp != null)
-					usr.setMiddleName((String) pp.getLiteral().getValue(), locale);
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.gost19, "domainName"));
-				if (pp != null)
-					usr.setDomainName((String) pp.getLiteral().getValue());
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "email"));
-				if (pp != null)
-					usr.setEmail((String) pp.getLiteral().getValue());
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.docs19, "position"));
-				if (pp != null)
-					usr.setPosition((String) pp.getLiteral().getValue(), locale);
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.docs19, "department"));
-				if (pp != null)
-				{
-					String pdep = pp.getObject().toString();
-					pdep = pdep.substring("zdb:dep_".length(), pdep.length());
-
-					if (pdep.equals(departmentId))
-						usr.setDepartment(dd);
-					else
-						throw new Exception("o_O parentDepartment != user.department");
-				}
-
-				// it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
-				// if (it.hasNext())
-				// {
-				// Triple tt = it.next();
-				// String val = (String) tt.getObject().getLiteral().getValue();
-				// val = val.substring("zdb:dep_".length(), val.length());
-				// usr.setDepartment(getDepartmentByUserUid(usr.getId(), locale, from));
-				// }
+				User usr = getUserFromGraph(ss, result.getGraph(), locale, from);
 				res.add(usr);
 			}
 
@@ -291,9 +221,11 @@ public class ba_organization_driver
 			Model result = pacahon_client.get(ticket, node, from);
 			Department dep = null;
 
-			if (result != null)
+			ResIterator subj_it = result.listSubjects();
+			if (subj_it.hasNext())
 			{
-				dep = getDepartmentFromGraph(result.getGraph(), locale, from);
+				Resource ss = subj_it.next();
+				dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
 			}
 
 			return dep;
@@ -330,9 +262,11 @@ public class ba_organization_driver
 			Model result = pacahon_client.get(ticket, node, from);
 			Department dep = null;
 
-			if (result != null)
+			ResIterator subj_it = result.listSubjects();
+			if (subj_it.hasNext())
 			{
-				dep = getDepartmentFromGraph(result.getGraph(), locale, from);
+				Resource ss = subj_it.next();
+				dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
 			}
 
 			return dep;
@@ -435,101 +369,6 @@ public class ba_organization_driver
 		}
 	} // end getUserUidByLogin()
 
-	private Department getDepartmentFromGraph(Graph gg, String locale, String from)
-	{
-		locale = correct_locale(locale);
-
-		Department dep = new Department();
-
-		ExtendedIterator<Triple> it = gg.find(null, Node.createURI(predicates.swrc + "name"), null);
-		while (it.hasNext())
-		{
-			Triple tt = it.next();
-			LiteralLabel ll = tt.getObject().getLiteral();
-			if (ll.language().equals("ru"))
-				dep.setName((String) tt.getObject().getLiteral().getValue(), "Ru");
-			if (ll.language().equals("en"))
-				dep.setName((String) tt.getObject().getLiteral().getValue(), "En");
-		}
-		it = gg.find(null, Node.createURI(predicates.gost19 + "parentDepartment"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			String val = (String) tt.getObject().getLiteral().getValue();
-			val = val.substring("zdb:dep_".length(), val.length());
-			dep.setId(val);
-		}
-		it = gg.find(null, Node.createURI(predicates.gost19 + "externalIdentifer"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			String val = (String) tt.getObject().getLiteral().getValue();
-			dep.setInternalId(val);
-		}
-
-		return dep;
-	}
-
-	private User getUserFromGraph(Graph gg, String locale, String from)
-	{
-		locale = correct_locale(locale);
-
-		User usr = new User();
-
-		ExtendedIterator<Triple> it = gg.find(null, Node.createURI(predicates.swrc + "firstName"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setFirstName((String) tt.getObject().getLiteral().getValue(), locale);
-		}
-
-		it = gg.find(null, Node.createURI(predicates.swrc + "lastName"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setLastName((String) tt.getObject().getLiteral().getValue(), locale);
-		}
-
-		it = gg.find(null, Node.createURI(predicates.gost19 + "middleName"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setMiddleName((String) tt.getObject().getLiteral().getValue(), locale);
-		}
-
-		it = gg.find(null, Node.createURI(predicates.gost19 + "domainName"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setLogin((String) tt.getObject().getLiteral().getValue());
-		}
-
-		it = gg.find(null, Node.createURI(predicates.swrc + "email"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setEmail((String) tt.getObject().getLiteral().getValue());
-		}
-
-		it = gg.find(null, Node.createURI(predicates.docs19 + "position"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setPosition((String) tt.getObject().getLiteral().getValue(), locale);
-		}
-
-		it = gg.find(null, Node.createURI(predicates.docs19 + "department"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			String val = (String) tt.getObject().getLiteral().getValue();
-			val = val.substring("zdb:dep_".length(), val.length());
-
-			// usr.setDepartment(getDepartmentByUid(val, locale, from));
-		}
-		return usr;
-	}
-
 	public User getUserByLogin(String login, String locale, String from) throws Exception
 	{
 		locale = correct_locale(locale);
@@ -566,9 +405,12 @@ public class ba_organization_driver
 			Model result = pacahon_client.get(ticket, node, from);
 			User usr = null;
 
-			if (result != null)
+			ResIterator subj_it = result.listSubjects();
+			if (subj_it.hasNext())
 			{
-				usr = getUserFromGraph(result.getGraph(), locale, from);
+				Resource ss = subj_it.next();
+
+				usr = getUserFromGraph(ss, result.getGraph(), locale, from);
 			}
 
 			return usr;
@@ -619,61 +461,12 @@ public class ba_organization_driver
 
 			Model result = pacahon_client.get(ticket, node, from);
 
-			if (result != null)
+			ResIterator subj_it = result.listSubjects();
+			while (subj_it.hasNext())
 			{
-				User usr = new User();
+				Resource ss = subj_it.next();
 
-				ExtendedIterator<Triple> it = result.getGraph().find(null,
-						Node.createURI(predicates.swrc + "firstName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setFirstName((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "lastName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setLastName((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "middleName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setMiddleName((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "domainName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setDomainName((String) tt.getObject().getLiteral().getValue());
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "email"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setEmail((String) tt.getObject().getLiteral().getValue());
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "position"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setPosition((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					String val = (String) tt.getObject().getLiteral().getValue();
-					val = val.substring("zdb:dep_".length(), val.length());
-					usr.setDepartment(getDepartmentByUserUid(usr.getId(), locale, from));
-				}
+				User usr = getUserFromGraph(ss, result.getGraph(), locale, from);
 				res.add(usr);
 			}
 
@@ -738,53 +531,11 @@ public class ba_organization_driver
 			Model result = pacahon_client.get(ticket, node, from);
 
 			ResIterator subj_it = result.listSubjects();
-			User usr = new User();
 			while (subj_it.hasNext())
 			{
 				Resource ss = subj_it.next();
 
-				Statement pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"));
-				usr.setFirstName((String) pp.getLiteral().getValue(), locale);
-
-				pp = ss.getProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"));
-				usr.setLastName((String) pp.getLiteral().getValue(), locale);
-
-				// it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "middleName"), null);
-				// if (it.hasNext())
-				// {
-				// Triple tt = it.next();
-				// usr.setMiddleName((String) tt.getObject().getLiteral().getValue());
-				// }
-				//
-				// it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "domainName"), null);
-				// if (it.hasNext())
-				// {
-				// Triple tt = it.next();
-				// usr.setDomainName((String) tt.getObject().getLiteral().getValue());
-				// }
-
-				// it = result.getGraph().find(null, Node.createURI(predicates.swrc + "email"), null);
-				// if (it.hasNext())
-				// {
-				// Triple tt = it.next();
-				// usr.setEmail((String) tt.getObject().getLiteral().getValue());
-				// }
-
-				// it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "position"), null);
-				// if (it.hasNext())
-				// {
-				// Triple tt = it.next();
-				// usr.setPost((String) tt.getObject().getLiteral().getValue());
-				// }
-
-				// it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
-				// if (it.hasNext())
-				// {
-				// Triple tt = it.next();
-				// String val = (String) tt.getObject().getLiteral().getValue();
-				// val = val.substring("zdb:dep_".length(), val.length());
-				// usr.setDepartment(getDepartmentByUserUid(usr.getId(), locale, from));
-				// }
+				User usr = getUserFromGraph(ss, result.getGraph(), locale, from);
 				res.add(usr);
 			}
 
@@ -845,61 +596,12 @@ public class ba_organization_driver
 			Model result = pacahon_client.get(ticket, node, from);
 			User usr = null;
 
-			if (result != null)
+			ResIterator subj_it = result.listSubjects();
+			if (subj_it.hasNext())
 			{
-				usr = new User();
+				Resource ss = subj_it.next();
 
-				ExtendedIterator<Triple> it = result.getGraph().find(null,
-						Node.createURI(predicates.swrc + "firstName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setFirstName((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "lastName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setLastName((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "middleName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setMiddleName((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.gost19 + "domainName"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setDomainName((String) tt.getObject().getLiteral().getValue());
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.swrc + "email"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setEmail((String) tt.getObject().getLiteral().getValue());
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "position"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					usr.setPosition((String) tt.getObject().getLiteral().getValue(), locale);
-				}
-
-				it = result.getGraph().find(null, Node.createURI(predicates.docs19 + "department"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					String val = (String) tt.getObject().getLiteral().getValue();
-					val = val.substring("zdb:dep_".length(), val.length());
-					usr.setDepartmentId(val);
-				}
+				usr = getUserFromGraph(ss, result.getGraph(), locale, from);
 			}
 
 			return usr;
@@ -955,6 +657,7 @@ public class ba_organization_driver
 			throw new IllegalStateException("Cannot get department", ex);
 		}
 	}
+
 	/*
 	 * public List<Department> getDepartmentsByIds(Collection<String> ids, String locale, String from) throws Exception
 	 * { try { List<Department> res = new ArrayList<Department>();
@@ -972,6 +675,167 @@ public class ba_organization_driver
 	 * 
 	 * }
 	 */
+
+	private Department getDepartmentFromGraph(Resource ss, Graph gg, String locale, String from)
+	{
+		locale = correct_locale(locale);
+
+		Department dep = new Department();
+
+		ExtendedIterator<Triple> it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "name"), null);
+
+		String val_en = null;
+		String val_ru = null;
+		while (it.hasNext())
+		{
+			Triple tt = it.next();
+			LiteralLabel ll = tt.getObject().getLiteral();
+			if (ll.language().equals("en"))
+				val_en = (String) tt.getObject().getLiteral().getValue();
+			if (ll.language().equals("ru"))
+				val_ru = (String) tt.getObject().getLiteral().getValue();
+		}
+
+		if (val_en != null)
+			dep.setName(val_en, "En");
+
+		if (val_ru != null)
+			dep.setName(val_ru, "Ru");
+
+		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "parentDepartment"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			String val = (String) tt.getObject().getLiteral().getValue();
+			val = val.substring("zdb:dep_".length(), val.length());
+			dep.setId(val);
+		}
+		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "externalIdentifer"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			String val = (String) tt.getObject().getLiteral().getValue();
+			dep.setInternalId(val);
+		}
+
+		return dep;
+	}
+
+	private User getUserFromGraph(Resource ss, Graph gg, String locale, String from)
+	{
+		locale = correct_locale(locale);
+
+		User usr = new User();
+
+		ExtendedIterator<Triple> it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "firstName"), null);
+		{
+			String val_en = null;
+			String val_ru = null;
+			while (it.hasNext())
+			{
+				Triple tt = it.next();
+				LiteralLabel ll = tt.getObject().getLiteral();
+				if (ll.language().equals("en"))
+					val_en = (String) tt.getObject().getLiteral().getValue();
+				if (ll.language().equals("ru"))
+					val_ru = (String) tt.getObject().getLiteral().getValue();
+			}
+
+			if (val_en != null)
+				usr.setFirstName(val_en, "En");
+
+			if (val_ru != null)
+				usr.setFirstName(val_ru, "Ru");
+		}
+
+		it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "lastName"), null);
+		{
+			String val_en = null;
+			String val_ru = null;
+			while (it.hasNext())
+			{
+				Triple tt = it.next();
+				LiteralLabel ll = tt.getObject().getLiteral();
+				if (ll.language().equals("en"))
+					val_en = (String) tt.getObject().getLiteral().getValue();
+				if (ll.language().equals("ru"))
+					val_ru = (String) tt.getObject().getLiteral().getValue();
+			}
+
+			if (val_en != null)
+				usr.setLastName(val_en, "En");
+
+			if (val_ru != null)
+				usr.setLastName(val_ru, "Ru");
+		}
+
+		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "middleName"), null);
+		{
+			String val_en = null;
+			String val_ru = null;
+			while (it.hasNext())
+			{
+				Triple tt = it.next();
+				LiteralLabel ll = tt.getObject().getLiteral();
+				if (ll.language().equals("en"))
+					val_en = (String) tt.getObject().getLiteral().getValue();
+				if (ll.language().equals("ru"))
+					val_ru = (String) tt.getObject().getLiteral().getValue();
+			}
+
+			if (val_en != null)
+				usr.setMiddleName(val_en, "En");
+
+			if (val_ru != null)
+				usr.setMiddleName(val_ru, "Ru");
+		}
+
+		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "domainName"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setLogin((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "email"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			usr.setEmail((String) tt.getObject().getLiteral().getValue());
+		}
+
+		it = gg.find(ss.asNode(), Node.createURI(predicates.docs19 + "position"), null);
+		{
+			String val_en = null;
+			String val_ru = null;
+			while (it.hasNext())
+			{
+				Triple tt = it.next();
+				LiteralLabel ll = tt.getObject().getLiteral();
+				if (ll.language().equals("en"))
+					val_en = (String) tt.getObject().getLiteral().getValue();
+				if (ll.language().equals("ru"))
+					val_ru = (String) tt.getObject().getLiteral().getValue();
+			}
+
+			if (val_en != null)
+				usr.setPosition(val_en, "En");
+
+			if (val_ru != null)
+				usr.setPosition(val_ru, "Ru");
+		}
+
+		it = gg.find(ss.asNode(), Node.createURI(predicates.docs19 + "department"), null);
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			String val = (String) tt.getObject().getLiteral().getValue();
+			val = val.substring("zdb:dep_".length(), val.length());
+
+			// usr.setDepartment(getDepartmentByUid(val, locale, from));
+		}
+		return usr;
+	}
 
 } // end UserManager
 
