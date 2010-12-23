@@ -2,6 +2,7 @@ package org.gost19.pacahon.ba_organization_driver;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.gost19.pacahon.client.PacahonClient;
@@ -20,7 +21,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
@@ -182,8 +182,13 @@ public class ba_organization_driver
 			{
 				Resource ss = subj_it.next();
 
-				User usr = getUserFromGraph(ss, result.getGraph(), locale, from);
-				res.add(usr);
+				User usr = getUserFromGraph(ss, result.getGraph(), null);
+
+				if (usr != null)
+				{
+					usr.setDepartment(dd);
+					res.add(usr);
+				}
 			}
 
 			return res;
@@ -410,7 +415,7 @@ public class ba_organization_driver
 			{
 				Resource ss = subj_it.next();
 
-				usr = getUserFromGraph(ss, result.getGraph(), locale, from);
+				usr = getUserFromGraph(ss, result.getGraph(), null);
 			}
 
 			return usr;
@@ -421,14 +426,26 @@ public class ba_organization_driver
 
 	}
 
-	public List<User> getUsersByName(String tokens, String locale, boolean withEmail, boolean withActive, String from)
-			throws Exception
+	public List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive,
+			String from) throws Exception
 	{
 		locale = correct_locale(locale);
 
+		String[] tokens = words.split(" ");
+
+		StringBuffer str_tokens = new StringBuffer();
+
+		for (String token : tokens)
+		{
+			if (str_tokens.length() > 0)
+				str_tokens.append(',');
+			str_tokens.append('^');
+			str_tokens.append(token);
+		}
+
 		try
 		{
-			List<User> res = new ArrayList<User>();
+			HashMap<String, User> res = new HashMap<String, User>();
 
 			Model node = ModelFactory.createDefaultModel();
 			node.setNsPrefixes(predicates.getPrefixs());
@@ -444,8 +461,10 @@ public class ba_organization_driver
 			// secondName->swrc:lastName@[localeName]
 
 			Resource r_department = node.createResource(predicates.query + "any");
+			r_department.addProperty(ResourceFactory.createProperty(predicates.query, "fulltext"),
+					node.createLiteral(str_tokens.toString()));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
-					node.createLiteral("[" + tokens + "]"));
+					ResourceFactory.createProperty(predicates.query, "get"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
 					ResourceFactory.createProperty(predicates.query, "get"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
@@ -457,7 +476,7 @@ public class ba_organization_driver
 			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
 					ResourceFactory.createProperty(predicates.query, "get"));
 			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+					ResourceFactory.createProperty(predicates.query, "get_reifed"));
 
 			Model result = pacahon_client.get(ticket, node, from);
 
@@ -465,12 +484,21 @@ public class ba_organization_driver
 			while (subj_it.hasNext())
 			{
 				Resource ss = subj_it.next();
+				String id = ss.getLocalName();
 
-				User usr = getUserFromGraph(ss, result.getGraph(), locale, from);
-				res.add(usr);
+				User usr = null;
+
+				if (id == null)
+				{
+					updateUserReifedData(ss, result.getGraph(), res);
+				} else
+					usr = getUserFromGraph(ss, result.getGraph(), res);
+
+				if (usr != null)
+					res.put(usr.getId(), usr);
 			}
 
-			return res;
+			return new ArrayList<User>(res.values());
 		} catch (Exception ex)
 		{
 			throw new Exception("Cannot get users", ex);
@@ -483,7 +511,7 @@ public class ba_organization_driver
 
 		try
 		{
-			List<User> res = new ArrayList<User>();
+			HashMap<String, User> res = new HashMap<String, User>();
 
 			Model node = ModelFactory.createDefaultModel();
 			node.setNsPrefixes(predicates.getPrefixs());
@@ -535,11 +563,10 @@ public class ba_organization_driver
 			{
 				Resource ss = subj_it.next();
 
-				User usr = getUserFromGraph(ss, result.getGraph(), locale, from);
-				res.add(usr);
+				getUserFromGraph(ss, result.getGraph(), res);
 			}
 
-			return res;
+			return new ArrayList<User>(res.values());
 		} catch (Exception ex)
 		{
 			throw new Exception("Cannot get users", ex);
@@ -601,7 +628,9 @@ public class ba_organization_driver
 			{
 				Resource ss = subj_it.next();
 
-				usr = getUserFromGraph(ss, result.getGraph(), locale, from);
+				String id = ss.getLocalName();
+
+				usr = getUserFromGraph(ss, result.getGraph(), null);
 			}
 
 			return usr;
@@ -682,6 +711,10 @@ public class ba_organization_driver
 
 		Department dep = new Department();
 
+		String id = ss.getLocalName();
+		id = id.substring("doc_".length(), id.length());
+		dep.setId(id);
+
 		ExtendedIterator<Triple> it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "name"), null);
 
 		String val_en = null;
@@ -721,11 +754,101 @@ public class ba_organization_driver
 		return dep;
 	}
 
-	private User getUserFromGraph(Resource ss, Graph gg, String locale, String from)
+	private void updateUserReifedData(Resource reifed_ss, Graph gg, HashMap<String, User> users)
 	{
-		locale = correct_locale(locale);
+		ExtendedIterator<Triple> it;
 
-		User usr = new User();
+		it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf + "Subject"), null);
+		String subject = null;
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			subject = (String) tt.getObject().getLiteral().getValue();
+		}
+
+		String id = subject.substring("zdb:doc_".length(), subject.length());
+
+		User user = users.get(id);
+
+		if (user == null)
+		{
+			user = new User();
+			user.setId(id);
+			users.put(id, user);
+		}
+
+		it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf + "Predicate"), null);
+		String predicate = null;
+		if (it.hasNext())
+		{
+			Triple tt = it.next();
+			predicate = (String) tt.getObject().getLiteral().getValue();
+		}
+		if (predicate.equals("docs19:department"))
+		{
+			Department dep = new Department();
+
+			it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.swrc + "name"), null);
+
+			String val_en = null;
+			String val_ru = null;
+			while (it.hasNext())
+			{
+				Triple tt = it.next();
+				LiteralLabel ll = tt.getObject().getLiteral();
+				if (ll.language().equals("en"))
+					val_en = (String) tt.getObject().getLiteral().getValue();
+				else if (ll.language().equals("ru"))
+					val_ru = (String) tt.getObject().getLiteral().getValue();
+				else if (ll.language().equals(""))
+					val_ru = (String) tt.getObject().getLiteral().getValue();
+			}
+
+			if (val_en != null)
+				dep.setName(val_en, "En");
+
+			if (val_ru != null)
+				dep.setName(val_ru, "Ru");
+
+			user.setDepartment(dep);
+		}
+
+		// это уже излишне для данного документа, так как в карточке пользователя содержится только одно подразделение
+		/*
+		 * it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf + "Object"), null); String object = null; if
+		 * (it.hasNext()) { Triple tt = it.next(); object = (String) tt.getObject().getLiteral().getValue(); }
+		 */
+
+	}
+
+	private User getUserFromGraph(Resource ss, Graph gg, HashMap<String, User> users)
+	{
+		String id = ss.getLocalName();
+
+		if (id == null)
+		{
+			return null;
+		}
+
+		id = id.substring("doc_".length(), id.length());
+
+		User usr = null;
+
+		if (users != null)
+		{
+			usr = users.get(id);
+
+			if (usr == null)
+			{
+				usr = new User();
+				usr.setId(id);
+				users.put(id, usr);
+			}
+		} else
+		{
+			usr = new User();
+			usr.setId(id);
+		}
 
 		ExtendedIterator<Triple> it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "firstName"), null);
 		{
@@ -834,6 +957,7 @@ public class ba_organization_driver
 
 			// usr.setDepartment(getDepartmentByUid(val, locale, from));
 		}
+
 		return usr;
 	}
 
