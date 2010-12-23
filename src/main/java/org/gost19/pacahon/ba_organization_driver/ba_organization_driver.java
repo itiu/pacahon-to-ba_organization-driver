@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.gost19.pacahon.client.PacahonClient;
 import org.gost19.pacahon.client.predicates;
-import org.omg.CORBA.UserException;
 
 import ru.magnetosoft.objects.organization.Department;
 import ru.magnetosoft.objects.organization.User;
