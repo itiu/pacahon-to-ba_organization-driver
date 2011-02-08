@@ -3,10 +3,13 @@ package org.gost19.pacahon.ba_organization_driver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.gost19.pacahon.client.PacahonClient;
 import org.gost19.pacahon.client.predicates;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import ru.magnetosoft.objects.organization.Department;
 import ru.magnetosoft.objects.organization.User;
@@ -15,11 +18,7 @@ import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
@@ -34,8 +33,10 @@ public class ba_organization_driver
 
 	/**
 	 * Конструктор.
+	 * 
+	 * @throws Exception
 	 */
-	public ba_organization_driver(String endpoint_pretending_organization)
+	public ba_organization_driver(String endpoint_pretending_organization) throws Exception
 	{
 		pacahon_client = new PacahonClient(endpoint_pretending_organization);
 		ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "NewUserManager.constructor");
@@ -58,26 +59,21 @@ public class ba_organization_driver
 		{
 			List<Department> res = new ArrayList<Department>();
 
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
+			JSONObject arg = new JSONObject();
 
-			Resource r_department = node.createResource(predicates.query + "any");
-			r_department.addProperty(ResourceFactory.createProperty(predicates.rdf, "type"),
-					ResourceFactory.createProperty(predicates.docs19, "organization_card"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "active"),
-					node.createLiteral("true"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			arg.put("@", predicates._query + "any");
+			arg.put("a", predicates._docs19 + "organization_card");
+			arg.put(predicates._gost19 + "active", "true");
+			arg.put(predicates._swrc + "name", predicates._query + "get");
+			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
-			Model result = pacahon_client.get(ticket, node, from);
+			JSONArray result = pacahon_client.get(ticket, arg, from);
 
-			ResIterator subj_it = result.listSubjects();
+			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-				Department dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
+				JSONObject ss = subj_it.next();
+				Department dep = getDepartmentFromGraph(ss, locale, from);
 				res.add(dep);
 			}
 
@@ -98,26 +94,20 @@ public class ba_organization_driver
 		{
 			List<Department> res = new ArrayList<Department>();
 
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
+			JSONObject arg = new JSONObject();
 
-			Resource r_department = node.createResource(predicates.query + "any");
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
-					ResourceFactory.createProperty(predicates.zdb, "dep_" + parentId));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "active"),
-					node.createLiteral("true"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			arg.put("@", predicates._query + "any");
+			arg.put(predicates._swrc + "name", predicates._query + "get");
+			arg.put(predicates._gost19 + "parentDepartment", predicates._zdb + "dep_" + parentId);
+			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
+			arg.put(predicates._gost19 + "active", "true");
 
-			Model result = pacahon_client.get(ticket, node, from);
-
-			ResIterator subj_it = result.listSubjects();
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-				Department dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
+				JSONObject ss = subj_it.next();
+				Department dep = getDepartmentFromGraph(ss, locale, from);
 				res.add(dep);
 			}
 
@@ -139,9 +129,6 @@ public class ba_organization_driver
 		{
 			List<User> res = new ArrayList<User>();
 
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
-
 			// выберем нижеперечисленные предикаты из субьекта с заданными uids
 
 			// gost19:department
@@ -152,44 +139,31 @@ public class ba_organization_driver
 			// post->docs19:position@[localeName]
 			// secondName->swrc:lastName@[localeName]
 
-			Resource r_department = node.createResource(predicates.query + "any");
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "domainName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "email"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.zdb, "dep_" + departmentId));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "active"),
-					node.createLiteral("true"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.rdf, "type"),
-					ResourceFactory.createProperty(predicates.docs19, "employee_card"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
+			arg.put("@", predicates._query + "any");
+			arg.put(predicates._swrc + "firstName", predicates._query + "get");
+			arg.put(predicates._swrc + "lastName", predicates._query + "get");
+			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
+			arg.put(predicates._docs19 + "domainName", predicates._query + "get");
+			arg.put(predicates._swrc + "email", predicates._query + "get");
+			arg.put(predicates._docs19 + "position", predicates._query + "get");
+			arg.put(predicates._docs19 + "department", predicates._query + "get");
+			arg.put(predicates._docs19 + "department", predicates._zdb + "dep_" + departmentId);
+			arg.put("a", predicates._docs19 + "employee_card");
 
-			ResIterator subj_it = result.listSubjects();
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-
-				User usr = getUserFromGraph(ss, result.getGraph(), null);
-
+				JSONObject ss = subj_it.next();
+				User usr = getUserFromGraph(ss, null);
 				if (usr != null)
 				{
 					usr.setDepartment(dd);
 					res.add(usr);
 				}
 			}
-
 			return res;
 		} catch (Exception ex)
 		{
@@ -198,38 +172,31 @@ public class ba_organization_driver
 
 	}
 
-	/**
-	 * {@inheritDoc} @@@
-	 */
 	public Department getDepartmentByUid(String uid, String locale, String from) throws Exception
 	{
 		locale = correct_locale(locale);
 
 		try
 		{
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
 
+			Department dep = null;
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
 			// swrc:name@[localeName]
 			// gost19:parentDepartment
 
-			Resource r_department = node.createResource(predicates.zdb + "doc_" + uid);
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
-			Department dep = null;
+			arg.put("@", predicates._zdb + "doc_" + uid);
+			arg.put(predicates._swrc + "name", predicates._query + "get");
+			arg.put(predicates._gost19 + "parentDepartment", predicates._query + "get");
+			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
-			ResIterator subj_it = result.listSubjects();
-			if (subj_it.hasNext())
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
+			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-				dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
+				JSONObject ss = subj_it.next();
+				dep = getDepartmentFromGraph(ss, locale, from);
 			}
 
 			return dep;
@@ -239,38 +206,30 @@ public class ba_organization_driver
 		}
 	} // end getDepartmentByUid()
 
-	/**
-	 * {@inheritDoc} @@@
-	 */
 	public Department getDepartmentByExtId(String externalIdentifer, String locale, String from) throws Exception
 	{
 		locale = correct_locale(locale);
 
 		try
 		{
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
-
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
 			// swrc:name@[localeName]
 			// gost19:parentDepartment
-
-			Resource r_department = node.createResource(predicates.query + "any");
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "name"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "parentDepartment"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "externalIdentifer"),
-					node.createLiteral(externalIdentifer));
-
-			Model result = pacahon_client.get(ticket, node, from);
 			Department dep = null;
 
-			ResIterator subj_it = result.listSubjects();
-			if (subj_it.hasNext())
+			JSONObject arg = new JSONObject();
+
+			arg.put("@", predicates._query + "any");
+			arg.put(predicates._swrc + "name", predicates._query + "get");
+			arg.put(predicates._gost19 + "parentDepartment", predicates._query + "get");
+			arg.put(predicates._gost19 + "externalIdentifer", externalIdentifer);
+
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
+			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-				dep = getDepartmentFromGraph(ss, result.getGraph(), locale, from);
+				JSONObject ss = subj_it.next();
+				dep = getDepartmentFromGraph(ss, locale, from);
 			}
 
 			return dep;
@@ -280,39 +239,28 @@ public class ba_organization_driver
 		}
 	} // end getDepartmentByUid()
 
-	/**
-	 * {@inheritDoc} @@@
-	 */
 	public String getDepartmentUidByUserUid(String uid, String from) throws Exception
 	{
 		try
 		{
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
-
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
 			// gost19:department
 
 			String res = null;
 
-			Resource r_department = node.createResource(predicates.zdb + "doc_" + uid);
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
+			arg.put("@", predicates._zdb + "doc_" + uid);
+			arg.put(predicates._docs19 + "department", predicates._query + "get");
 
-			if (result != null)
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
+			if (subj_it.hasNext())
 			{
-
-				ExtendedIterator<Triple> it = result.getGraph().find(null,
-						Node.createURI(predicates.gost19 + "department"), null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					String val = (String) tt.getObject().getLiteral().getValue();
-					val = val.substring("zdb:dep_".length(), val.length());
-					res = val;
-				}
+				JSONObject ss = subj_it.next();
+				String val = (String) ss.get(predicates._docs19 + "department");
+				val = val.substring("zdb:dep_".length(), val.length());
+				res = val;
 			}
 
 			return res;
@@ -329,41 +277,32 @@ public class ba_organization_driver
 	 * @param login
 	 *            имя учетной записи
 	 * @return уникальный идентификатор пользователя
-	 * @throws UserException
-	 *             в случае ошибки
 	 */
 	public String getUserUidByLoginInternal(String login, String from) throws Exception
 	{
 		try
 		{
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
-
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
 			// gost19:department
 
 			String res = null;
 
-			Resource r_department = node.createResource(predicates.query + "any");
-			r_department.addProperty(ResourceFactory.createProperty(predicates.auth, "login"),
-					node.createLiteral(login));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.rdf, "type"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
+			arg.put("@", predicates._query + "any");
+			arg.put(predicates._swrc + "name", predicates._query + "get");
+			arg.put(predicates._auth + "login", login);
+			arg.put("a", predicates._query + "get");
 
-			if (result != null)
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
+
+			if (subj_it.hasNext())
 			{
-
-				ExtendedIterator<Triple> it = result.getGraph().find(null, Node.createURI(predicates.rdf + "type"),
-						null);
-				if (it.hasNext())
-				{
-					Triple tt = it.next();
-					String val = (String) tt.getSubject().getLocalName();
-					val = val.substring("doc_".length(), val.length());
-					res = val;
-				}
+				JSONObject ss = subj_it.next();
+				String val = (String) ss.get("a");
+				val = val.substring("doc_".length(), val.length());
+				res = val;
 			}
 
 			return res;
@@ -379,50 +318,42 @@ public class ba_organization_driver
 
 		try
 		{
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
-
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
 
-			// gost19:department // firstName->swrc:firstName@[localeName] // surname->swrc:middlename@[localeName] //
-			// domainName->docs19:login // email->swrc:email // post->docs19:position@[localeName] //
+			// gost19:department
+			// firstName->swrc:firstName@[localeName]
+			// surname->swrc:middlename@[localeName]
+			// domainName->docs19:login
+			// email->swrc:email
+			// post->docs19:position@[localeName]
 			// secondName->swrc:lastName@[localeName]
 
-			Resource r_department = node.createResource(predicates.query + "any");
-			r_department.addProperty(ResourceFactory.createProperty(predicates.auth, "login"),
-					node.createLiteral(login));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "domainName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "email"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
+			arg.put("@", predicates._query + "any");
+			arg.put(predicates._swrc + "firstName", predicates._query + "get");
+			arg.put(predicates._swrc + "lastName", predicates._query + "get");
+			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
+			arg.put(predicates._docs19 + "domainName", predicates._query + "get");
+			arg.put(predicates._swrc + "email", predicates._query + "get");
+			arg.put(predicates._docs19 + "position", predicates._query + "get");
+			arg.put(predicates._docs19 + "department", predicates._query + "get");
+			arg.put(predicates._auth + "login", login);
+			arg.put("a", predicates._docs19 + "employee_card");
+
 			User usr = null;
-
-			ResIterator subj_it = result.listSubjects();
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
 			if (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-
-				usr = getUserFromGraph(ss, result.getGraph(), null);
+				JSONObject ss = subj_it.next();
+				usr = getUserFromGraph(ss, null);
 			}
-
 			return usr;
 		} catch (Exception ex)
 		{
 			throw new IllegalStateException("Cannot get user", ex);
 		}
-
 	}
 
 	public List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive,
@@ -446,9 +377,6 @@ public class ba_organization_driver
 		{
 			HashMap<String, User> res = new HashMap<String, User>();
 
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
-
 			// выберем нижеперечисленные предикаты из субьекта с заданными uids
 
 			// gost19:department
@@ -459,45 +387,39 @@ public class ba_organization_driver
 			// post->docs19:position@[localeName]
 			// secondName->swrc:lastName@[localeName]
 
-			Resource r_department = node.createResource(predicates.query + "any");
-			r_department.addProperty(ResourceFactory.createProperty(predicates.query, "fulltext"),
-					node.createLiteral(str_tokens.toString()));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "domainName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "email"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get_reifed"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
+			arg.put("@", predicates._query + "any");
+			arg.put(predicates._swrc + "firstName", predicates._query + "get");
+			arg.put(predicates._swrc + "lastName", predicates._query + "get");
+			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
+			arg.put(predicates._docs19 + "domainName", predicates._query + "get");
+			arg.put(predicates._swrc + "email", predicates._query + "get");
+			arg.put(predicates._docs19 + "position", predicates._query + "get");
+			arg.put(predicates._docs19 + "department", predicates._query + "get_reifed");
+			arg.put(predicates._query + "fulltext", str_tokens.toString());
+			arg.put("a", predicates._docs19 + "employee_card");
 
-			ResIterator subj_it = result.listSubjects();
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-				String id = ss.getLocalName();
+				JSONObject ss = subj_it.next();
+				String id = (String) ss.get("@");
 
 				User usr = null;
 
-				if (id == null)
+				if (id.charAt(0) == '_' && id.charAt(1) == ':' && id.charAt(2) == 'R')
 				{
-					updateUserReifedData(ss, result.getGraph(), res);
+					updateUserReifedData(ss, res);
 				} else
-					usr = getUserFromGraph(ss, result.getGraph(), res);
+					usr = getUserFromGraph(ss, res);
 
 				if (usr != null)
 					res.put(usr.getId(), usr);
 			}
-
 			return new ArrayList<User>(res.values());
+
 		} catch (Exception ex)
 		{
 			throw new Exception("Cannot get users", ex);
@@ -511,9 +433,6 @@ public class ba_organization_driver
 		try
 		{
 			HashMap<String, User> res = new HashMap<String, User>();
-
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
 
 			// выберем нижеперечисленные предикаты из субьекта с заданными uids
 
@@ -539,30 +458,29 @@ public class ba_organization_driver
 			}
 			sb.append("\"]");
 
-			Resource r_department = node.createResource(sb.toString());
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "domainName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "email"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
+			arg.put("@", sb.toString());
+			arg.put(predicates._swrc + "firstName", predicates._query + "get");
+			arg.put(predicates._swrc + "lastName", predicates._query + "get");
+			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
+			arg.put(predicates._docs19 + "domainName", predicates._query + "get");
+			arg.put(predicates._swrc + "email", predicates._query + "get");
+			arg.put(predicates._docs19 + "position", predicates._query + "get");
+			arg.put(predicates._docs19 + "department", predicates._query + "get");
+			arg.put("a", predicates._docs19 + "employee_card");
 
-			ResIterator subj_it = result.listSubjects();
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
-
-				getUserFromGraph(ss, result.getGraph(), res);
+				JSONObject ss = subj_it.next();
+				User usr = getUserFromGraph(ss, null);
+				if (usr != null)
+				{
+					// usr.setDepartment(dd);
+					res.put(usr.getId(), usr);
+				}
 			}
 
 			return new ArrayList<User>(res.values());
@@ -581,8 +499,6 @@ public class ba_organization_driver
 	 * @param localeName
 	 *            имя локали
 	 * @return пользователь
-	 * @throws UserException
-	 *             в случае ошибки
 	 */
 	public User selectUserByUidInternal(String uid, String locale, String from) throws Exception
 	{
@@ -590,8 +506,6 @@ public class ba_organization_driver
 
 		try
 		{
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
 
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
 
@@ -603,33 +517,26 @@ public class ba_organization_driver
 			// post->docs19:position@[localeName]
 			// secondName->swrc:lastName@[localeName]
 
-			Resource r_department = node.createResource(predicates.zdb + "doc_" + uid);
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "firstName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "lastName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.gost19, "middleName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "domainName"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.swrc, "email"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "position"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get"));
+			JSONObject arg = new JSONObject();
 
-			Model result = pacahon_client.get(ticket, node, from);
+			arg.put("@", predicates._zdb + "doc_" + uid);
+			arg.put(predicates._swrc + "firstName", predicates._query + "get");
+			arg.put(predicates._swrc + "lastName", predicates._query + "get");
+			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
+			arg.put(predicates._docs19 + "domainName", predicates._query + "get");
+			arg.put(predicates._swrc + "email", predicates._query + "get");
+			arg.put(predicates._docs19 + "position", predicates._query + "get");
+			arg.put(predicates._docs19 + "department", predicates._query + "get");
+			arg.put("a", predicates._docs19 + "employee_card");
+
 			User usr = null;
-
-			ResIterator subj_it = result.listSubjects();
-			if (subj_it.hasNext())
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
+			while (subj_it.hasNext())
 			{
-				Resource ss = subj_it.next();
+				JSONObject ss = subj_it.next();
+				usr = getUserFromGraph(ss, null);
 
-				String id = ss.getLocalName();
-
-				usr = getUserFromGraph(ss, result.getGraph(), null);
 			}
 
 			return usr;
@@ -645,9 +552,6 @@ public class ba_organization_driver
 
 		try
 		{
-			Model node = ModelFactory.createDefaultModel();
-			node.setNsPrefixes(predicates.getPrefixs());
-
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
 
 			// gost19:department
@@ -658,21 +562,20 @@ public class ba_organization_driver
 			// post->docs19:position@[localeName]
 			// secondName->swrc:lastName@[localeName]
 
-			Resource r_department = node.createResource(predicates.zdb + "doc_" + uid);
-			r_department.addProperty(ResourceFactory.createProperty(predicates.docs19, "department"),
-					ResourceFactory.createProperty(predicates.query, "get"));
-
-			Model result = pacahon_client.get(ticket, node, from);
 			String department = null;
+			JSONObject arg = new JSONObject();
 
-			if (result != null)
+			arg.put("@", predicates.zdb + "doc_" + uid);
+			arg.put(predicates._docs19 + "department", predicates._query + "get");
+
+			JSONArray result = pacahon_client.get(ticket, arg, from);
+			Iterator<JSONObject> subj_it = result.iterator();
+			if (subj_it.hasNext())
 			{
-				ExtendedIterator<Triple> it = result.getGraph().find(null,
-						Node.createURI(predicates.docs19 + "department"), null);
-				if (it.hasNext())
+				JSONObject ss = subj_it.next();
+				String val = (String) ss.get(predicates._docs19 + "department");
+				if (val != null)
 				{
-					Triple tt = it.next();
-					String val = (String) tt.getObject().getLiteral().getValue();
 					val = val.substring("zdb:dep_".length(), val.length());
 					department = val;
 				}
@@ -704,71 +607,57 @@ public class ba_organization_driver
 	 * }
 	 */
 
-	private Department getDepartmentFromGraph(Resource ss, Graph gg, String locale, String from)
+	String doc_prefix = "doc_";
+
+	private Department getDepartmentFromGraph(JSONObject oo, String locale, String from)
 	{
 		locale = correct_locale(locale);
 
 		Department dep = new Department();
 
-		String id = ss.getLocalName();
-		id = id.substring("doc_".length(), id.length());
+		String id = (String) oo.get("@");
+		id = id.substring(id.indexOf(doc_prefix) + doc_prefix.length(), id.length());
 		dep.setId(id);
 
-		ExtendedIterator<Triple> it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "name"), null);
+		Object namez = oo.get(predicates._swrc + "name");
 
-		String val_en = null;
-		String val_ru = null;
-		while (it.hasNext())
+		if (namez instanceof JSONArray)
 		{
-			Triple tt = it.next();
-			LiteralLabel ll = tt.getObject().getLiteral();
-			if (ll.language().equals("en"))
-				val_en = (String) tt.getObject().getLiteral().getValue();
-			if (ll.language().equals("ru"))
-				val_ru = (String) tt.getObject().getLiteral().getValue();
+			Iterator<String> subj_it = ((JSONArray) namez).iterator();
+			while (subj_it.hasNext())
+			{
+				dep.set__Name(subj_it.next());
+			}
+
+		} else if (namez instanceof String)
+		{
+			dep.set__Name((String) namez);
+
 		}
 
-		if (val_en != null)
-			dep.setName(val_en, "En");
+		String parentDepartment = (String) oo.get(predicates._gost19 + "parentDepartment");
 
-		if (val_ru != null)
-			dep.setName(val_ru, "Ru");
-
-		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "parentDepartment"), null);
-		if (it.hasNext())
+		if (parentDepartment != null)
 		{
-			Triple tt = it.next();
-			String val = (String) tt.getObject().getLiteral().getValue();
-			val = val.substring("zdb:dep_".length(), val.length());
-			dep.setId(val);
+			String val = parentDepartment.substring("zdb:dep_".length(), parentDepartment.length());
+			dep.setParentDepartmentId(val);
 		}
-		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "externalIdentifer"), null);
-		if (it.hasNext())
+
+		String externalIdentifer = (String) oo.get(predicates._gost19 + "externalIdentifer");
+
+		if (externalIdentifer != null)
 		{
-			Triple tt = it.next();
-			String val = (String) tt.getObject().getLiteral().getValue();
-			dep.setInternalId(val);
+			dep.setInternalId(externalIdentifer);
 		}
 
 		return dep;
 	}
 
-	private void updateUserReifedData(Resource reifed_ss, Graph gg, HashMap<String, User> users)
+	private void updateUserReifedData(JSONObject oo, HashMap<String, User> users)
 	{
-		ExtendedIterator<Triple> it;
-
-		it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf + "Subject"), null);
-		String subject = null;
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			subject = (String) tt.getObject().getLiteral().getValue();
-		}
-
+		String subject = (String) oo.get(predicates._rdf + "Subject");
 		String id = subject.substring("zdb:doc_".length(), subject.length());
-
 		User user = users.get(id);
-
 		if (user == null)
 		{
 			user = new User();
@@ -776,42 +665,28 @@ public class ba_organization_driver
 			users.put(id, user);
 		}
 
-		it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf + "Predicate"), null);
-		String predicate = null;
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			predicate = (String) tt.getObject().getLiteral().getValue();
-		}
+		String predicate = (String) oo.get(predicates._rdf + "Predicate");
 		if (predicate.equals("docs19:department"))
 		{
 			Department dep = new Department();
+			Object namez = oo.get(predicates._swrc + "name");
 
-			it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.swrc + "name"), null);
-
-			String val_en = null;
-			String val_ru = null;
-			while (it.hasNext())
+			if (namez instanceof JSONArray)
 			{
-				Triple tt = it.next();
-				LiteralLabel ll = tt.getObject().getLiteral();
-				if (ll.language().equals("en"))
-					val_en = (String) tt.getObject().getLiteral().getValue();
-				else if (ll.language().equals("ru"))
-					val_ru = (String) tt.getObject().getLiteral().getValue();
-				else if (ll.language().equals(""))
-					val_ru = (String) tt.getObject().getLiteral().getValue();
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					dep.set__Name(subj_it.next());
+				}
+
+			} else if (namez instanceof String)
+			{
+				dep.set__Name((String) namez);
+
 			}
-
-			if (val_en != null)
-				dep.setName(val_en, "En");
-
-			if (val_ru != null)
-				dep.setName(val_ru, "Ru");
 
 			user.setDepartment(dep);
 		}
-
 		// это уже излишне для данного документа, так как в карточке пользователя содержится только одно подразделение
 		/*
 		 * it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf + "Object"), null); String object = null; if
@@ -820,16 +695,16 @@ public class ba_organization_driver
 
 	}
 
-	private User getUserFromGraph(Resource ss, Graph gg, HashMap<String, User> users)
+	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users)
 	{
-		String id = ss.getLocalName();
+		String id = (String) oo.get("@");
 
 		if (id == null)
 		{
 			return null;
 		}
 
-		id = id.substring("doc_".length(), id.length());
+		id = id.substring(id.indexOf(doc_prefix) + doc_prefix.length(), id.length());
 
 		User usr = null;
 
@@ -849,116 +724,119 @@ public class ba_organization_driver
 			usr.setId(id);
 		}
 
-		ExtendedIterator<Triple> it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "firstName"), null);
+		Object namez = oo.get(predicates._swrc + "firstName");
+		if (namez != null)
 		{
-			String val_en = null;
-			String val_ru = null;
-			while (it.hasNext())
+			if (namez instanceof JSONArray)
 			{
-				Triple tt = it.next();
-				LiteralLabel ll = tt.getObject().getLiteral();
-				if (ll.language().equals("en"))
-					val_en = (String) tt.getObject().getLiteral().getValue();
-				if (ll.language().equals("ru"))
-					val_ru = (String) tt.getObject().getLiteral().getValue();
-			}
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					usr.set__FirstName(subj_it.next());
+				}
 
-			if (val_en != null)
-				usr.setFirstName(val_en, "En");
-
-			if (val_ru != null)
-				usr.setFirstName(val_ru, "Ru");
-		}
-
-		it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "lastName"), null);
-		{
-			String val_en = null;
-			String val_ru = null;
-			while (it.hasNext())
+			} else if (namez instanceof String)
 			{
-				Triple tt = it.next();
-				LiteralLabel ll = tt.getObject().getLiteral();
-				if (ll.language().equals("en"))
-					val_en = (String) tt.getObject().getLiteral().getValue();
-				if (ll.language().equals("ru"))
-					val_ru = (String) tt.getObject().getLiteral().getValue();
+				usr.set__FirstName((String) namez);
+
 			}
-
-			if (val_en != null)
-				usr.setLastName(val_en, "En");
-
-			if (val_ru != null)
-				usr.setLastName(val_ru, "Ru");
 		}
 
-		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "middleName"), null);
+		namez = oo.get(predicates._swrc + "lastName");
+		if (namez != null)
 		{
-			String val_en = null;
-			String val_ru = null;
-			while (it.hasNext())
+			if (namez instanceof JSONArray)
 			{
-				Triple tt = it.next();
-				LiteralLabel ll = tt.getObject().getLiteral();
-				if (ll.language().equals("en"))
-					val_en = (String) tt.getObject().getLiteral().getValue();
-				if (ll.language().equals("ru"))
-					val_ru = (String) tt.getObject().getLiteral().getValue();
-			}
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					usr.set__LastName(subj_it.next());
+				}
 
-			if (val_en != null)
-				usr.setMiddleName(val_en, "En");
-
-			if (val_ru != null)
-				usr.setMiddleName(val_ru, "Ru");
-		}
-
-		it = gg.find(ss.asNode(), Node.createURI(predicates.gost19 + "domainName"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setLogin((String) tt.getObject().getLiteral().getValue());
-		}
-
-		it = gg.find(ss.asNode(), Node.createURI(predicates.swrc + "email"), null);
-		if (it.hasNext())
-		{
-			Triple tt = it.next();
-			usr.setEmail((String) tt.getObject().getLiteral().getValue());
-		}
-
-		it = gg.find(ss.asNode(), Node.createURI(predicates.docs19 + "position"), null);
-		{
-			String val_en = null;
-			String val_ru = null;
-			while (it.hasNext())
+			} else if (namez instanceof String)
 			{
-				Triple tt = it.next();
-				LiteralLabel ll = tt.getObject().getLiteral();
-				if (ll.language().equals("en"))
-					val_en = (String) tt.getObject().getLiteral().getValue();
-				if (ll.language().equals("ru"))
-					val_ru = (String) tt.getObject().getLiteral().getValue();
+				usr.set__LastName((String) namez);
+
 			}
-
-			if (val_en != null)
-				usr.setPosition(val_en, "En");
-
-			if (val_ru != null)
-				usr.setPosition(val_ru, "Ru");
 		}
 
-		it = gg.find(ss.asNode(), Node.createURI(predicates.docs19 + "department"), null);
-		if (it.hasNext())
+		namez = oo.get(predicates._gost19 + "middleName");
+		if (namez != null)
 		{
-			Triple tt = it.next();
-			String val = (String) tt.getObject().getLiteral().getValue();
-			val = val.substring("zdb:dep_".length(), val.length());
+			if (namez instanceof JSONArray)
+			{
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					usr.set__MiddleName(subj_it.next());
+				}
 
+			} else if (namez instanceof String)
+			{
+				usr.set__MiddleName((String) namez);
+
+			}
+		}
+
+		Object valuez = oo.get(predicates._gost19 + "domainName");
+		if (valuez != null)
+		{
+			usr.setLogin((String) valuez);
+		}
+
+		valuez = oo.get(predicates._swrc + "email");
+		if (valuez != null)
+		{
+			usr.setEmail((String) valuez);
+		}
+
+		valuez = oo.get(predicates._docs19 + "position");
+		if (valuez != null)
+		{
+			if (valuez instanceof JSONArray)
+			{
+				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
+				while (subj_it.hasNext())
+				{
+					usr.set__Position(subj_it.next());
+				}
+
+			} else if (valuez instanceof String)
+			{
+				usr.set__Position((String) valuez);
+
+			}
+		}
+
+		valuez = oo.get(predicates._docs19 + "department");
+		if (valuez != null)
+		{
+			// val = val.substring("zdb:dep_".length(), val.length());
 			// usr.setDepartment(getDepartmentByUid(val, locale, from));
 		}
 
 		return usr;
 	}
 
-} // end UserManager
+	public static void main(String[] args) throws Exception
+	{
+		ba_organization_driver drv = new ba_organization_driver(null);
 
+		List<User> users = drv.getUsersByFullTextSearch("карп", "ru", false, false, "test");
+
+		users.size();
+
+		List<Department> deps = drv.getOrganizationRoots("ru", "test");
+
+		Iterator<Department> it = deps.iterator();
+
+		while (it.hasNext())
+		{
+			Department dd = it.next();
+			drv.getUsersByDepartmentId(dd.getInternalId(), "ru", false, false, "test");
+
+		}
+
+	}
+
+}
