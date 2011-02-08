@@ -14,13 +14,6 @@ import org.json.simple.JSONObject;
 import ru.magnetosoft.objects.organization.Department;
 import ru.magnetosoft.objects.organization.User;
 
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.graph.impl.LiteralLabel;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-
 /**
  * Менеджер пользователей.
  * 

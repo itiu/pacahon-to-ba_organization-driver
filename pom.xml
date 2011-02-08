@@ -16,12 +16,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.hp.hpl.jena</groupId>
-            <artifactId>jena</artifactId>
-            <version>2.6.3</version>
-        </dependency>
-
-        <dependency>
     	    <groupId>org.gost19.pacahon.client</groupId>
     	    <artifactId>pacahon-client</artifactId>
     	    <version>0.1-SNAPSHOT</version>
