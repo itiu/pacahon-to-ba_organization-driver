@@ -23,6 +23,8 @@ public class ba_organization_driver
 {
 	private PacahonClient pacahon_client;
 	private String ticket;
+	private long start_time_ticket;
+	private int lifetime_ticket = 3600 * 1000;
 
 	/**
 	 * Конструктор.
@@ -33,6 +35,7 @@ public class ba_organization_driver
 	{
 		pacahon_client = new PacahonClient(endpoint_pretending_organization);
 		ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "NewUserManager.constructor");
+		start_time_ticket = System.currentTimeMillis();
 	}
 
 	private String correct_locale(String locale)
@@ -44,8 +47,25 @@ public class ba_organization_driver
 		return locale;
 	}
 
+	private void recheck_ticket()
+	{
+		try
+		{
+			long now = System.currentTimeMillis();
+			if (now - start_time_ticket > lifetime_ticket)
+			{
+				ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "NewUserManager.recheck_ticket");
+				start_time_ticket = System.currentTimeMillis();
+			}
+		} catch (Exception ex)
+		{
+			throw new IllegalStateException(ex);
+		}
+	}
+
 	public List<Department> getOrganizationRoots(String locale, String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -81,6 +101,7 @@ public class ba_organization_driver
 	public List<Department> getDepartmentsByParentId(String parentId, String locale, boolean withActive, String from)
 			throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -115,6 +136,7 @@ public class ba_organization_driver
 	public List<User> getUsersByDepartmentId(String departmentId, String locale, boolean withEmail, boolean withActive,
 			String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 		Department dd = getDepartmentByExtId(departmentId, locale, from);
 
@@ -167,6 +189,7 @@ public class ba_organization_driver
 
 	public Department getDepartmentByUid(String uid, String locale, String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -201,6 +224,7 @@ public class ba_organization_driver
 
 	public Department getDepartmentByExtId(String externalIdentifer, String locale, String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -234,6 +258,7 @@ public class ba_organization_driver
 
 	public String getDepartmentUidByUserUid(String uid, String from) throws Exception
 	{
+		recheck_ticket();
 		try
 		{
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
@@ -273,6 +298,7 @@ public class ba_organization_driver
 	 */
 	public String getUserUidByLoginInternal(String login, String from) throws Exception
 	{
+		recheck_ticket();
 		try
 		{
 			// выберем нижеперечисленные предикаты из субьекта с заданным uid
@@ -307,6 +333,7 @@ public class ba_organization_driver
 
 	public User getUserByLogin(String login, String locale, String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -352,6 +379,7 @@ public class ba_organization_driver
 	public List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive,
 			String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		String[] tokens = words.split(" ");
@@ -421,6 +449,7 @@ public class ba_organization_driver
 
 	public List<User> getUsersByUids(Collection<String> ids, String locale, String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -495,6 +524,7 @@ public class ba_organization_driver
 	 */
 	public User selectUserByUidInternal(String uid, String locale, String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -541,6 +571,7 @@ public class ba_organization_driver
 
 	public Department getDepartmentByUserUid(String uid, String locale, String from) throws Exception
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		try
@@ -604,6 +635,7 @@ public class ba_organization_driver
 
 	private Department getDepartmentFromGraph(JSONObject oo, String locale, String from)
 	{
+		recheck_ticket();
 		locale = correct_locale(locale);
 
 		Department dep = new Department();
