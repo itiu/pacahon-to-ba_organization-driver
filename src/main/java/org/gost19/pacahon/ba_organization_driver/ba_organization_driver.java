@@ -75,7 +75,7 @@ public class ba_organization_driver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._query + "any");
-			arg.put("a", predicates._docs + "organization_card");
+			arg.put(predicates._docs + "parentUnit", "zdb:dep_0");
 			arg.put(predicates._docs + "active", "true");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
@@ -112,7 +112,7 @@ public class ba_organization_driver
 
 			arg.put("@", predicates._query + "any");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
-			arg.put(predicates._gost19 + "parentDepartment", predicates._zdb + "dep_" + parentId);
+			arg.put(predicates._gost19 + "parentUnit", predicates._zdb + "dep_" + parentId);
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 			arg.put(predicates._docs + "active", "true");
 
@@ -163,8 +163,8 @@ public class ba_organization_driver
 			arg.put(predicates._docs + "domainName", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
-			arg.put(predicates._docs + "department", predicates._query + "get");
-			arg.put(predicates._docs + "department", predicates._zdb + "dep_" + departmentId);
+			arg.put(predicates._docs + "unit", predicates._query + "get");
+			arg.put(predicates._docs + "unit", predicates._zdb + "dep_" + departmentId);
 			arg.put("a", predicates._docs + "employee_card");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByDepartmentId");
@@ -204,7 +204,7 @@ public class ba_organization_driver
 
 			arg.put("@", predicates._zdb + "doc_" + uid);
 			arg.put(predicates._swrc + "name", predicates._query + "get");
-			arg.put(predicates._gost19 + "parentDepartment", predicates._query + "get");
+			arg.put(predicates._gost19 + "parentUnit", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from);
@@ -238,7 +238,7 @@ public class ba_organization_driver
 
 			arg.put("@", predicates._query + "any");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
-			arg.put(predicates._gost19 + "parentDepartment", predicates._query + "get");
+			arg.put(predicates._gost19 + "parentUnit", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", externalIdentifer);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from);
@@ -269,14 +269,14 @@ public class ba_organization_driver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._zdb + "doc_" + uid);
-			arg.put(predicates._docs + "department", predicates._query + "get");
+			arg.put(predicates._docs + "unit", predicates._query + "get");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from);
 			Iterator<JSONObject> subj_it = result.iterator();
 			if (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				String val = (String) ss.get(predicates._docs + "department");
+				String val = (String) ss.get(predicates._docs + "unit");
 				val = val.substring("zdb:dep_".length(), val.length());
 				res = val;
 			}
@@ -357,7 +357,7 @@ public class ba_organization_driver
 			arg.put(predicates._docs + "domainName", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
-			arg.put(predicates._docs + "department", predicates._query + "get");
+			arg.put(predicates._docs + "unit", predicates._query + "get");
 			arg.put(predicates._auth + "login", login);
 			arg.put("a", predicates._docs + "employee_card");
 
@@ -417,7 +417,7 @@ public class ba_organization_driver
 			arg.put(predicates._docs + "domainName", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
-			arg.put(predicates._docs + "department", predicates._query + "get_reifed");
+			arg.put(predicates._docs + "unit", predicates._query + "get_reifed");
 			arg.put(predicates._query + "fulltext", str_tokens.toString());
 			arg.put("a", predicates._docs + "employee_card");
 
@@ -489,7 +489,7 @@ public class ba_organization_driver
 			arg.put(predicates._docs + "domainName", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
-			arg.put(predicates._docs + "department", predicates._query + "get");
+			arg.put(predicates._docs + "unit", predicates._query + "get");
 			arg.put("a", predicates._docs + "employee_card");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByUids");
@@ -549,7 +549,7 @@ public class ba_organization_driver
 			arg.put(predicates._docs + "domainName", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
-			arg.put(predicates._docs + "department", predicates._query + "get");
+			arg.put(predicates._docs + "unit", predicates._query + "get");
 			arg.put("a", predicates._docs + "employee_card");
 
 			User usr = null;
@@ -590,14 +590,14 @@ public class ba_organization_driver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates.zdb + "doc_" + uid);
-			arg.put(predicates._docs + "department", predicates._query + "get");
+			arg.put(predicates._docs + "unit", predicates._query + "get");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByUserUid");
 			Iterator<JSONObject> subj_it = result.iterator();
 			if (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				String val = (String) ss.get(predicates._docs + "department");
+				String val = (String) ss.get(predicates._docs + "unit");
 				if (val != null)
 				{
 					val = val.substring("zdb:dep_".length(), val.length());
@@ -691,7 +691,7 @@ public class ba_organization_driver
 		}
 
 		String predicate = (String) oo.get(predicates._rdf + "Predicate");
-		if (predicate.equals("docs:department"))
+		if (predicate.equals("docs:unit"))
 		{
 			Department dep = new Department();
 			Object namez = oo.get(predicates._swrc + "name");
@@ -833,7 +833,7 @@ public class ba_organization_driver
 			}
 		}
 
-		valuez = oo.get(predicates._docs + "department");
+		valuez = oo.get(predicates._docs + "unit");
 		if (valuez != null)
 		{
 			// val = val.substring("zdb:dep_".length(), val.length());
