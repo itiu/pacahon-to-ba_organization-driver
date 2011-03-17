@@ -4,7 +4,7 @@
 	<packaging>jar</packaging>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gost19.pacahon.client</groupId>
-	<artifactId>ba-organization-driver</artifactId>
+	<artifactId>ba-pacahon-driver</artifactId>
 	<version>0.1-SNAPSHOT</version>
 
 	<dependencies>
