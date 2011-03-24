@@ -1,4 +1,4 @@
-package org.gost19.pacahon.ba_organization_driver;
+package org.gost19.pacahon;
 
 import org.gost19.pacahon.client.PacahonClient;
 import org.gost19.pacahon.client.predicates;

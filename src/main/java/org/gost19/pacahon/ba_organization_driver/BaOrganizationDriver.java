@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.gost19.pacahon.client.PacahonClient;
+import org.gost19.pacahon.BaDriver;
 import org.gost19.pacahon.client.predicates;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
