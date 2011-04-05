@@ -32,6 +32,10 @@ public class OrganizationUnit implements Serializable
 	private String hint = "";
 	private Map<String, String> attributes = new HashMap<String, String>();
 
+	public OrganizationUnit()
+	{
+	}
+
 	public OrganizationUnit(Type _type)
 	{
 		type = _type;
