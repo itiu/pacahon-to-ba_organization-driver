@@ -20,6 +20,11 @@ public class BaDriver
 			ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
 			start_time_ticket = System.currentTimeMillis();
 		}
+		else
+		{
+			ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
+			start_time_ticket = System.currentTimeMillis();			
+		}
 
 	}
 

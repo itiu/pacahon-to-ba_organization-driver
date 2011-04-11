@@ -487,7 +487,7 @@ public class BaOrganizationDriver extends BaDriver
 				sb.append(id);
 				first = false;
 			}
-			sb.append("\"]");
+			sb.append("]\"");
 
 			JSONObject arg = new JSONObject();
 
