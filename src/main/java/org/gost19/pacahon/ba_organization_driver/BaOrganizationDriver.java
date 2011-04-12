@@ -435,9 +435,9 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				String id = (String) ss.get("@");
-
 				User usr = null;
+
+				String id = (String) ss.get("@");
 
 				if (id.charAt(0) == '_' && id.charAt(1) == ':' && id.charAt(2) == 'R')
 				{
