@@ -328,8 +328,8 @@ public class BaOrganizationDriver extends BaDriver
 			if (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				String val = (String) ss.get("a");
-				val = val.substring("doc_".length(), val.length());
+				String val = (String) ss.get("@");
+				val = val.substring("zdb:doc_".length(), val.length());
 				res = val;
 			}
 
@@ -723,7 +723,8 @@ public class BaOrganizationDriver extends BaDriver
 
 			user.setDepartment(dep);
 		}
-		// это уже излишне для данного документа, так как в карточке пользователя содержится только одно подразделение
+		// это уже излишне для данного документа, так как в карточке
+		// пользователя содержится только одно подразделение
 		/*
 		 * it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf +
 		 * "Object"), null); String object = null; if (it.hasNext()) { Triple tt
@@ -762,59 +763,10 @@ public class BaOrganizationDriver extends BaDriver
 			usr.setId(id);
 		}
 
-		Object namez = oo.get(predicates._swrc + "firstName");
-		if (namez != null)
-		{
-			if (namez instanceof JSONArray)
-			{
-				Iterator<String> subj_it = ((JSONArray) namez).iterator();
-				while (subj_it.hasNext())
-				{
-					usr.set__FirstName(subj_it.next());
-				}
-
-			} else if (namez instanceof String)
-			{
-				usr.set__FirstName((String) namez);
-
-			}
-		}
-
-		namez = oo.get(predicates._swrc + "lastName");
-		if (namez != null)
-		{
-			if (namez instanceof JSONArray)
-			{
-				Iterator<String> subj_it = ((JSONArray) namez).iterator();
-				while (subj_it.hasNext())
-				{
-					usr.set__LastName(subj_it.next());
-				}
-
-			} else if (namez instanceof String)
-			{
-				usr.set__LastName((String) namez);
-
-			}
-		}
-
-		namez = oo.get(predicates._gost19 + "middleName");
-		if (namez != null)
-		{
-			if (namez instanceof JSONArray)
-			{
-				Iterator<String> subj_it = ((JSONArray) namez).iterator();
-				while (subj_it.hasNext())
-				{
-					usr.set__MiddleName(subj_it.next());
-				}
-
-			} else if (namez instanceof String)
-			{
-				usr.set__MiddleName((String) namez);
-
-			}
-		}
+		usr.set__oFirstName(oo.get(predicates._swrc + "firstName"));
+		usr.set__oLastName(oo.get(predicates._swrc + "lastName"));
+		usr.set__oMiddleName(oo.get(predicates._gost19 + "middleName"));
+		usr.set__oPosition(oo.get(predicates._docs + "position"));
 
 		Object valuez = oo.get(predicates._gost19 + "domainName");
 		if (valuez != null)
@@ -828,23 +780,6 @@ public class BaOrganizationDriver extends BaDriver
 			usr.setEmail((String) valuez);
 		}
 
-		valuez = oo.get(predicates._docs + "position");
-		if (valuez != null)
-		{
-			if (valuez instanceof JSONArray)
-			{
-				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
-				while (subj_it.hasNext())
-				{
-					usr.set__Position(subj_it.next());
-				}
-
-			} else if (valuez instanceof String)
-			{
-				usr.set__Position((String) valuez);
-
-			}
-		}
 
 		valuez = oo.get(predicates._docs + "unit");
 		if (valuez != null)

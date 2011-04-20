@@ -1,11 +1,14 @@
 package ru.magnetosoft.objects.organization;
 
 import java.io.Serializable;
-
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import org.json.simple.JSONArray;
+
 import ru.magnetosoft.bigarch.wsclient.bl.organizationservice.AttributeType;
-import ru.magnetosoft.bigarch.wsclient.bl.organizationservice.EntityType;// не ясно где находится
+import ru.magnetosoft.bigarch.wsclient.bl.organizationservice.EntityType;
 
 /**
  * 
@@ -145,12 +148,12 @@ public class User implements IOrganizationEntity, Serializable
 		this.middleName = secondName;
 		this.lastName = surName;
 		this.position = position;
-		
+
 		if (this.department != null)
 			this.department.setName(department);
 		else
 			this.department_name = department;
-		
+
 	}
 
 	public String getOrgName()
@@ -449,11 +452,14 @@ public class User implements IOrganizationEntity, Serializable
 	}
 
 	/*
-	 * public String getName() { if (lastName != null && firstName != null && lastName.length() > 0 &&
-	 * firstName.length() > 0) { if (middleName != null && middleName.length() > 0) { name = lastName + " " +
-	 * firstName.toUpperCase().charAt(0) + "." + middleName.toUpperCase().charAt(0) + "."; } else { name = lastName +
-	 * " " + firstName.toUpperCase().charAt(0) + "."; } } else if (position != null && position.length() > 0) { name =
-	 * position; } else { name = login; } return name; }
+	 * public String getName() { if (lastName != null && firstName != null &&
+	 * lastName.length() > 0 && firstName.length() > 0) { if (middleName != null
+	 * && middleName.length() > 0) { name = lastName + " " +
+	 * firstName.toUpperCase().charAt(0) + "." +
+	 * middleName.toUpperCase().charAt(0) + "."; } else { name = lastName + " "
+	 * + firstName.toUpperCase().charAt(0) + "."; } } else if (position != null
+	 * && position.length() > 0) { name = position; } else { name = login; }
+	 * return name; }
 	 */
 	public String getName()
 	{
@@ -610,4 +616,85 @@ public class User implements IOrganizationEntity, Serializable
 	{
 		return attributes;
 	}
+
+	public void set__oFirstName(Object namez)
+	{
+		if (namez != null)
+		{
+			if (namez instanceof JSONArray)
+			{
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					set__FirstName(subj_it.next());
+				}
+
+			} else if (namez instanceof String)
+			{
+				set__FirstName((String) namez);
+
+			}
+		}
+	}
+
+	public void set__oLastName(Object namez)
+	{
+		if (namez != null)
+		{
+			if (namez instanceof JSONArray)
+			{
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					set__LastName(subj_it.next());
+				}
+
+			} else if (namez instanceof String)
+			{
+				set__LastName((String) namez);
+
+			}
+		}
+	}
+
+	public void set__oMiddleName(Object namez)
+	{
+		if (namez != null)
+		{
+			if (namez instanceof JSONArray)
+			{
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					set__MiddleName(subj_it.next());
+				}
+
+			} else if (namez instanceof String)
+			{
+				set__MiddleName((String) namez);
+
+			}
+		}
+	}
+
+	public void set__oPosition(Object valuez)
+	{
+		if (valuez != null)
+		{
+			if (valuez instanceof JSONArray)
+			{
+				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
+				while (subj_it.hasNext())
+				{
+					set__Position(subj_it.next());
+				}
+
+			} else if (valuez instanceof String)
+			{
+				set__Position((String) valuez);
+
+			}
+		}
+	}
+
 }

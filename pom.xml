@@ -29,6 +29,11 @@
     	    <version>0.16.22-SNAPSHOT</version>
         </dependency>
         
+        <dependency>
+    	    <groupId>ru.magnetosoft.bigarchive.server</groupId>
+            <artifactId>big-archive-server-kernel-organization</artifactId>
+    	    <version>0.16.22-SNAPSHOT</version>
+        </dependency>
         
         <dependency>
             <groupId>ru.magnetosoft.bigarchive.client.web</groupId>
