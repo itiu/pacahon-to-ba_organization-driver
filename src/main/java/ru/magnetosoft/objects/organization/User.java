@@ -366,7 +366,7 @@ public class User implements IOrganizationEntity, Serializable
 		this.firstName = firstName;
 	}
 
-	public void set__FirstName(String nm)
+	public void _set__FirstName(String nm)
 	{
 		byte lang = getLang(nm);
 		nm = stripLang(nm);
@@ -377,7 +377,7 @@ public class User implements IOrganizationEntity, Serializable
 			setFirstName(nm, "En");
 	}
 
-	public void set__LastName(String nm)
+	public void _set__LastName(String nm)
 	{
 		byte lang = getLang(nm);
 		nm = stripLang(nm);
@@ -388,7 +388,7 @@ public class User implements IOrganizationEntity, Serializable
 			setLastName(nm, "En");
 	}
 
-	public void set__MiddleName(String nm)
+	public void _set__MiddleName(String nm)
 	{
 		byte lang = getLang(nm);
 		nm = stripLang(nm);
@@ -399,7 +399,7 @@ public class User implements IOrganizationEntity, Serializable
 			setMiddleName(nm, "En");
 	}
 
-	public void set__Position(String nm)
+	public void _set__Position(String nm)
 	{
 		byte lang = getLang(nm);
 		nm = stripLang(nm);
@@ -617,7 +617,7 @@ public class User implements IOrganizationEntity, Serializable
 		return attributes;
 	}
 
-	public void set__oFirstName(Object namez)
+	public void _set__oFirstName(Object namez)
 	{
 		if (namez != null)
 		{
@@ -626,18 +626,18 @@ public class User implements IOrganizationEntity, Serializable
 				Iterator<String> subj_it = ((JSONArray) namez).iterator();
 				while (subj_it.hasNext())
 				{
-					set__FirstName(subj_it.next());
+					_set__FirstName(subj_it.next());
 				}
 
 			} else if (namez instanceof String)
 			{
-				set__FirstName((String) namez);
+				_set__FirstName((String) namez);
 
 			}
 		}
 	}
 
-	public void set__oLastName(Object namez)
+	public void _set__oLastName(Object namez)
 	{
 		if (namez != null)
 		{
@@ -646,18 +646,18 @@ public class User implements IOrganizationEntity, Serializable
 				Iterator<String> subj_it = ((JSONArray) namez).iterator();
 				while (subj_it.hasNext())
 				{
-					set__LastName(subj_it.next());
+					_set__LastName(subj_it.next());
 				}
 
 			} else if (namez instanceof String)
 			{
-				set__LastName((String) namez);
+				_set__LastName((String) namez);
 
 			}
 		}
 	}
 
-	public void set__oMiddleName(Object namez)
+	public void _set__oMiddleName(Object namez)
 	{
 		if (namez != null)
 		{
@@ -666,18 +666,18 @@ public class User implements IOrganizationEntity, Serializable
 				Iterator<String> subj_it = ((JSONArray) namez).iterator();
 				while (subj_it.hasNext())
 				{
-					set__MiddleName(subj_it.next());
+					_set__MiddleName(subj_it.next());
 				}
 
 			} else if (namez instanceof String)
 			{
-				set__MiddleName((String) namez);
+				_set__MiddleName((String) namez);
 
 			}
 		}
 	}
 
-	public void set__oPosition(Object valuez)
+	public void _set__oPosition(Object valuez)
 	{
 		if (valuez != null)
 		{
@@ -686,12 +686,12 @@ public class User implements IOrganizationEntity, Serializable
 				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
 				while (subj_it.hasNext())
 				{
-					set__Position(subj_it.next());
+					_set__Position(subj_it.next());
 				}
 
 			} else if (valuez instanceof String)
 			{
-				set__Position((String) valuez);
+				_set__Position((String) valuez);
 
 			}
 		}

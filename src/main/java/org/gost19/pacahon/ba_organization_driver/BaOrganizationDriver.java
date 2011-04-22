@@ -763,10 +763,10 @@ public class BaOrganizationDriver extends BaDriver
 			usr.setId(id);
 		}
 
-		usr.set__oFirstName(oo.get(predicates._swrc + "firstName"));
-		usr.set__oLastName(oo.get(predicates._swrc + "lastName"));
-		usr.set__oMiddleName(oo.get(predicates._gost19 + "middleName"));
-		usr.set__oPosition(oo.get(predicates._docs + "position"));
+		usr._set__oFirstName(oo.get(predicates._swrc + "firstName"));
+		usr._set__oLastName(oo.get(predicates._swrc + "lastName"));
+		usr._set__oMiddleName(oo.get(predicates._gost19 + "middleName"));
+		usr._set__oPosition(oo.get(predicates._docs + "position"));
 
 		Object valuez = oo.get(predicates._gost19 + "domainName");
 		if (valuez != null)
