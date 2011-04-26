@@ -87,7 +87,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + parentId);
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
-			arg.put(predicates._docs + "active", "true");
+			
+			if (withActive == true)
+				arg.put(predicates._docs + "active", "true");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from);
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -139,6 +141,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._docs + "unit", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._zdb + "dep_" + departmentId);
 			arg.put("a", predicates._docs + "employee_card");
+			
+			if (withActive == true)
+				arg.put(predicates._docs + "active", "true");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByDepartmentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -211,7 +216,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "name", name);
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
-			arg.put(predicates._docs + "active", "true");
+			
+			if (withActive == true)
+				arg.put(predicates._docs + "active", "true");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from);
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -400,7 +407,7 @@ public class BaOrganizationDriver extends BaDriver
 			if (str_tokens.length() > 0)
 				str_tokens.append(',');
 			str_tokens.append('^');
-			str_tokens.append(token);
+			str_tokens.append(token.toLowerCase());
 		}
 
 		try
@@ -429,6 +436,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._docs + "unit", predicates._query + "get_reifed");
 			arg.put(predicates._query + "fulltext", str_tokens.toString());
 			arg.put("a", predicates._docs + "employee_card");
+			
+			if (withActive == true)
+				arg.put(predicates._docs + "active", "true");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByFullTextSearch");
 			Iterator<JSONObject> subj_it = result.iterator();
