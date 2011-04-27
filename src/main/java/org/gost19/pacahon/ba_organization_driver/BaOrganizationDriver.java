@@ -21,7 +21,6 @@ import ru.magnetosoft.objects.organization.User;
  */
 public class BaOrganizationDriver extends BaDriver
 {
-
 	public BaOrganizationDriver(String endpoint_pretending_organization) throws Exception
 	{
 		super.initailize(endpoint_pretending_organization);
@@ -48,7 +47,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._query + "any");
-			arg.put(predicates._docs + "parentUnit", "zdb:dep_0");
+			arg.put(predicates._gost19 + "tag", "root");
 			arg.put(predicates._docs + "active", "true");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
@@ -71,7 +70,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<Department> getDepartmentsByParentId(String parentId, String locale, boolean withActive, String from)
+	public List<Department> getDepartmentsByParentId(String parentExtId, String locale, boolean withActive, String from)
 			throws Exception
 	{
 		recheck_ticket();
@@ -79,15 +78,20 @@ public class BaOrganizationDriver extends BaDriver
 
 		try
 		{
+			String departmentId = null;
+			Department dd = getDepartmentByExtId(parentExtId, locale, from + ":getDepartmentsByParentId");
+
+			departmentId = dd.getId();
+
 			List<Department> res = new ArrayList<Department>();
 
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._query + "any");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
-			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + parentId);
+			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + departmentId);
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
-			
+
 			if (withActive == true)
 				arg.put(predicates._docs + "active", "true");
 
@@ -108,15 +112,20 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<User> getUsersByDepartmentId(String departmentId, String locale, boolean withEmail, boolean withActive,
-			String from) throws Exception
+	public List<User> getUsersByDepartmentId(String departmentExtId, String locale, boolean withEmail,
+			boolean withActive, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
-		Department dd = getDepartmentByExtId(departmentId, locale, from);
 
 		try
 		{
+			String departmentId = null;
+
+			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getUsersByDepartmentId");
+
+			departmentId = dd.getId();
+
 			List<User> res = new ArrayList<User>();
 
 			// выберем нижеперечисленные предикаты из субьекта с заданными uids
@@ -132,6 +141,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._query + "any");
+			arg.put("a", predicates._docs + "employee_card");
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
 			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
@@ -139,9 +149,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
-			arg.put(predicates._docs + "unit", predicates._zdb + "dep_" + departmentId);
+			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + departmentId);
 			arg.put("a", predicates._docs + "employee_card");
-			
+
 			if (withActive == true)
 				arg.put(predicates._docs + "active", "true");
 
@@ -216,7 +226,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "name", name);
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
-			
+
 			if (withActive == true)
 				arg.put(predicates._docs + "active", "true");
 
@@ -436,7 +446,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._docs + "unit", predicates._query + "get_reifed");
 			arg.put(predicates._query + "fulltext", str_tokens.toString());
 			arg.put("a", predicates._docs + "employee_card");
-			
+
 			if (withActive == true)
 				arg.put(predicates._docs + "active", "true");
 
@@ -789,7 +799,6 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			usr.setEmail((String) valuez);
 		}
-
 
 		valuez = oo.get(predicates._docs + "unit");
 		if (valuez != null)
