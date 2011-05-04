@@ -1,12 +1,16 @@
 package org.gost19.pacahon;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 import org.gost19.pacahon.client.PacahonClient;
-import org.gost19.pacahon.client.predicates;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 public class BaDriver
 {
+	private static SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.sss");
+	private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		
 	public static PacahonClient pacahon_client = null;
 	public String ticket;
 	public long start_time_ticket;
@@ -44,4 +48,29 @@ public class BaDriver
 		}
 	}
 
+	/**
+	 * Transforms String to Date.
+	 * 
+	 * @param date
+	 * @param time
+	 * @return XMLGregorianCalendar
+	 */
+	public static Date string2date(String date)
+	{
+		date = date.replace('T', ' ');
+		date = date.substring(0, date.indexOf('+'));
+		GregorianCalendar gcal = new GregorianCalendar();
+		try
+		{
+			if (date.length() < 22)
+				gcal.setTime(sdf2.parse(date));
+			else
+				gcal.setTime(sdf1.parse(date));
+			return gcal.getTime();
+		} catch (Exception ex)
+		{
+			ex.hashCode();
+		}
+		return null;
+	}	
 }
