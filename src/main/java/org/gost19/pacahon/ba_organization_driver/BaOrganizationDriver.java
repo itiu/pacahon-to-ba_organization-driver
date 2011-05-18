@@ -145,7 +145,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
 			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
-			arg.put(predicates._docs + "domainName", predicates._query + "get");
+			arg.put(predicates._auth + "login", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
@@ -210,11 +210,22 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end getDepartmentByUid()
 
-	public List<Department> getDepartmentsByName(String name, String locale, boolean withActive, String from)
+	public List<Department> getDepartmentsByName(String words, String locale, boolean withActive, String from)
 			throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
+
+		String[] tokens = words.split(" ");
+
+		StringBuffer str_tokens = new StringBuffer();
+
+		for (String token : tokens)
+		{
+			if (str_tokens.length() > 0)
+				str_tokens.append(',');
+			str_tokens.append(token.toLowerCase());
+		}
 
 		try
 		{
@@ -224,7 +235,8 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", predicates._query + "any");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
-			arg.put(predicates._docs + "name", name);
+			arg.put(predicates._query + "fulltext", str_tokens.toString());
+			arg.put("a", predicates._docs + "unit_card");
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
 			if (withActive == true)
@@ -235,7 +247,7 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByName");
+				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByName (FT)");
 				res.add(dep);
 			}
 
@@ -380,7 +392,6 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
 			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
-			arg.put(predicates._docs + "domainName", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
@@ -394,6 +405,7 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				usr = getUserFromGraph(ss, null);
+				usr.setLogin(login);
 			}
 			return usr;
 		} catch (Exception ex)
@@ -440,7 +452,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
 			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
-			arg.put(predicates._docs + "domainName", predicates._query + "get");
+			arg.put(predicates._auth + "login", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get_reifed");
@@ -515,7 +527,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
 			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
-			arg.put(predicates._docs + "domainName", predicates._query + "get");
+			arg.put(predicates._auth + "login", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
@@ -575,7 +587,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
 			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
-			arg.put(predicates._docs + "domainName", predicates._query + "get");
+			arg.put(predicates._auth + "login", predicates._query + "get");
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
@@ -788,7 +800,7 @@ public class BaOrganizationDriver extends BaDriver
 		usr._set__oMiddleName(oo.get(predicates._gost19 + "middleName"));
 		usr._set__oPosition(oo.get(predicates._docs + "position"));
 
-		Object valuez = oo.get(predicates._gost19 + "domainName");
+		Object valuez = oo.get(predicates._auth + "login");
 		if (valuez != null)
 		{
 			usr.setLogin((String) valuez);
