@@ -11,15 +11,15 @@
 
         <dependency>
             <groupId>org.zeromq</groupId>
-            <artifactId>zmq</artifactId>
-            <version>2.1.0</version>
+            <artifactId>jzmq</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
 <!--	    <scope>provided</scope> -->
         </dependency>
 
         <dependency>
     	    <groupId>org.gost19.pacahon.client</groupId>
     	    <artifactId>pacahon-client</artifactId>
-    	    <version>0.2-SNAPSHOT</version>
+    	    <version>0.3-SNAPSHOT</version>
         </dependency>
 
 
