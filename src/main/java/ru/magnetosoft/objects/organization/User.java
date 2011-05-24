@@ -371,10 +371,10 @@ public class User implements IOrganizationEntity, Serializable
 		byte lang = getLang(nm);
 		nm = stripLang(nm);
 
-		if (lang == _RU || lang == _NONE)
-			setFirstName(nm, "Ru");
 		if (lang == _EN)
 			setFirstName(nm, "En");
+		if (lang == _RU || lang == _NONE)
+			setFirstName(nm, "Ru");
 	}
 
 	public void _set__LastName(String nm)
@@ -617,16 +617,36 @@ public class User implements IOrganizationEntity, Serializable
 		return attributes;
 	}
 
-	public void _set__oFirstName(Object namez)
+	public void _set__oFirstName(Object namez, String locale)
 	{
 		if (namez != null)
 		{
 			if (namez instanceof JSONArray)
 			{
+				String nm_ru = "";
+				String nm_en = "";
+
 				Iterator<String> subj_it = ((JSONArray) namez).iterator();
 				while (subj_it.hasNext())
 				{
-					_set__FirstName(subj_it.next());
+					String nm = subj_it.next();
+					byte lang = getLang(nm);
+					nm = stripLang(nm);
+
+					if (lang == _EN)
+						nm_en = nm;
+					if (lang == _RU || lang == _NONE)
+						nm_ru = nm;
+				}
+
+				if (locale.equals("Ru"))
+				{
+					setFirstName(nm_en, "En");
+					setFirstName(nm_ru, "Ru");
+				} else
+				{
+					setFirstName(nm_ru, "Ru");
+					setFirstName(nm_en, "En");
 				}
 
 			} else if (namez instanceof String)
@@ -637,16 +657,35 @@ public class User implements IOrganizationEntity, Serializable
 		}
 	}
 
-	public void _set__oLastName(Object namez)
+	public void _set__oLastName(Object namez, String locale)
 	{
 		if (namez != null)
 		{
 			if (namez instanceof JSONArray)
 			{
+				String nm_ru = "";
+				String nm_en = "";
+
 				Iterator<String> subj_it = ((JSONArray) namez).iterator();
 				while (subj_it.hasNext())
 				{
-					_set__LastName(subj_it.next());
+					String nm = subj_it.next();
+					byte lang = getLang(nm);
+					nm = stripLang(nm);
+
+					if (lang == _EN)
+						nm_en = nm;
+					if (lang == _RU || lang == _NONE)
+						nm_ru = nm;
+				}
+				if (locale.equals("Ru"))
+				{
+					setLastName(nm_en, "En");
+					setLastName(nm_ru, "Ru");
+				} else
+				{
+					setLastName(nm_ru, "Ru");
+					setLastName(nm_en, "En");
 				}
 
 			} else if (namez instanceof String)
@@ -657,16 +696,35 @@ public class User implements IOrganizationEntity, Serializable
 		}
 	}
 
-	public void _set__oMiddleName(Object namez)
+	public void _set__oMiddleName(Object namez, String locale)
 	{
 		if (namez != null)
 		{
 			if (namez instanceof JSONArray)
 			{
+				String nm_ru = "";
+				String nm_en = "";
+
 				Iterator<String> subj_it = ((JSONArray) namez).iterator();
 				while (subj_it.hasNext())
 				{
-					_set__MiddleName(subj_it.next());
+					String nm = subj_it.next();
+					byte lang = getLang(nm);
+					nm = stripLang(nm);
+
+					if (lang == _EN)
+						nm_en = nm;
+					if (lang == _RU || lang == _NONE)
+						nm_ru = nm;
+				}
+				if (locale.equals("Ru"))
+				{
+					setMiddleName(nm_en, "En");
+					setMiddleName(nm_ru, "Ru");
+				} else
+				{
+					setMiddleName(nm_ru, "Ru");
+					setMiddleName(nm_en, "En");
 				}
 
 			} else if (namez instanceof String)
@@ -677,16 +735,35 @@ public class User implements IOrganizationEntity, Serializable
 		}
 	}
 
-	public void _set__oPosition(Object valuez)
+	public void _set__oPosition(Object valuez, String locale)
 	{
 		if (valuez != null)
 		{
 			if (valuez instanceof JSONArray)
 			{
+				String nm_ru = "";
+				String nm_en = "";
+
 				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
 				while (subj_it.hasNext())
 				{
-					_set__Position(subj_it.next());
+					String nm = subj_it.next();
+					byte lang = getLang(nm);
+					nm = stripLang(nm);
+
+					if (lang == _EN)
+						nm_en = nm;
+					if (lang == _RU || lang == _NONE)
+						nm_ru = nm;
+				}
+				if (locale.equals("Ru"))
+				{
+					setPosition(nm_en, "En");
+					setPosition(nm_ru, "Ru");
+				} else
+				{
+					setPosition(nm_ru, "Ru");
+					setPosition(nm_en, "En");
 				}
 
 			} else if (valuez instanceof String)

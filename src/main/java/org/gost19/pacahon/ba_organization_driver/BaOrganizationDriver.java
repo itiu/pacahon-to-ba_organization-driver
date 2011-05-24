@@ -160,7 +160,7 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				User usr = getUserFromGraph(ss, null);
+				User usr = getUserFromGraph(ss, null, locale);
 				if (usr != null)
 				{
 					usr.setDepartment(dd);
@@ -404,7 +404,7 @@ public class BaOrganizationDriver extends BaDriver
 			if (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				usr = getUserFromGraph(ss, null);
+				usr = getUserFromGraph(ss, null, locale);
 				usr.setLogin(login);
 			}
 			return usr;
@@ -475,7 +475,7 @@ public class BaOrganizationDriver extends BaDriver
 				{
 					updateUserReifedData(ss, res);
 				} else
-					usr = getUserFromGraph(ss, res);
+					usr = getUserFromGraph(ss, res, locale);
 
 				if (usr != null)
 					res.put(usr.getId(), usr);
@@ -538,7 +538,7 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				User usr = getUserFromGraph(ss, null);
+				User usr = getUserFromGraph(ss, null, locale);
 				if (usr != null)
 				{
 					// usr.setDepartment(dd);
@@ -599,7 +599,7 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				usr = getUserFromGraph(ss, null);
+				usr = getUserFromGraph(ss, null, locale);
 
 			}
 
@@ -766,7 +766,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users)
+	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users, String locale)
 	{
 		String id = (String) oo.get("@");
 
@@ -795,10 +795,10 @@ public class BaOrganizationDriver extends BaDriver
 			usr.setId(id);
 		}
 
-		usr._set__oFirstName(oo.get(predicates._swrc + "firstName"));
-		usr._set__oLastName(oo.get(predicates._swrc + "lastName"));
-		usr._set__oMiddleName(oo.get(predicates._gost19 + "middleName"));
-		usr._set__oPosition(oo.get(predicates._docs + "position"));
+		usr._set__oFirstName(oo.get(predicates._swrc + "firstName"), locale);
+		usr._set__oLastName(oo.get(predicates._swrc + "lastName"), locale);
+		usr._set__oMiddleName(oo.get(predicates._gost19 + "middleName"), locale);
+		usr._set__oPosition(oo.get(predicates._docs + "position"), locale);
 
 		Object valuez = oo.get(predicates._auth + "login");
 		if (valuez != null)
