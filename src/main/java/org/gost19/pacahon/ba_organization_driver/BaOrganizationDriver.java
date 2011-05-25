@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.gost19.pacahon.BaDriver;
 import org.gost19.pacahon.client.predicates;
@@ -825,6 +826,27 @@ public class BaOrganizationDriver extends BaDriver
 		return usr;
 	}
 
+	public void updateOrganizationEntity(String type, Map<String,String> attributes) {
+		if (type.equals("contact")) {
+			
+		} else if (type.equals("department")) {
+			
+		} else {
+			throw new IllegalStateException("Incompatible type");
+		}
+	}
+
+	public String createOrganizationEntity(String type, Map<String,String> attributes) {
+		// среди атрибутов нет идентификатора 
+		if (type.equals("contact")) {
+			return "NewOrgEntityId";
+		} else if (type.equals("department")) {
+			return "NewOrgEntityId";
+		} else {
+			throw new IllegalStateException("Incompatible type");
+		}
+	}
+	
 	public static void main(String[] args) throws Exception
 	{
 		BaOrganizationDriver drv = new BaOrganizationDriver(null);
