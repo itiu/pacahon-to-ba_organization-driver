@@ -349,6 +349,8 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("@", predicates._query + "any");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._auth + "login", login.toUpperCase());
+			arg.put(predicates._docs + "active", "true");
+			
 			arg.put("a", predicates._query + "get");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUserUidByLoginInternal");
@@ -396,6 +398,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
 			arg.put(predicates._auth + "login", login.toUpperCase());
+			arg.put(predicates._docs + "active", "true");
 			arg.put("a", predicates._docs + "employee_card");
 
 			User usr = null;

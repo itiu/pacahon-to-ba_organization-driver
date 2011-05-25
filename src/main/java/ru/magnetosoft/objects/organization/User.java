@@ -20,6 +20,40 @@ public class User implements IOrganizationEntity, Serializable
 	private static final byte _RU = 1;
 	private static final byte _EN = 2;
 
+	private static final long serialVersionUID = 6L;
+
+	public String uid; 
+	private String id;
+	private String name;
+	private String firstName;
+	private String middleName;
+	private String lastName;
+	private String position;
+	private Department department;
+	private String email;
+	private String login;
+	private long tabNomer;
+	private String telephone;
+	private String internalId;
+	private boolean active;
+	private String department_name;
+
+	private Map<String, String> attributes = new HashMap<String, String>();
+
+	public User()
+	{
+	}
+
+	public User(String id, String firstName, String secondName, String surName, String position, String department)
+	{
+		takeData(id, firstName, secondName, surName, position, department);
+	}
+
+	public String getUid()
+	{
+		return uid;
+	}
+	
 	private static byte getLang(String ss)
 	{
 		if (ss.length() >= 3)
@@ -47,33 +81,6 @@ public class User implements IOrganizationEntity, Serializable
 		}
 
 		return ss;
-	}
-
-	private static final long serialVersionUID = 6L;
-	private String id;
-	private String name;
-	private String firstName;
-	private String middleName;
-	private String lastName;
-	private String position;
-	private Department department;
-	private String email;
-	private String login;
-	private long tabNomer;
-	private String telephone;
-	private String internalId;
-	private boolean active;
-	private String department_name;
-
-	private Map<String, String> attributes = new HashMap<String, String>();
-
-	public User()
-	{
-	}
-
-	public User(String id, String firstName, String secondName, String surName, String position, String department)
-	{
-		takeData(id, firstName, secondName, surName, position, department);
 	}
 
 	public User(String id, String domainName, String firstName, String lastName, String email, String post,

@@ -16,6 +16,11 @@ public class BaDriver
 	public long start_time_ticket;
 	public int lifetime_ticket = 3600 * 1000;
 
+	public boolean removeSubject (String subject_id, String from) throws Exception
+	{
+		return pacahon_client.remove_subject (subject_id, from);
+	}
+	
 	public void initailize(String endpoint_pretending_organization) throws Exception
 	{
 		if (pacahon_client == null)

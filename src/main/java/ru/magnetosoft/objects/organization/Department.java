@@ -27,6 +27,18 @@ public class Department implements IOrganizationEntity, Serializable
 	private static final byte _RU = 1;
 	private static final byte _EN = 2;
 
+	public String uid; 
+
+	private static final long serialVersionUID = 1;
+	private String name;
+	private String id;
+	private String internalId;
+	private Map<String, String> attributes = new HashMap<String, String>();
+
+	private boolean chosen;
+	private String previousId;
+	private String nameEn;
+
 	private static byte getLang(String ss)
 	{
 		if (ss.length() >= 3)
@@ -55,16 +67,11 @@ public class Department implements IOrganizationEntity, Serializable
 		return ss;
 	}
 
-	private static final long serialVersionUID = 1;
-	private String name;
-	private String id;
-	private String internalId;
-	private Map<String, String> attributes = new HashMap<String, String>();
-
-	private boolean chosen;
-	private String previousId;
-	private String nameEn;
-
+	public String getUid()
+	{
+		return uid;
+	}
+	
 	public String getOrgName()
 	{
 		return name;

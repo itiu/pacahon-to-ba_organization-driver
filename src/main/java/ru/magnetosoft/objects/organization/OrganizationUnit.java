@@ -20,6 +20,8 @@ public class OrganizationUnit implements Serializable
 	public Type type = Type.Unknown;
 
 	private static final long serialVersionUID = 7236181962950149947L;
+	
+	public String uid; 
 	private String id;
 	private String name;
 	private String position;
