@@ -1,14 +1,17 @@
 package ru.magnetosoft.objects.organization;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public interface IOrganizationEntity extends Serializable
 {
-	String getUid();
+	public String getUid();
 
-	String getId();
+	public String getId();
 
-	String getName();
+	public String getName();
 
-	String getOrgName();
+	public String getOrgName();
+	
+	public Map<String, String> getAttributes();	
 }

@@ -13,6 +13,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import ru.magnetosoft.objects.organization.Department;
+import ru.magnetosoft.objects.organization.IOrganizationEntity;
 import ru.magnetosoft.objects.organization.User;
 
 /**
@@ -161,7 +162,7 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				User usr = getUserFromGraph(ss, null, locale);
+				User usr = getUserFromGraph(ss, null, locale, true);
 				if (usr != null)
 				{
 					usr.setDepartment(dd);
@@ -351,7 +352,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._auth + "login", login.toUpperCase());
 			arg.put(predicates._docs + "active", "true");
-			
+
 			arg.put("a", predicates._query + "get");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUserUidByLoginInternal");
@@ -408,7 +409,7 @@ public class BaOrganizationDriver extends BaDriver
 			if (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				usr = getUserFromGraph(ss, null, locale);
+				usr = getUserFromGraph(ss, null, locale, true);
 				usr.setLogin(login);
 			}
 			return usr;
@@ -479,7 +480,7 @@ public class BaOrganizationDriver extends BaDriver
 				{
 					updateUserReifedData(ss, res);
 				} else
-					usr = getUserFromGraph(ss, res, locale);
+					usr = getUserFromGraph(ss, res, locale, true);
 
 				if (usr != null)
 					res.put(usr.getId(), usr);
@@ -542,7 +543,7 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				User usr = getUserFromGraph(ss, null, locale);
+				User usr = getUserFromGraph(ss, null, locale, true);
 				if (usr != null)
 				{
 					// usr.setDepartment(dd);
@@ -554,6 +555,47 @@ public class BaOrganizationDriver extends BaDriver
 		} catch (Exception ex)
 		{
 			throw new Exception("Cannot get users", ex);
+		}
+
+	}
+
+	/**
+	 * Найти орг-единицу по уникальному идентификатору.
+	 * 
+	 * @param uid
+	 *            уникальный идентификатор
+	 * @param localeName
+	 *            имя локали
+	 * @return пользователь
+	 */
+	public IOrganizationEntity selectUnitByUidInternal(String uid, String locale, String from) throws Exception
+	{
+		recheck_ticket();
+		locale = correct_locale(locale);
+
+		try
+		{
+			JSONObject arg = new JSONObject();
+
+			arg.put("@", predicates._zdb + "doc_" + uid);
+			arg.put(predicates._query + "all_predicates", predicates._query + "get");
+
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":selectUnitByUidInternal");
+			Iterator<JSONObject> subj_it = result.iterator();
+
+			IOrganizationEntity ou = null;
+			if (subj_it.hasNext())
+			{
+				JSONObject ss = subj_it.next();
+				ou = getUserFromGraph(ss, null, locale, false);
+				if (ou == null)
+					ou = getDepartmentFromGraph(ss, null, locale);
+			}
+
+			return ou;
+		} catch (Exception ex)
+		{
+			throw new Exception("ex! selectUserByUidInternal", ex);
 		}
 
 	}
@@ -574,17 +616,6 @@ public class BaOrganizationDriver extends BaDriver
 
 		try
 		{
-
-			// выберем нижеперечисленные предикаты из субьекта с заданным uid
-
-			// gost19:department
-			// firstName->swrc:firstName@[localeName]
-			// surname->swrc:middlename@[localeName]
-			// domainName->docs:login
-			// email->swrc:email
-			// post->docs:position@[localeName]
-			// secondName->swrc:lastName@[localeName]
-
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._zdb + "doc_" + uid);
@@ -600,17 +631,16 @@ public class BaOrganizationDriver extends BaDriver
 			User usr = null;
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":selectUserByUidInternal");
 			Iterator<JSONObject> subj_it = result.iterator();
-			while (subj_it.hasNext())
+			if (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				usr = getUserFromGraph(ss, null, locale);
-
+				usr = getUserFromGraph(ss, null, locale, true);
 			}
 
 			return usr;
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get root department", ex);
+			throw new Exception("ex! selectUserByUidInternal", ex);
 		}
 	} // end selectUserByUid()
 
@@ -770,8 +800,36 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users, String locale)
+	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users, String locale, boolean isUser)
 	{
+		if (isUser == false)
+		{
+			Object rdf_type = oo.get("a");
+			if (rdf_type instanceof JSONArray)
+			{
+				JSONArray rdf_type_array = (JSONArray) rdf_type;
+
+				for (int i = 0; i < rdf_type_array.size(); i++)
+				{
+					String a = (String) rdf_type_array.get(i);
+					if (a.equals("docs:employee_card"))
+					{
+						isUser = true;
+						break;
+					}
+
+				}
+			} else
+			{
+				if (((String) rdf_type).equals("docs:employee_card"))
+				{
+					isUser = true;
+				}
+			}
+		}
+		if (isUser == false)
+			return null;
+
 		String id = (String) oo.get("@");
 
 		if (id == null)
@@ -826,27 +884,35 @@ public class BaOrganizationDriver extends BaDriver
 		return usr;
 	}
 
-	public void updateOrganizationEntity(String type, Map<String,String> attributes) {
-		if (type.equals("contact")) {
-			
-		} else if (type.equals("department")) {
-			
-		} else {
+	public void updateOrganizationEntity(String type, Map<String, String> attributes)
+	{
+		if (type.equals("contact"))
+		{
+
+		} else if (type.equals("department"))
+		{
+
+		} else
+		{
 			throw new IllegalStateException("Incompatible type");
 		}
 	}
 
-	public String createOrganizationEntity(String type, Map<String,String> attributes) {
+	public String createOrganizationEntity(String type, Map<String, String> attributes)
+	{
 		// среди атрибутов нет идентификатора 
-		if (type.equals("contact")) {
+		if (type.equals("contact"))
+		{
 			return "NewOrgEntityId";
-		} else if (type.equals("department")) {
+		} else if (type.equals("department"))
+		{
 			return "NewOrgEntityId";
-		} else {
+		} else
+		{
 			throw new IllegalStateException("Incompatible type");
 		}
 	}
-	
+
 	public static void main(String[] args) throws Exception
 	{
 		BaOrganizationDriver drv = new BaOrganizationDriver(null);
