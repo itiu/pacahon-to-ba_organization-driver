@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.gost19.pacahon.BaDriver;
 import org.gost19.pacahon.client.predicates;
@@ -49,6 +50,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._query + "any");
+			arg.put("a", predicates._query + "get");
 			arg.put(predicates._gost19 + "tag", "root");
 			arg.put(predicates._docs + "active", "true");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
@@ -90,6 +92,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._query + "any");
+			arg.put("a", "docs:unit_card");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + departmentId);
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
@@ -103,7 +106,9 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByParentId");
-				res.add(dep);
+
+				if (dep != null)
+					res.add(dep);
 			}
 
 			return res;
@@ -151,6 +156,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
+			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + departmentId);
 			arg.put("a", predicates._docs + "employee_card");
 
@@ -193,6 +199,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._zdb + "doc_" + uid);
+			arg.put("a", predicates._query + "get");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
@@ -276,6 +283,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", predicates._query + "any");
+			arg.put("a", predicates._query + "get");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", externalIdentifer);
@@ -712,12 +720,18 @@ public class BaOrganizationDriver extends BaDriver
 
 	private Department getDepartmentFromGraph(JSONObject oo, String locale, String from)
 	{
+		Object rdf_type = oo.get("a");
+
+		if (rdf_type != null && isUser(rdf_type) == true)
+			return null;
+
 		recheck_ticket();
 		locale = correct_locale(locale);
 
 		Department dep = new Department();
 
 		String id = (String) oo.get("@");
+		dep.uid = id;
 		id = id.substring(id.indexOf(doc_prefix) + doc_prefix.length(), id.length());
 		dep.setId(id);
 
@@ -746,13 +760,126 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 		String externalIdentifer = (String) oo.get(predicates._gost19 + "externalIdentifer");
-
 		if (externalIdentifer != null)
 		{
 			dep.setInternalId(externalIdentifer);
 		}
+		
+		dep.getAttributes().put("@", dep.uid);
+
+		if (rdf_type != null)
+			dep.getAttributes().put("a", rdf_type.toString());
 
 		return dep;
+	}
+
+	private boolean isUser(Object rdf_type)
+	{
+		boolean res = false;
+
+		//		Object rdf_type = oo.get("a");
+		if (rdf_type == null)
+			rdf_type = "docs:employee_card";
+
+		if (rdf_type instanceof JSONArray)
+		{
+			JSONArray rdf_type_array = (JSONArray) rdf_type;
+
+			for (int i = 0; i < rdf_type_array.size(); i++)
+			{
+				String a = (String) rdf_type_array.get(i);
+				if (a.equals("docs:employee_card"))
+				{
+					return true;
+				}
+
+			}
+		} else
+		{
+			if (((String) rdf_type).equals("docs:employee_card"))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users, String locale, boolean isUser)
+	{
+		Object rdf_type = oo.get("a");
+
+		if (isUser == false)
+		{
+			isUser = isUser(oo);
+		}
+
+		if (isUser == false)
+			return null;
+
+		String id = (String) oo.get("@");
+		if (id == null)
+		{
+			return null;
+		}
+
+		id = id.substring(id.indexOf(doc_prefix) + doc_prefix.length(), id.length());
+
+		User usr = null;
+
+		if (users != null)
+		{
+			usr = users.get(id);
+
+			if (usr == null)
+			{
+				usr = new User();
+				users.put(id, usr);
+			}
+		} else
+		{
+			usr = new User();
+		}
+
+		usr.setId(id);
+		usr.uid = id;
+
+		usr._set__oFirstName(oo.get(predicates._swrc + "firstName"), locale);
+		usr._set__oLastName(oo.get(predicates._swrc + "lastName"), locale);
+		usr._set__oMiddleName(oo.get(predicates._gost19 + "middleName"), locale);
+		usr._set__oPosition(oo.get(predicates._docs + "position"), locale);
+
+		Object valuez = oo.get(predicates._auth + "login");
+		if (valuez != null)
+		{
+			usr.setLogin((String) valuez);
+		}
+
+		valuez = oo.get(predicates._swrc + "email");
+		if (valuez != null)
+		{
+			usr.setEmail((String) valuez);
+		}
+
+		valuez = oo.get(predicates._docs + "unit");
+		if (valuez != null)
+		{
+			// val = val.substring("zdb:dep_".length(), val.length());
+			// usr.setDepartment(getDepartmentByUid(val, locale, from));
+		}
+		
+		String externalIdentifer = (String) oo.get(predicates._gost19 + "externalIdentifer");
+		if (externalIdentifer != null)
+		{
+			usr.setTabNomer(externalIdentifer);
+			usr.getAttributes().put("pid", externalIdentifer);
+		}
+
+		usr.getAttributes().put("@", usr.uid);
+		if (rdf_type != null)
+			usr.getAttributes().put("a", rdf_type.toString());
+
+		return usr;
 	}
 
 	private void updateUserReifedData(JSONObject oo, HashMap<String, User> users)
@@ -800,106 +927,53 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users, String locale, boolean isUser)
+	public void updateOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
-		if (isUser == false)
+		String uid = attributes.get("@");
+		if (uid == null)
+			throw new IllegalStateException("@ is null");
+
+		try
 		{
-			Object rdf_type = oo.get("a");
-			if (rdf_type instanceof JSONArray)
-			{
-				JSONArray rdf_type_array = (JSONArray) rdf_type;
-
-				for (int i = 0; i < rdf_type_array.size(); i++)
-				{
-					String a = (String) rdf_type_array.get(i);
-					if (a.equals("docs:employee_card"))
-					{
-						isUser = true;
-						break;
-					}
-
-				}
-			} else
-			{
-				if (((String) rdf_type).equals("docs:employee_card"))
-				{
-					isUser = true;
-				}
-			}
-		}
-		if (isUser == false)
-			return null;
-
-		String id = (String) oo.get("@");
-
-		if (id == null)
+			this.removeSubject(uid, from + ":updateOrganizationEntity");
+		} catch (Exception ex)
 		{
-			return null;
+			throw new IllegalStateException(ex);
 		}
 
-		id = id.substring(id.indexOf(doc_prefix) + doc_prefix.length(), id.length());
-
-		User usr = null;
-
-		if (users != null)
-		{
-			usr = users.get(id);
-
-			if (usr == null)
-			{
-				usr = new User();
-				usr.setId(id);
-				users.put(id, usr);
-			}
-		} else
-		{
-			usr = new User();
-			usr.setId(id);
-		}
-
-		usr._set__oFirstName(oo.get(predicates._swrc + "firstName"), locale);
-		usr._set__oLastName(oo.get(predicates._swrc + "lastName"), locale);
-		usr._set__oMiddleName(oo.get(predicates._gost19 + "middleName"), locale);
-		usr._set__oPosition(oo.get(predicates._docs + "position"), locale);
-
-		Object valuez = oo.get(predicates._auth + "login");
-		if (valuez != null)
-		{
-			usr.setLogin((String) valuez);
-		}
-
-		valuez = oo.get(predicates._swrc + "email");
-		if (valuez != null)
-		{
-			usr.setEmail((String) valuez);
-		}
-
-		valuez = oo.get(predicates._docs + "unit");
-		if (valuez != null)
-		{
-			// val = val.substring("zdb:dep_".length(), val.length());
-			// usr.setDepartment(getDepartmentByUid(val, locale, from));
-		}
-
-		return usr;
+		createOrganizationEntity(type, attributes, from);
 	}
 
-	public void updateOrganizationEntity(String type, Map<String, String> attributes)
+	public String createOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
-		if (type.equals("contact"))
+		String uid = attributes.get("@");
+		if (uid == null)
 		{
-
-		} else if (type.equals("department"))
-		{
-
+			// это совсем новый субьект
 		} else
 		{
-			throw new IllegalStateException("Incompatible type");
-		}
-	}
 
-	public String createOrganizationEntity(String type, Map<String, String> attributes)
-	{
+			JSONArray arg = new JSONArray();
+			JSONObject one = new JSONObject();
+			arg.add(one);
+
+			one.put("@", predicates.zdb + "doc_" + uid);
+			one.put(predicates._docs + "unit", predicates._query + "get");
+
+			pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
+
+			Iterator<Entry<String, String>> it = attributes.entrySet().iterator();
+
+			while (it.hasNext())
+			{
+				Entry<String, String> ee = it.next();
+				String key = ee.getKey();
+				String val = ee.getValue();
+
+				//			if ()
+
+			}
+		}
 		// среди атрибутов нет идентификатора 
 		if (type.equals("contact"))
 		{
