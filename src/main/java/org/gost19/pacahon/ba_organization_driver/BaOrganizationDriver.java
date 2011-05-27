@@ -149,6 +149,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", predicates._query + "any");
 			arg.put("a", predicates._docs + "employee_card");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
 			arg.put(predicates._gost19 + "middleName", predicates._query + "get");
@@ -696,6 +697,39 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	}
 
+	private boolean isUser(Object rdf_type)
+	{
+		boolean res = false;
+
+		//		Object rdf_type = oo.get("a");
+		if (rdf_type == null)
+			rdf_type = "docs:employee_card";
+
+		if (rdf_type instanceof JSONArray)
+		{
+			JSONArray rdf_type_array = (JSONArray) rdf_type;
+
+			for (int i = 0; i < rdf_type_array.size(); i++)
+			{
+				String a = (String) rdf_type_array.get(i);
+				if (a.equals("docs:employee_card"))
+				{
+					return true;
+				}
+
+			}
+		} else
+		{
+			if (((String) rdf_type).equals("docs:employee_card"))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	
 	/*
 	 * public List<Department> getDepartmentsByIds(Collection<String> ids,
 	 * String locale, String from) throws Exception { try { List<Department> res
@@ -773,40 +807,9 @@ public class BaOrganizationDriver extends BaDriver
 		return dep;
 	}
 
-	private boolean isUser(Object rdf_type)
-	{
-		boolean res = false;
-
-		//		Object rdf_type = oo.get("a");
-		if (rdf_type == null)
-			rdf_type = "docs:employee_card";
-
-		if (rdf_type instanceof JSONArray)
-		{
-			JSONArray rdf_type_array = (JSONArray) rdf_type;
-
-			for (int i = 0; i < rdf_type_array.size(); i++)
-			{
-				String a = (String) rdf_type_array.get(i);
-				if (a.equals("docs:employee_card"))
-				{
-					return true;
-				}
-
-			}
-		} else
-		{
-			if (((String) rdf_type).equals("docs:employee_card"))
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	private User getUserFromGraph(JSONObject oo, HashMap<String, User> users, String locale, boolean isUser)
 	{
+		String uid;
 		Object rdf_type = oo.get("a");
 
 		if (isUser == false)
@@ -823,6 +826,7 @@ public class BaOrganizationDriver extends BaDriver
 			return null;
 		}
 
+		uid = id;
 		id = id.substring(id.indexOf(doc_prefix) + doc_prefix.length(), id.length());
 
 		User usr = null;
@@ -842,7 +846,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 		usr.setId(id);
-		usr.uid = id;
+		usr.uid = uid;
 
 		usr._set__oFirstName(oo.get(predicates._swrc + "firstName"), locale);
 		usr._set__oLastName(oo.get(predicates._swrc + "lastName"), locale);
@@ -861,12 +865,18 @@ public class BaOrganizationDriver extends BaDriver
 			usr.setEmail((String) valuez);
 		}
 
-		valuez = oo.get(predicates._docs + "unit");
+		valuez = oo.get(predicates._gost19 + "synchronize");
 		if (valuez != null)
 		{
+			usr.getAttributes().put("doNotSynchronize", "1");
+		}
+
+		//		valuez = oo.get(predicates._docs + "unit");
+//		if (valuez != null)
+//		{
 			// val = val.substring("zdb:dep_".length(), val.length());
 			// usr.setDepartment(getDepartmentByUid(val, locale, from));
-		}
+//		}
 		
 		String externalIdentifer = (String) oo.get(predicates._gost19 + "externalIdentifer");
 		if (externalIdentifer != null)
