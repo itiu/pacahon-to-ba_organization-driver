@@ -761,7 +761,7 @@ public class BaOrganizationDriver extends BaDriver
 				}
 
 			}
-		} else
+		} else if (rdf_type instanceof String)
 		{
 			if (((String) rdf_type).equals("docs:employee_card"))
 			{
