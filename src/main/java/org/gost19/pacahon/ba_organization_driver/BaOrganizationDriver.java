@@ -149,6 +149,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", predicates._query + "any");
 			arg.put("a", predicates._docs + "employee_card");
+
 			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");
 			arg.put(predicates._swrc + "firstName", predicates._query + "get");
 			arg.put(predicates._swrc + "lastName", predicates._query + "get");
@@ -159,12 +160,54 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._docs + "unit", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + departmentId);
-			arg.put("a", predicates._docs + "employee_card");
 
 			if (withActive == true)
 				arg.put(predicates._docs + "active", "true");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByDepartmentId");
+			Iterator<JSONObject> subj_it = result.iterator();
+			while (subj_it.hasNext())
+			{
+				JSONObject ss = subj_it.next();
+				User usr = getUserFromGraph(ss, null, locale, true);
+				if (usr != null)
+				{
+					usr.setDepartment(dd);
+					res.add(usr);
+				}
+			}
+			return res;
+		} catch (Exception ex)
+		{
+			throw new Exception("Cannot get users", ex);
+		}
+
+	}
+
+	public List<User> getFullUsersByDepartmentId(String departmentExtId, String locale, String from) throws Exception
+	{
+		recheck_ticket();
+		locale = correct_locale(locale);
+
+		try
+		{
+			String departmentId = null;
+
+			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getFullUsersByDepartmentId");
+
+			departmentId = dd.getId();
+
+			List<User> res = new ArrayList<User>();
+
+			JSONObject arg = new JSONObject();
+
+			arg.put("@", predicates._query + "any");
+			arg.put("a", predicates._docs + "employee_card");
+			arg.put(predicates._docs + "active", "true");
+			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + departmentId);
+			arg.put(predicates._query + "all_predicates", "query:get");
+
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getFullUsersByDepartmentId");
 			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
@@ -289,7 +332,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._docs + "parentUnit", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", externalIdentifer);
 
-			JSONArray result = pacahon_client.get(ticket, arg, from);
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByExtId");
 			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
@@ -729,7 +772,6 @@ public class BaOrganizationDriver extends BaDriver
 		return false;
 	}
 
-	
 	/*
 	 * public List<Department> getDepartmentsByIds(Collection<String> ids,
 	 * String locale, String from) throws Exception { try { List<Department> res
@@ -798,7 +840,7 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			dep.setInternalId(externalIdentifer);
 		}
-		
+
 		dep.getAttributes().put("@", dep.uid);
 
 		if (rdf_type != null)
@@ -871,13 +913,37 @@ public class BaOrganizationDriver extends BaDriver
 			usr.getAttributes().put("doNotSynchronize", "1");
 		}
 
+		valuez = oo.get(predicates._gost19 + "internal_phone");
+		if (valuez != null)
+		{
+			usr.getAttributes().put("phone", (String) valuez);
+		}
+
+		valuez = oo.get(predicates._gost19 + "mobile");
+		if (valuez != null)
+		{
+			usr.getAttributes().put("mobilePrivate", (String) valuez);
+		}
+
+		valuez = oo.get(predicates._swrc + "phone");
+		if (valuez != null)
+		{
+			usr.getAttributes().put("phoneExt", (String) valuez);
+		}
+
+		valuez = oo.get(predicates._gost19 + "work_mobile");
+		if (valuez != null)
+		{
+			usr.getAttributes().put("mobile", (String) valuez);
+		}
+
 		//		valuez = oo.get(predicates._docs + "unit");
-//		if (valuez != null)
-//		{
-			// val = val.substring("zdb:dep_".length(), val.length());
-			// usr.setDepartment(getDepartmentByUid(val, locale, from));
-//		}
-		
+		//		if (valuez != null)
+		//		{
+		// val = val.substring("zdb:dep_".length(), val.length());
+		// usr.setDepartment(getDepartmentByUid(val, locale, from));
+		//		}
+
 		String externalIdentifer = (String) oo.get(predicates._gost19 + "externalIdentifer");
 		if (externalIdentifer != null)
 		{
