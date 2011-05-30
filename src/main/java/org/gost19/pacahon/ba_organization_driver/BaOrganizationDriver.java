@@ -216,7 +216,7 @@ public class BaOrganizationDriver extends BaDriver
 				if (usr != null)
 				{
 					usr.setDepartment(dd);
-					usr.getAttributes().put("departmentId", departmentId);
+					usr.getAttributes().put("departmentId", departmentExtId);
 					res.add(usr);
 				}
 			}
@@ -906,6 +906,7 @@ public class BaOrganizationDriver extends BaDriver
 		if (valuez != null)
 		{
 			usr.setEmail((String) valuez);
+			usr.getAttributes().put("email", (String) valuez);
 		}
 
 		valuez = oo.get(predicates._gost19 + "synchronize");
