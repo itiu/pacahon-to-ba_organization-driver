@@ -216,6 +216,7 @@ public class BaOrganizationDriver extends BaDriver
 				if (usr != null)
 				{
 					usr.setDepartment(dd);
+					usr.getAttributes().put("departmentId", departmentId);
 					res.add(usr);
 				}
 			}
@@ -917,6 +918,12 @@ public class BaOrganizationDriver extends BaDriver
 		if (valuez != null)
 		{
 			usr.getAttributes().put("phone", (String) valuez);
+		}
+
+		valuez = oo.get(predicates._docs + "active");
+		if (valuez != null)
+		{
+			usr.getAttributes().put("active", (String) valuez);
 		}
 
 		valuez = oo.get(predicates._gost19 + "mobile");

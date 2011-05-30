@@ -14,4 +14,6 @@ public interface IOrganizationEntity extends Serializable
 	public String getOrgName();
 	
 	public Map<String, String> getAttributes();	
+	
+	public String getInternalId();
 }
