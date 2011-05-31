@@ -62,7 +62,7 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				Department dep = getDepartmentFromGraph(ss, locale, from);
+				Department dep = getDepartmentFromGraph(ss, locale, from + ":getOrganizationRoots");
 				res.add(dep);
 			}
 
@@ -100,7 +100,7 @@ public class BaOrganizationDriver extends BaDriver
 			if (withActive == true)
 				arg.put(predicates._docs + "active", "true");
 
-			JSONArray result = pacahon_client.get(ticket, arg, from);
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByParentId");
 			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
@@ -296,7 +296,7 @@ public class BaOrganizationDriver extends BaDriver
 			if (withActive == true)
 				arg.put(predicates._docs + "active", "true");
 
-			JSONArray result = pacahon_client.get(ticket, arg, from);
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByName (FT)");
 			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
@@ -363,7 +363,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("@", predicates._zdb + "doc_" + uid);
 			arg.put(predicates._docs + "unit", predicates._query + "get");
 
-			JSONArray result = pacahon_client.get(ticket, arg, from);
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentUidByUserUid");
 			Iterator<JSONObject> subj_it = result.iterator();
 			if (subj_it.hasNext())
 			{
@@ -731,7 +731,7 @@ public class BaOrganizationDriver extends BaDriver
 					val = val.substring("zdb:dep_".length(), val.length());
 					department = val;
 				}
-				return getDepartmentByUid(department, locale, from);
+				return getDepartmentByUid(department, locale, from + ":getDepartmentByUserUid");
 			}
 
 			return null;
@@ -819,13 +819,15 @@ public class BaOrganizationDriver extends BaDriver
 			Iterator<String> subj_it = ((JSONArray) namez).iterator();
 			while (subj_it.hasNext())
 			{
-				dep.set__Name(subj_it.next());
+				String nm = subj_it.next();
+				dep.set__Name(nm);
+				dep.getAttributes().put("name", nm);
 			}
 
 		} else if (namez instanceof String)
 		{
 			dep.set__Name((String) namez);
-
+			dep.getAttributes().put("name", (String) namez);
 		}
 
 		String parentDepartment = (String) oo.get(predicates._gost19 + "parentDepartment");
@@ -834,18 +836,26 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			String val = parentDepartment.substring("zdb:dep_".length(), parentDepartment.length());
 			dep.setParentDepartmentId(val);
+//			dep.getAttributes().put("parentId", val);
 		}
 
 		String externalIdentifer = (String) oo.get(predicates._gost19 + "externalIdentifer");
 		if (externalIdentifer != null)
 		{
 			dep.setInternalId(externalIdentifer);
+			dep.getAttributes().put("id", dep.getInternalId());
 		}
 
 		dep.getAttributes().put("@", dep.uid);
 
 		if (rdf_type != null)
 			dep.getAttributes().put("a", rdf_type.toString());
+
+		Object valuez = oo.get(predicates._docs + "active");
+		if (valuez != null)
+		{
+			dep.getAttributes().put("active", (String) valuez);
+		}
 
 		return dep;
 	}
@@ -902,6 +912,13 @@ public class BaOrganizationDriver extends BaDriver
 			usr.setLogin((String) valuez);
 		}
 
+		valuez = oo.get(predicates._auth + "login");
+		if (valuez != null)
+		{
+			usr.setEmail((String) valuez);
+			usr.getAttributes().put("domainName", (String) valuez);
+		}
+
 		valuez = oo.get(predicates._swrc + "email");
 		if (valuez != null)
 		{
@@ -925,6 +942,10 @@ public class BaOrganizationDriver extends BaDriver
 		if (valuez != null)
 		{
 			usr.getAttributes().put("active", (String) valuez);
+			if (((String) valuez).equalsIgnoreCase("true"))
+				usr.setActive(true);
+			else
+				usr.setActive(false);
 		}
 
 		valuez = oo.get(predicates._gost19 + "mobile");
@@ -1025,7 +1046,7 @@ public class BaOrganizationDriver extends BaDriver
 			throw new IllegalStateException(ex);
 		}
 
-		createOrganizationEntity(type, attributes, from);
+		createOrganizationEntity(type, attributes, from + ":updateOrganizationEntity");
 	}
 
 	public String createOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
