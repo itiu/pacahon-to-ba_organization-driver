@@ -53,6 +53,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("a", predicates._query + "get");
 			arg.put(predicates._gost19 + "tag", "root");
 			arg.put(predicates._docs + "active", "true");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
@@ -63,6 +64,7 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getOrganizationRoots");
+				dep.getAttributes().put("active", "true");
 				res.add(dep);
 			}
 
@@ -94,6 +96,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("@", predicates._query + "any");
 			arg.put("a", "docs:unit_card");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put(predicates._docs + "parentUnit", predicates._zdb + "dep_" + departmentId);
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
@@ -107,6 +110,9 @@ public class BaOrganizationDriver extends BaDriver
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByParentId");
 
+				if (withActive == true)
+					dep.getAttributes().put("active", "true");
+				
 				if (dep != null)
 					res.add(dep);
 			}
@@ -173,6 +179,10 @@ public class BaOrganizationDriver extends BaDriver
 				if (usr != null)
 				{
 					usr.setDepartment(dd);
+										
+					if (withActive == true)
+						usr.getAttributes().put("active", "true");
+					
 					res.add(usr);
 				}
 			}
@@ -215,6 +225,7 @@ public class BaOrganizationDriver extends BaDriver
 				User usr = getUserFromGraph(ss, null, locale, true);
 				if (usr != null)
 				{
+					usr.getAttributes().put("active", "true");
 					usr.setDepartment(dd);
 					usr.getAttributes().put("departmentId", departmentExtId);
 					res.add(usr);
@@ -247,6 +258,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("a", predicates._query + "get");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._query + "get");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from);
@@ -291,6 +303,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._query + "fulltext", str_tokens.toString());
 			arg.put("a", predicates._docs + "unit_card");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put(predicates._gost19 + "externalIdentifer", predicates._query + "get");
 
 			if (withActive == true)
@@ -302,6 +315,8 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByName (FT)");
+				if (withActive == true)
+					dep.getAttributes().put("active", "true");				
 				res.add(dep);
 			}
 
@@ -331,6 +346,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("a", predicates._query + "get");
 			arg.put(predicates._swrc + "name", predicates._query + "get");
 			arg.put(predicates._docs + "parentUnit", predicates._query + "get");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put(predicates._gost19 + "externalIdentifer", externalIdentifer);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByExtId");
@@ -453,6 +469,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
 			arg.put(predicates._auth + "login", login.toUpperCase());
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put(predicates._docs + "active", "true");
 			arg.put("a", predicates._docs + "employee_card");
 
@@ -463,6 +480,7 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				usr = getUserFromGraph(ss, null, locale, true);
+				usr.getAttributes().put("active", "true");				
 				usr.setLogin(login);
 			}
 			return usr;
@@ -514,6 +532,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get_reifed");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put(predicates._query + "fulltext", str_tokens.toString());
 			arg.put("a", predicates._docs + "employee_card");
 
@@ -536,7 +555,11 @@ public class BaOrganizationDriver extends BaDriver
 					usr = getUserFromGraph(ss, res, locale, true);
 
 				if (usr != null)
+				{
+					if (withActive == true)
+						usr.getAttributes().put("active", "true");
 					res.put(usr.getId(), usr);
+				}
 			}
 			return new ArrayList<User>(res.values());
 
@@ -589,6 +612,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put("a", predicates._docs + "employee_card");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByUids");
@@ -679,6 +703,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(predicates._swrc + "email", predicates._query + "get");
 			arg.put(predicates._docs + "position", predicates._query + "get");
 			arg.put(predicates._docs + "unit", predicates._query + "get");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 			arg.put("a", predicates._docs + "employee_card");
 
 			User usr = null;
@@ -719,6 +744,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", predicates.zdb + "doc_" + uid);
 			arg.put(predicates._docs + "unit", predicates._query + "get");
+			arg.put(predicates._gost19 + "synchronize", predicates._query + "get");			
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByUserUid");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -836,7 +862,13 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			String val = parentDepartment.substring("zdb:dep_".length(), parentDepartment.length());
 			dep.setParentDepartmentId(val);
-//			dep.getAttributes().put("parentId", val);
+			//			dep.getAttributes().put("parentId", val);
+		}
+
+		Object valuez = oo.get(predicates._gost19 + "synchronize");
+		if (valuez != null)
+		{
+			dep.getAttributes().put("doNotSynchronize", "1");
 		}
 
 		String externalIdentifer = (String) oo.get(predicates._gost19 + "externalIdentifer");
@@ -851,7 +883,7 @@ public class BaOrganizationDriver extends BaDriver
 		if (rdf_type != null)
 			dep.getAttributes().put("a", rdf_type.toString());
 
-		Object valuez = oo.get(predicates._docs + "active");
+		valuez = oo.get(predicates._docs + "active");
 		if (valuez != null)
 		{
 			dep.getAttributes().put("active", (String) valuez);
