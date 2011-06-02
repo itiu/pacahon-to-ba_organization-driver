@@ -1094,7 +1094,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject one = new JSONObject();
 			arg.add(one);
 
-			one.put("@", predicates.zdb + "doc_" + uid);
+			one.put("@", predicates._zdb + "doc_" + uid);
 			one.put(predicates._docs + "unit", predicates._query + "get");
 
 			pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");

@@ -10,17 +10,17 @@ public class BaDriver
 {
 	private static SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.sss");
 	private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		
+
 	public static PacahonClient pacahon_client = null;
 	public String ticket;
 	public long start_time_ticket;
 	public int lifetime_ticket = 3600 * 1000;
 
-	public boolean removeSubject (String subject_id, String from) throws Exception
+	public boolean removeSubject(String subject_id, String from) throws Exception
 	{
-		return pacahon_client.remove_subject (subject_id, from);
+		return pacahon_client.remove_subject(ticket, subject_id, from);
 	}
-	
+
 	public void initailize(String endpoint_pretending_organization) throws Exception
 	{
 		if (pacahon_client == null)
@@ -28,11 +28,10 @@ public class BaDriver
 			pacahon_client = new PacahonClient(endpoint_pretending_organization);
 			ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
 			start_time_ticket = System.currentTimeMillis();
-		}
-		else
+		} else
 		{
 			ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
-			start_time_ticket = System.currentTimeMillis();			
+			start_time_ticket = System.currentTimeMillis();
 		}
 
 	}
@@ -77,5 +76,5 @@ public class BaDriver
 			ex.hashCode();
 		}
 		return null;
-	}	
+	}
 }
