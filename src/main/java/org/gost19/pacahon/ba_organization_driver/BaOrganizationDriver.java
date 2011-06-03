@@ -1116,6 +1116,7 @@ public class BaOrganizationDriver extends BaDriver
 			if (dep != null)
 			{
 				JSONObject dep_info = get_reif_subject(uid, Predicates.docs__parentUnit, dep.getUid());
+				dep_info.put(Predicates.swrc__name, dep.getName());
 				arg.add(dep_info);
 			}
 
