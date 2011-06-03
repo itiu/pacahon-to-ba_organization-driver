@@ -1120,6 +1120,7 @@ public class BaOrganizationDriver extends BaDriver
 				arg.add(dep_info);
 			}
 
+			one.put(Predicates.docs__parentUnit, dep.getUid());
 			one.put("a", rdf_type_content);
 			one.put("active", "true");
 
