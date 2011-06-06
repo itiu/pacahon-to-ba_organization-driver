@@ -1089,12 +1089,15 @@ public class BaOrganizationDriver extends BaDriver
 	public String createOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
 		String parentId = attributes.get("parentId");
-		Department dep = null;
+		Department parent_dep = null;
 
 		if (parentId != null)
 		{
-			dep = getDepartmentByExtId(parentId, "Ru", from + ":createOrganizationEntity");
-
+			parent_dep = getDepartmentByExtId(parentId, "Ru", from + ":createOrganizationEntity");
+			if (parent_dep == null)
+			{
+				// такого подразделения еще нет в базе !!! что делать?
+			}
 		}
 
 		String uid = attributes.get("@");
@@ -1113,16 +1116,51 @@ public class BaOrganizationDriver extends BaDriver
 			rdf_type_content.add(Predicates.docs__unit_card);
 			rdf_type_content.add(Predicates.docs__department_card);
 
-			if (dep != null)
+			if (parent_dep != null)
 			{
-				JSONObject dep_info = get_reif_subject(uid, Predicates.docs__parentUnit, dep.getUid());
-				dep_info.put(Predicates.swrc__name, dep.getName());
+				JSONObject dep_info = get_reif_subject(uid, Predicates.docs__parentUnit, parent_dep.getUid());
+
+				parent_dep.setChosen(false);
+				String nameRu = parent_dep.getAttributes().get("nameRu");
+				String nameEn = parent_dep.getAttributes().get("nameEn");
+
+				if (nameRu != null && nameEn != null)
+				{
+					JSONArray namez = new JSONArray();
+					namez.add(nameRu + "@ru");
+					namez.add(nameEn + "@en");
+					dep_info.put(Predicates.swrc__name, namez);
+				} else
+				{
+					if (nameRu != null)
+						dep_info.put(Predicates.swrc__name, nameRu + "@ru");
+					else
+						dep_info.put(Predicates.swrc__name, nameEn + "@en");
+				}
 				arg.add(dep_info);
+				
+				one.put(Predicates.docs__parentUnit, parent_dep.getUid());
 			}
 
-			one.put(Predicates.docs__parentUnit, dep.getUid());
 			one.put("a", rdf_type_content);
 			one.put("active", "true");
+
+			String nameRu = attributes.get("nameRu");
+			String nameEn = attributes.get("nameEn");
+
+			if (nameRu != null && nameEn != null)
+			{
+				JSONArray namez = new JSONArray();
+				namez.add(nameRu + "@ru");
+				namez.add(nameEn + "@en");
+				one.put(Predicates.swrc__name, namez);
+			} else
+			{
+				if (nameRu != null)
+					one.put(Predicates.swrc__name, nameRu + "@ru");
+				else
+					one.put(Predicates.swrc__name, nameEn + "@en");
+			}
 
 			pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
 		}
