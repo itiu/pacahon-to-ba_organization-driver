@@ -337,7 +337,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public JSONArray getDepartment(String uid, String from) throws Exception
+	public JSONArray getAsJSONArray(String uid, String from) throws Exception
 	{
 		recheck_ticket();
 
@@ -350,11 +350,11 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("@", uid);
 			arg.put(Predicates.query__all_predicates, Predicates.query__get_reifed);
 
-			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByExtId");
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getAsJSONArray");
 			return result;
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get department", ex);
+			throw new Exception("Cannot getAsJSONArray", ex);
 		}
 	} // end getDepartmentByUid()
 
@@ -1112,7 +1112,7 @@ public class BaOrganizationDriver extends BaDriver
 	{
 		String uid = attributes.get("@");
 		// считать предыдущие данные
-		JSONArray exist_data = getDepartment(uid, from + ":updateOrganizationEntity");
+		JSONArray exist_data = getAsJSONArray(uid, from + ":updateOrganizationEntity");
 
 		HashMap<String, JSONObject> reif_data = new HashMap<String, JSONObject>();
 
@@ -1135,8 +1135,14 @@ public class BaOrganizationDriver extends BaDriver
 		JSONArray arg = new JSONArray();
 
 		// обновим изменившиеся аттрибуты
-		String parentId = attributes.get("parentId");
-		Department parent_dep = getDepartmentByExtId(parentId, "Ru", from + ":updateOrganizationEntity");
+		String parentDepartmentId = null;
+
+		if (type.equals("contact"))
+			parentDepartmentId = attributes.get("departmentId");
+		else
+			parentDepartmentId = attributes.get("parentId");
+
+		Department parent_dep = getDepartmentByExtId(parentDepartmentId, "Ru", from + ":updateOrganizationEntity");
 
 		if (parent_dep != null)
 		{
@@ -1150,22 +1156,27 @@ public class BaOrganizationDriver extends BaDriver
 			base.put(Predicates.docs__parentUnit, parent_untit);
 		}
 
-		String nameRu = attributes.get("nameRu");
-		String nameEn = attributes.get("nameEn");
-
-		if (nameRu != null && nameEn != null)
+		if (type.equals("contact"))
 		{
-			JSONArray namez = new JSONArray();
-			namez.add(nameRu + "@ru");
-			namez.add(nameEn + "@en");
-			base.put(Predicates.swrc__name, namez);
+			add_att("pid", attributes, Predicates.gost19__externalIdentifer, base);
+
+			add_lang_att("firstName", attributes, Predicates.swrc__firstName, base);
+			add_lang_att("secondName", attributes, Predicates.gost19__middleName, base);
+			add_lang_att("surname", attributes, Predicates.swrc__lastName, base);
+			add_lang_att("post", attributes, Predicates.docs__position, base);
+
+			add_att("login", attributes, Predicates.auth__login, base);
+			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
+			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
+			add_att("email", attributes, Predicates.swrc__email, base);
+			add_att("mobile", attributes, Predicates.gost19__work_mobile, base);
+			//			add_att ("departmentId", attributes, Predicates.docs__parentUnit);
 		} else
 		{
-			if (nameRu != null)
-				base.put(Predicates.swrc__name, nameRu + "@ru");
-			else
-				base.put(Predicates.swrc__name, nameEn + "@en");
+			add_lang_att("name", attributes, Predicates.swrc__name, base);
 		}
+
+		add_att("active", attributes, Predicates.docs__active, base);
 
 		arg.add(base);
 
@@ -1178,17 +1189,56 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 		pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
+	}
+
+	private void add_att(String att_name, Map<String, String> attributes, String predicate, JSONObject dest)
+	{
+		String val = attributes.get(att_name);
+
+		if (val != null)
+			dest.put(predicate, val);
+	}
+
+	private void add_lang_att(String att_name, Map<String, String> attributes, String predicate, JSONObject dest)
+	{
+		String valRu = attributes.get(att_name + "Ru");
+		String valEn = attributes.get(att_name + "En");
+
+		if (valRu != null && valRu.endsWith("@ru") == false)
+			valRu += "@ru";
+
+		if (valEn != null && valEn.endsWith("@en") == false)
+			valEn += "@en";
+
+		if (valRu != null && valEn != null)
+		{
+			JSONArray namez = new JSONArray();
+			namez.add(valRu);
+			namez.add(valEn);
+			dest.put(predicate, namez);
+		} else
+		{
+			if (valRu != null)
+				dest.put(predicate, valRu);
+			else
+				dest.put(predicate, valEn);
+		}
 
 	}
 
 	public void createOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
-		String parentId = attributes.get("parentId");
+		String parentDepartmentId = null;
+		if (type.equals("contact"))
+			parentDepartmentId = attributes.get("departmentId");
+		else
+			parentDepartmentId = attributes.get("parentId");
+
 		Department parent_dep = null;
 
-		if (parentId != null)
+		if (parentDepartmentId != null)
 		{
-			parent_dep = getDepartmentByExtId(parentId, "Ru", from + ":createOrganizationEntity");
+			parent_dep = getDepartmentByExtId(parentDepartmentId, "Ru", from + ":createOrganizationEntity");
 			if (parent_dep == null)
 			{
 				// такого подразделения еще нет в базе !!! что делать?
@@ -1197,67 +1247,60 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 		String id = UUID.randomUUID().toString();
-		String uid = "zdb:dep_" + id;
+		String uid = null;
 
 		JSONArray arg = new JSONArray();
-		JSONObject one = new JSONObject();
-		arg.add(one);
+		JSONObject base = new JSONObject();
+		arg.add(base);
 
-		one.put("@", uid);
-
-		JSONArray rdf_type_content = new JSONArray();
-		rdf_type_content.add(Predicates.docs__unit_card);
-		rdf_type_content.add(Predicates.docs__department_card);
+		base.put("@", uid);
 
 		if (parent_dep != null)
 		{
 			JSONObject dep_info = get_reif_subject(uid, Predicates.docs__parentUnit, parent_dep.getUid());
 
-			parent_dep.setChosen(false);
-			String nameRu = parent_dep.getAttributes().get("nameRu");
-			String nameEn = parent_dep.getAttributes().get("nameEn");
+			add_lang_att("name", attributes, Predicates.swrc__name, dep_info);
 
-			if (nameRu != null && nameEn != null)
-			{
-				JSONArray namez = new JSONArray();
-				namez.add(nameRu + "@ru");
-				namez.add(nameEn + "@en");
-				dep_info.put(Predicates.swrc__name, namez);
-			} else
-			{
-				if (nameRu != null)
-					dep_info.put(Predicates.swrc__name, nameRu + "@ru");
-				else
-					dep_info.put(Predicates.swrc__name, nameEn + "@en");
-			}
 			arg.add(dep_info);
-
-			one.put(Predicates.docs__parentUnit, parent_dep.getUid());
-			one.put(Predicates.swrc__organization, parent_dep.getAttributes().get(Predicates.swrc__organization));
 		}
 
-		one.put("a", rdf_type_content);
-		one.put(Predicates.docs__active, "true");
-		one.put(Predicates.gost19__externalIdentifer, attributes.get("id"));
+		uid = "zdb:dep_" + id;
 
-		one.put(Predicates.docs__unit, "dep_" + id);
-
-		String nameRu = attributes.get("nameRu");
-		String nameEn = attributes.get("nameEn");
-
-		if (nameRu != null && nameEn != null)
+		if (type.equals("contact"))
 		{
-			JSONArray namez = new JSONArray();
-			namez.add(nameRu + "@ru");
-			namez.add(nameEn + "@en");
-			one.put(Predicates.swrc__name, namez);
+			add_att("pid", attributes, Predicates.gost19__externalIdentifer, base);
+
+			add_lang_att("firstName", attributes, Predicates.swrc__firstName, base);
+			add_lang_att("secondName", attributes, Predicates.gost19__middleName, base);
+			add_lang_att("surname", attributes, Predicates.swrc__lastName, base);
+			add_lang_att("post", attributes, Predicates.docs__position, base);
+
+			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
+			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
+			add_att("email", attributes, Predicates.swrc__email, base);
+			add_att("login", attributes, Predicates.auth__login, base);
+			add_att("mobile", attributes, Predicates.gost19__work_mobile, base);
+
 		} else
 		{
-			if (nameRu != null)
-				one.put(Predicates.swrc__name, nameRu + "@ru");
-			else
-				one.put(Predicates.swrc__name, nameEn + "@en");
+			JSONArray rdf_type_content = new JSONArray();
+			rdf_type_content.add(Predicates.docs__unit_card);
+			rdf_type_content.add(Predicates.docs__department_card);
+			base.put("a", rdf_type_content);
+			base.put(Predicates.docs__active, "true");
+			base.put(Predicates.gost19__externalIdentifer, attributes.get("id"));
+
+			base.put(Predicates.docs__unit, "dep_" + id);
+
+			if (parent_dep != null)
+			{
+				base.put(Predicates.docs__parentUnit, parent_dep.getUid());
+				base.put(Predicates.swrc__organization, parent_dep.getAttributes().get(Predicates.swrc__organization));
+			}
+
+			add_lang_att("name", attributes, Predicates.swrc__name, base);
 		}
+		add_att("active", attributes, Predicates.docs__active, base);
 
 		pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
 
@@ -1267,25 +1310,9 @@ public class BaOrganizationDriver extends BaDriver
 	{
 		JSONObject dep_info = get_reif_subject(subject, predicate, object);
 
-		String nameRu = dep.getAttributes().get("nameRu");
-		String nameEn = dep.getAttributes().get("nameEn");
-
-		if (nameRu != null && nameEn != null)
-		{
-			JSONArray namez = new JSONArray();
-			namez.add(nameRu + "@ru");
-			namez.add(nameEn + "@en");
-			dep_info.put(Predicates.swrc__name, namez);
-		} else
-		{
-			if (nameRu != null)
-				dep_info.put(Predicates.swrc__name, nameRu + "@ru");
-			else
-				dep_info.put(Predicates.swrc__name, nameEn + "@en");
-		}
+		add_lang_att("name", dep.getAttributes(), Predicates.swrc__name, dep_info);
 
 		return dep_info;
-
 	}
 
 	private JSONObject get_reif_subject(String s_target, String p_target, String o_target)
