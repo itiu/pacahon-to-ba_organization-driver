@@ -1277,12 +1277,18 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.add(dep_info);
 		}
-		
+
 		base.put("@", uid);
 		arg.add(base);
 
 		if (type.equals("contact"))
 		{
+			JSONArray rdf_type_content = new JSONArray();
+
+			rdf_type_content.add(Predicates.auth__Authenticated);
+			rdf_type_content.add(Predicates.docs__employee_card);
+			base.put("a", rdf_type_content);
+
 			add_att("pid", attributes, Predicates.gost19__externalIdentifer, base);
 
 			add_lang_att("firstName", attributes, Predicates.swrc__firstName, base);
