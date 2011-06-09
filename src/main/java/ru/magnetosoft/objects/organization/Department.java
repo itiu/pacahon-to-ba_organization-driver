@@ -27,7 +27,14 @@ public class Department implements IOrganizationEntity, Serializable
 	private static final byte _RU = 1;
 	private static final byte _EN = 2;
 
+	private static final byte _ORGANIZATION = 0;
+	private static final byte _GROUP = 1;
+	private static final byte _DEPARMENT = 2;
+
+	public byte type = _DEPARMENT; 
+	
 	public String uid; 
+	public String unit; 
 
 	private static final long serialVersionUID = 1;
 	private String name;

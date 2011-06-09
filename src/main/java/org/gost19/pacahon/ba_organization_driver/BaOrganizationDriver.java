@@ -89,10 +89,10 @@ public class BaOrganizationDriver extends BaDriver
 
 		try
 		{
-			String departmentId = null;
+			//			String departmentId = null;
 			Department dd = getDepartmentByExtId(parentExtId, locale, from + ":getDepartmentsByParentId");
 
-			departmentId = dd.getId();
+			//			departmentId = dd.getId();
 
 			List<Department> res = new ArrayList<Department>();
 
@@ -102,7 +102,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("a", Predicates.docs__unit_card);
 			arg.put(Predicates.swrc__name, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
-			arg.put(Predicates.docs__parentUnit, Predicates.zdb + "dep_" + departmentId);
+			arg.put(Predicates.docs__parentUnit, dd.unit);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 
@@ -207,11 +207,11 @@ public class BaOrganizationDriver extends BaDriver
 
 		try
 		{
-			String departmentId = null;
+			//			String departmentId = null;
 
 			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getFullUsersByDepartmentId");
 
-			departmentId = dd.getId();
+			//			departmentId = dd.getId();
 
 			List<User> res = new ArrayList<User>();
 
@@ -220,7 +220,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("@", Predicates.query__any);
 			arg.put("a", Predicates.docs__employee_card);
 			arg.put(Predicates.docs__active, "true");
-			arg.put(Predicates.docs__parentUnit, Predicates.zdb + "dep_" + departmentId);
+			arg.put(Predicates.docs__parentUnit, dd.unit);
 			arg.put(Predicates.query__all_predicates, "query:get");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getFullUsersByDepartmentId");
@@ -872,27 +872,30 @@ public class BaOrganizationDriver extends BaDriver
 
 		Object namez = oo.get(Predicates.swrc__name);
 
-		if (namez instanceof JSONArray)
+		if (namez != null)
 		{
-			Iterator<String> subj_it = ((JSONArray) namez).iterator();
-			while (subj_it.hasNext())
+			if (namez instanceof JSONArray)
 			{
-				String nm = subj_it.next();
-				dep.set__Name(nm);
-				dep.getAttributes().put("name", nm);
-			}
+				Iterator<String> subj_it = ((JSONArray) namez).iterator();
+				while (subj_it.hasNext())
+				{
+					String nm = subj_it.next();
+					dep.set__Name(nm);
+					dep.getAttributes().put("name", nm);
+				}
 
-		} else if (namez instanceof String)
-		{
-			dep.set__Name((String) namez);
-			dep.getAttributes().put("name", (String) namez);
+			} else if (namez instanceof String)
+			{
+				dep.set__Name((String) namez);
+				dep.getAttributes().put("name", (String) namez);
+			}
 		}
 
 		String parentDepartment = (String) oo.get(Predicates.docs__parentUnit);
 
 		if (parentDepartment != null)
 		{
-			String val = parentDepartment.substring("zdb:dep_".length(), parentDepartment.length());
+			String val = parentDepartment.substring(parentDepartment.indexOf("_"), parentDepartment.length());
 			dep.setParentDepartmentId(val);
 			//			dep.getAttributes().put("parentId", val);
 		}
@@ -920,6 +923,7 @@ public class BaOrganizationDriver extends BaDriver
 		if (unit != null)
 		{
 			dep.getAttributes().put(Predicates.docs__unit, unit);
+			dep.unit = unit;
 		}
 
 		dep.getAttributes().put("@", dep.uid);
@@ -1081,18 +1085,20 @@ public class BaOrganizationDriver extends BaDriver
 			Department dep = new Department();
 			Object namez = oo.get(Predicates.swrc__name);
 
-			if (namez instanceof JSONArray)
+			if (namez != null)
 			{
-				Iterator<String> subj_it = ((JSONArray) namez).iterator();
-				while (subj_it.hasNext())
+				if (namez instanceof JSONArray)
 				{
-					dep.set__Name(subj_it.next());
+					Iterator<String> subj_it = ((JSONArray) namez).iterator();
+					while (subj_it.hasNext())
+					{
+						dep.set__Name(subj_it.next());
+					}
+
+				} else if (namez instanceof String)
+				{
+					dep.set__Name((String) namez);
 				}
-
-			} else if (namez instanceof String)
-			{
-				dep.set__Name((String) namez);
-
 			}
 
 			user.setDepartment(dep);
@@ -1146,7 +1152,11 @@ public class BaOrganizationDriver extends BaDriver
 
 		if (parent_dep != null)
 		{
-			String parent_untit = parent_dep.getAttributes().get(Predicates.docs__unit);
+			String org = parent_dep.getAttributes().get(Predicates.swrc__organization);
+			if (org != null)
+				base.put(Predicates.swrc__organization, org);
+
+			String parent_untit = parent_dep.unit;
 
 			JSONObject parent_reif_data = generate_reifed_data(uid, Predicates.docs__parentUnit, parent_untit,
 					parent_dep);
@@ -1183,12 +1193,12 @@ public class BaOrganizationDriver extends BaDriver
 		try
 		{
 			this.removeSubject(uid, from + ":updateOrganizationEntity");
+			pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
 		} catch (Exception ex)
 		{
 			throw new IllegalStateException(ex);
 		}
 
-		pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
 	}
 
 	private void add_att(String att_name, Map<String, String> attributes, String predicate, JSONObject dest)
@@ -1220,7 +1230,7 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			if (valRu != null)
 				dest.put(predicate, valRu);
-			else
+			else if (valEn != null)
 				dest.put(predicate, valEn);
 		}
 
@@ -1248,23 +1258,28 @@ public class BaOrganizationDriver extends BaDriver
 
 		String id = UUID.randomUUID().toString();
 		String uid = null;
+		uid = "zdb:doc_" + id;
 
 		JSONArray arg = new JSONArray();
 		JSONObject base = new JSONObject();
-		arg.add(base);
-
-		base.put("@", uid);
 
 		if (parent_dep != null)
 		{
-			JSONObject dep_info = get_reif_subject(uid, Predicates.docs__parentUnit, parent_dep.getUid());
+			String org = parent_dep.getAttributes().get(Predicates.swrc__organization);
+			if (org != null)
+				base.put(Predicates.swrc__organization, org);
+
+			base.put(Predicates.docs__parentUnit, parent_dep.unit);
+
+			JSONObject dep_info = get_reif_subject(uid, Predicates.docs__parentUnit, parent_dep.unit);
 
 			add_lang_att("name", attributes, Predicates.swrc__name, dep_info);
 
 			arg.add(dep_info);
 		}
-
-		uid = "zdb:dep_" + id;
+		
+		base.put("@", uid);
+		arg.add(base);
 
 		if (type.equals("contact"))
 		{
@@ -1292,14 +1307,9 @@ public class BaOrganizationDriver extends BaDriver
 
 			base.put(Predicates.docs__unit, "dep_" + id);
 
-			if (parent_dep != null)
-			{
-				base.put(Predicates.docs__parentUnit, parent_dep.getUid());
-				base.put(Predicates.swrc__organization, parent_dep.getAttributes().get(Predicates.swrc__organization));
-			}
-
 			add_lang_att("name", attributes, Predicates.swrc__name, base);
 		}
+
 		add_att("active", attributes, Predicates.docs__active, base);
 
 		pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
