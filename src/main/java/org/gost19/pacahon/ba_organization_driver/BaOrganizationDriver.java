@@ -439,6 +439,9 @@ public class BaOrganizationDriver extends BaDriver
 	 */
 	public String getUserUidByLoginInternal(String login, String from) throws Exception
 	{
+		if (login == null || login.length() < 1)
+			return null;
+		
 		recheck_ticket();
 		try
 		{
@@ -476,6 +479,9 @@ public class BaOrganizationDriver extends BaDriver
 
 	public User getUserByLogin(String login, String locale, String from) throws Exception
 	{
+		if (login == null || login.length() < 1)
+			return null;
+		
 		recheck_ticket();
 		locale = correct_locale(locale);
 
