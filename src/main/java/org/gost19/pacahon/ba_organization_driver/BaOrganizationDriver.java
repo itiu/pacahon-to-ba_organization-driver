@@ -710,7 +710,7 @@ public class BaOrganizationDriver extends BaDriver
 			return ou;
 		} catch (Exception ex)
 		{
-			throw new Exception("ex! selectUserByUidInternal", ex);
+			throw new Exception("ex! selectUnitByUidInternal", ex);
 		}
 
 	}
@@ -735,6 +735,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", Predicates.zdb + "doc_" + uid);
 			arg.put(Predicates.query__all_predicates, Predicates.query__get);
+			arg.put("a", Predicates.docs__employee_card);
 			//			arg.put(Predicates.swrc__firstName, Predicates.query__get);
 			//			arg.put(Predicates.swrc__lastName, Predicates.query__get);
 			//			arg.put(Predicates.gost19__middleName, Predicates.query__get);
@@ -743,7 +744,6 @@ public class BaOrganizationDriver extends BaDriver
 			//			arg.put(Predicates.docs__position, Predicates.query__get);
 			//			arg.put(Predicates.docs__unit, Predicates.query__get);
 			//			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
-			//			arg.put("a", Predicates.docs__employee_card);
 
 			User usr = null;
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":selectUserByUidInternal");
@@ -909,9 +909,9 @@ public class BaOrganizationDriver extends BaDriver
 
 		Object valuez = oo.get(Predicates.gost19__synchronize);
 		if (valuez != null)
-		{
 			dep.getAttributes().put("doNotSynchronize", "1");
-		}
+		else
+			dep.getAttributes().put("doNotSynchronize", "0");
 
 		String externalIdentifer = (String) oo.get(Predicates.gost19__externalIdentifer);
 		if (externalIdentifer != null)
@@ -1015,9 +1015,9 @@ public class BaOrganizationDriver extends BaDriver
 
 		valuez = oo.get(Predicates.gost19__synchronize);
 		if (valuez != null)
-		{
 			usr.getAttributes().put("doNotSynchronize", "1");
-		}
+		else
+			usr.getAttributes().put("doNotSynchronize", "0");
 
 		valuez = oo.get(Predicates.gost19__internal_phone);
 		if (valuez != null)
