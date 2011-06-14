@@ -441,7 +441,7 @@ public class BaOrganizationDriver extends BaDriver
 	{
 		if (login == null || login.length() < 1)
 			return null;
-		
+
 		recheck_ticket();
 		try
 		{
@@ -481,7 +481,7 @@ public class BaOrganizationDriver extends BaDriver
 	{
 		if (login == null || login.length() < 1)
 			return null;
-		
+
 		recheck_ticket();
 		locale = correct_locale(locale);
 
@@ -734,15 +734,16 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", Predicates.zdb + "doc_" + uid);
-			arg.put(Predicates.swrc__firstName, Predicates.query__get);
-			arg.put(Predicates.swrc__lastName, Predicates.query__get);
-			arg.put(Predicates.gost19__middleName, Predicates.query__get);
-			arg.put(Predicates.auth__login, Predicates.query__get);
-			arg.put(Predicates.swrc__email, Predicates.query__get);
-			arg.put(Predicates.docs__position, Predicates.query__get);
-			arg.put(Predicates.docs__unit, Predicates.query__get);
-			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
-			arg.put("a", Predicates.docs__employee_card);
+			arg.put(Predicates.query__all_predicates, Predicates.query__get);
+			//			arg.put(Predicates.swrc__firstName, Predicates.query__get);
+			//			arg.put(Predicates.swrc__lastName, Predicates.query__get);
+			//			arg.put(Predicates.gost19__middleName, Predicates.query__get);
+			//			arg.put(Predicates.auth__login, Predicates.query__get);
+			//			arg.put(Predicates.swrc__email, Predicates.query__get);
+			//			arg.put(Predicates.docs__position, Predicates.query__get);
+			//			arg.put(Predicates.docs__unit, Predicates.query__get);
+			//			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
+			//			arg.put("a", Predicates.docs__employee_card);
 
 			User usr = null;
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":selectUserByUidInternal");
@@ -901,7 +902,7 @@ public class BaOrganizationDriver extends BaDriver
 
 		if (parentDepartment != null)
 		{
-			String val = parentDepartment.substring(parentDepartment.indexOf("_"), parentDepartment.length());
+			String val = parentDepartment.substring(parentDepartment.indexOf("_") + 1, parentDepartment.length());
 			dep.setParentDepartmentId(val);
 			//			dep.getAttributes().put("parentId", val);
 		}
@@ -1052,12 +1053,14 @@ public class BaOrganizationDriver extends BaDriver
 			usr.getAttributes().put("mobile", (String) valuez);
 		}
 
-		//		valuez = oo.get(Predicates.docs__unit);
-		//		if (valuez != null)
-		//		{
-		// val = val.substring("zdb:dep_".length(), val.length());
-		// usr.setDepartment(getDepartmentByUid(val, locale, from));
-		//		}
+		String parentDepartment = (String) oo.get(Predicates.docs__parentUnit);
+
+		if (parentDepartment != null)
+		{
+			String val = parentDepartment.substring(parentDepartment.indexOf("_") + 1, parentDepartment.length());
+			usr.setDepartmentId(val);
+			usr.getAttributes().put("departmentId", val);
+		}
 
 		String externalIdentifer = (String) oo.get(Predicates.gost19__externalIdentifer);
 		if (externalIdentifer != null)
@@ -1154,7 +1157,12 @@ public class BaOrganizationDriver extends BaDriver
 		else
 			parentDepartmentId = attributes.get("parentId");
 
-		Department parent_dep = getDepartmentByExtId(parentDepartmentId, "Ru", from + ":updateOrganizationEntity");
+		Department parent_dep = null;
+
+		if (parentDepartmentId.length() == 36)
+			parent_dep = getDepartmentByUid(parentDepartmentId, "Ru", from + ":updateOrganizationEntity");
+		else
+			parent_dep = getDepartmentByExtId(parentDepartmentId, "Ru", from + ":updateOrganizationEntity");
 
 		if (parent_dep != null)
 		{
@@ -1254,7 +1262,11 @@ public class BaOrganizationDriver extends BaDriver
 
 		if (parentDepartmentId != null)
 		{
-			parent_dep = getDepartmentByExtId(parentDepartmentId, "Ru", from + ":createOrganizationEntity");
+			if (parentDepartmentId.length() == 36)
+				parent_dep = getDepartmentByUid(parentDepartmentId, "Ru", from + ":createOrganizationEntity");
+			else
+				parent_dep = getDepartmentByExtId(parentDepartmentId, "Ru", from + ":createOrganizationEntity");
+
 			if (parent_dep == null)
 			{
 				// такого подразделения еще нет в базе !!! что делать?
