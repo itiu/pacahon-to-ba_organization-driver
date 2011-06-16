@@ -143,7 +143,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getUsersByDepartmentId");
 
-			departmentId = dd.getId();
+//			departmentId = dd.getId();
 
 			List<User> res = new ArrayList<User>();
 
@@ -171,7 +171,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.docs__position, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
-			arg.put(Predicates.docs + "parentUnit", Predicates.zdb + "dep_" + departmentId);
+			arg.put(Predicates.docs + "parentUnit", dd.unit);
 
 			if (withActive == true)
 				arg.put(Predicates.docs__active, "true");
@@ -268,8 +268,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.swrc__organization, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
+			arg.put(Predicates.docs__active, Predicates.query__get);
 
-			JSONArray result = pacahon_client.get(ticket, arg, from);
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByUid");
 			Iterator<JSONObject> subj_it = result.iterator();
 			while (subj_it.hasNext())
 			{
@@ -380,6 +381,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__organization, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, externalIdentifer);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
+			arg.put(Predicates.docs__active, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByExtId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -954,7 +956,7 @@ public class BaOrganizationDriver extends BaDriver
 
 		if (isUser == false)
 		{
-			isUser = isUser(oo);
+			isUser = isUser(rdf_type);
 		}
 
 		if (isUser == false)
@@ -1189,7 +1191,11 @@ public class BaOrganizationDriver extends BaDriver
 			add_lang_att("surname", attributes, Predicates.swrc__lastName, base);
 			add_lang_att("post", attributes, Predicates.docs__position, base);
 
-			add_att("login", attributes, Predicates.auth__login, base);
+			String val = attributes.get("domainName");
+			if (val != null)
+				base.put(Predicates.auth__login, val.toUpperCase());
+			
+			
 			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
 			add_att("email", attributes, Predicates.swrc__email, base);
@@ -1317,9 +1323,11 @@ public class BaOrganizationDriver extends BaDriver
 			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
 			add_att("email", attributes, Predicates.swrc__email, base);
-			add_att("login", attributes, Predicates.auth__login, base);
 			add_att("mobile", attributes, Predicates.gost19__work_mobile, base);
-
+			
+			String val = attributes.get("domainName");
+			if (val != null)
+				base.put(Predicates.auth__login, val.toUpperCase());			
 		} else
 		{
 			JSONArray rdf_type_content = new JSONArray();
@@ -1329,7 +1337,7 @@ public class BaOrganizationDriver extends BaDriver
 			base.put(Predicates.docs__active, "true");
 			base.put(Predicates.gost19__externalIdentifer, attributes.get("id"));
 
-			base.put(Predicates.docs__unit, "dep_" + id);
+			base.put(Predicates.docs__unit, "zdb:dep_" + id);
 
 			add_lang_att("name", attributes, Predicates.swrc__name, base);
 		}
