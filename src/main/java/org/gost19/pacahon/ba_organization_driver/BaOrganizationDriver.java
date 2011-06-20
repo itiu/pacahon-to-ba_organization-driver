@@ -1091,7 +1091,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 		String predicate = (String) oo.get(Predicates.rdf__predicate);
-		if (predicate.equals("docs:unit"))
+		if (predicate.equals(Predicates.docs__unit))
 		{
 			Department dep = new Department();
 			Object namez = oo.get(Predicates.swrc__name);
@@ -1328,6 +1328,8 @@ public class BaOrganizationDriver extends BaDriver
 			String val = attributes.get("domainName");
 			if (val != null)
 				base.put(Predicates.auth__login, val.toUpperCase());			
+
+			base.put(Predicates.docs__unit, "zdb:person_" + id);
 		} else
 		{
 			JSONArray rdf_type_content = new JSONArray();
