@@ -143,7 +143,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getUsersByDepartmentId");
 
-//			departmentId = dd.getId();
+			//			departmentId = dd.getId();
 
 			List<User> res = new ArrayList<User>();
 
@@ -171,6 +171,10 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.docs__position, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
+			arg.put(Predicates.gost19__internal_phone, Predicates.query__get);
+			arg.put(Predicates.swrc__phone, Predicates.query__get);
+			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.docs + "parentUnit", dd.unit);
 
 			if (withActive == true)
@@ -510,6 +514,10 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.auth__login, login.toUpperCase());
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
+			arg.put(Predicates.gost19__internal_phone, Predicates.query__get);
+			arg.put(Predicates.swrc__phone, Predicates.query__get);
+			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.docs__active, "true");
 			arg.put("a", Predicates.docs__employee_card);
 
@@ -572,6 +580,10 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__email, Predicates.query__get);
 			arg.put(Predicates.docs__position, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get_reifed);
+			arg.put(Predicates.gost19__internal_phone, Predicates.query__get);
+			arg.put(Predicates.swrc__phone, Predicates.query__get);
+			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.query__fulltext, str_tokens.toString());
 			arg.put("a", Predicates.docs__employee_card);
@@ -652,6 +664,10 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__email, Predicates.query__get);
 			arg.put(Predicates.docs__position, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
+			arg.put(Predicates.gost19__internal_phone, Predicates.query__get);
+			arg.put(Predicates.swrc__phone, Predicates.query__get);
+			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put("a", Predicates.docs__employee_card);
 
@@ -1024,6 +1040,7 @@ public class BaOrganizationDriver extends BaDriver
 		valuez = oo.get(Predicates.gost19__internal_phone);
 		if (valuez != null)
 		{
+			usr.setTelephone((String) valuez);
 			usr.getAttributes().put("phone", (String) valuez);
 		}
 
@@ -1194,8 +1211,7 @@ public class BaOrganizationDriver extends BaDriver
 			String val = attributes.get("domainName");
 			if (val != null)
 				base.put(Predicates.auth__login, val.toUpperCase());
-			
-			
+
 			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
 			add_att("email", attributes, Predicates.swrc__email, base);
@@ -1324,10 +1340,10 @@ public class BaOrganizationDriver extends BaDriver
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
 			add_att("email", attributes, Predicates.swrc__email, base);
 			add_att("mobile", attributes, Predicates.gost19__work_mobile, base);
-			
+
 			String val = attributes.get("domainName");
 			if (val != null)
-				base.put(Predicates.auth__login, val.toUpperCase());			
+				base.put(Predicates.auth__login, val.toUpperCase());
 
 			base.put(Predicates.docs__unit, "zdb:person_" + id);
 		} else
