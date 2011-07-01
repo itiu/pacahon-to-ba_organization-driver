@@ -415,14 +415,14 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", Predicates.zdb + "doc_" + uid);
-			arg.put(Predicates.docs__unit, Predicates.query__get);
+			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentUidByUserUid");
 			Iterator<JSONObject> subj_it = result.iterator();
 			if (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				String val = (String) ss.get(Predicates.docs__unit);
+				String val = (String) ss.get(Predicates.docs__parentUnit);
 				val = val.substring("zdb:dep_".length(), val.length());
 				res = val;
 			}
