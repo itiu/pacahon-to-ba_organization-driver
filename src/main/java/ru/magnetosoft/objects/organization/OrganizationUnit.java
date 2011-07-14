@@ -43,7 +43,7 @@ public class OrganizationUnit implements Serializable
 		type = _type;
 	}
 
-	public OrganizationUnit(User user)
+	public OrganizationUnit(User user, String locale)
 	{
 		if (user != null)
 		{
@@ -54,7 +54,7 @@ public class OrganizationUnit implements Serializable
 			if (user.getDepartment() != null)
 			{
 				parentNode = user.getDepartment();
-				department = user.getDepartment().getName();
+				department = user.getDepartment().getName(locale);
 			}
 			email = user.getEmail();
 			tabNomer = user.getTabNomer();
@@ -85,11 +85,11 @@ public class OrganizationUnit implements Serializable
 		type = Type.User;
 	}
 
-	public OrganizationUnit(Department department)
+	public OrganizationUnit(Department department, String locale)
 	{
 		id = department.getId();
 		name = department.getName();
-		this.department = department.getName();
+		this.department = department.getName(locale);
 		parentNode = department;
 		tag = ObjectsHelper.deptTag;
 		attributes = department.getAttributes();

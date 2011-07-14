@@ -346,6 +346,9 @@ public class BaOrganizationDriver extends BaDriver
 	{
 		recheck_ticket();
 
+		if (uid == null)
+    		    throw new Exception ("uid is null");
+
 		try
 		{
 			Department dep = null;
@@ -518,6 +521,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__phone, Predicates.query__get);
 			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
+			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.docs__active, "true");
 			arg.put("a", Predicates.docs__employee_card);
 
@@ -585,6 +589,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
+			arg.put(Predicates.docs__parentUnit, Predicates.query__get_reifed);
 			arg.put(Predicates.query__fulltext, str_tokens.toString());
 			arg.put("a", Predicates.docs__employee_card);
 
@@ -669,6 +674,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
+			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put("a", Predicates.docs__employee_card);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByUids");
@@ -922,7 +928,7 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			String val = parentDepartment.substring(parentDepartment.indexOf("_") + 1, parentDepartment.length());
 			dep.setParentDepartmentId(val);
-			//			dep.getAttributes().put("parentId", val);
+			dep.getAttributes().put("parentId", val);
 		}
 
 		Object valuez = oo.get(Predicates.gost19__synchronize);
@@ -1108,7 +1114,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 		String predicate = (String) oo.get(Predicates.rdf__predicate);
-		if (predicate.equals(Predicates.docs__unit))
+		if (predicate.equals(Predicates.docs__parentUnit))
 		{
 			Department dep = new Department();
 			Object namez = oo.get(Predicates.swrc__name);
@@ -1145,6 +1151,10 @@ public class BaOrganizationDriver extends BaDriver
 	public void updateOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
 		String uid = attributes.get("@");
+
+		if (uid == null)
+		    throw new Exception ("uid is null");
+
 		// считать предыдущие данные
 		JSONArray exist_data = getAsJSONArray(uid, from + ":updateOrganizationEntity");
 
@@ -1195,6 +1205,10 @@ public class BaOrganizationDriver extends BaDriver
 					parent_dep);
 			arg.add(parent_reif_data);
 
+			String val = attributes.get("doNotSynchronize");
+			if (val != null && val.equals("1"))
+				base.put(Predicates.gost19__synchronize, "none");
+
 			//		base.remove(Predicates.docs__parentUnit);
 			base.put(Predicates.docs__parentUnit, parent_untit);
 		}
@@ -1211,6 +1225,10 @@ public class BaOrganizationDriver extends BaDriver
 			String val = attributes.get("domainName");
 			if (val != null)
 				base.put(Predicates.auth__login, val.toUpperCase());
+
+			val = attributes.get("doNotSynchronize");
+			if (val != null && val.equals("1"))
+				base.put(Predicates.gost19__synchronize, "none");
 
 			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);

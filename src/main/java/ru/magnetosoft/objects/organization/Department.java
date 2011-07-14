@@ -31,10 +31,10 @@ public class Department implements IOrganizationEntity, Serializable
 	private static final byte _GROUP = 1;
 	private static final byte _DEPARMENT = 2;
 
-	public byte type = _DEPARMENT; 
-	
-	public String uid; 
-	public String unit; 
+	public byte type = _DEPARMENT;
+
+	public String uid;
+	public String unit;
 
 	private static final long serialVersionUID = 1;
 	private String name;
@@ -78,7 +78,7 @@ public class Department implements IOrganizationEntity, Serializable
 	{
 		return uid;
 	}
-	
+
 	public String getOrgName()
 	{
 		return name;
@@ -166,6 +166,14 @@ public class Department implements IOrganizationEntity, Serializable
 	public void setId(String id)
 	{
 		this.id = id;
+	}
+
+	public String getName(String locale)
+	{
+		locale = correct_locale(locale);
+		name = attributes.get("name" + locale);
+
+		return name;
 	}
 
 	public String getName()
