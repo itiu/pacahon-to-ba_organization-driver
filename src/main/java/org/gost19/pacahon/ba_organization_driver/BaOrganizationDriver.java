@@ -347,7 +347,7 @@ public class BaOrganizationDriver extends BaDriver
 		recheck_ticket();
 
 		if (uid == null)
-    		    throw new Exception ("uid is null");
+			throw new Exception("uid is null");
 
 		try
 		{
@@ -615,7 +615,13 @@ public class BaOrganizationDriver extends BaDriver
 				{
 					if (withActive == true)
 						usr.getAttributes().put("active", "true");
-					res.put(usr.getId(), usr);
+
+					if (withEmail == true)
+					{
+						if (usr.getLogin() != null && usr.getLogin().length() > 1)
+							res.put(usr.getId(), usr);
+					} else
+						res.put(usr.getId(), usr);
 				}
 			}
 			return new ArrayList<User>(res.values());
@@ -1153,7 +1159,7 @@ public class BaOrganizationDriver extends BaDriver
 		String uid = attributes.get("@");
 
 		if (uid == null)
-		    throw new Exception ("uid is null");
+			throw new Exception("uid is null");
 
 		// считать предыдущие данные
 		JSONArray exist_data = getAsJSONArray(uid, from + ":updateOrganizationEntity");
@@ -1208,6 +1214,8 @@ public class BaOrganizationDriver extends BaDriver
 			String val = attributes.get("doNotSynchronize");
 			if (val != null && val.equals("1"))
 				base.put(Predicates.gost19__synchronize, "none");
+			else
+				base.remove(Predicates.gost19__synchronize);
 
 			//		base.remove(Predicates.docs__parentUnit);
 			base.put(Predicates.docs__parentUnit, parent_untit);
@@ -1229,6 +1237,8 @@ public class BaOrganizationDriver extends BaDriver
 			val = attributes.get("doNotSynchronize");
 			if (val != null && val.equals("1"))
 				base.put(Predicates.gost19__synchronize, "none");
+			else
+				base.remove(Predicates.gost19__synchronize);
 
 			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
