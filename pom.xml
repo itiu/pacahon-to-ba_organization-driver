@@ -75,15 +75,15 @@
 <distributionManagement>
         <repository>
             <uniqueVersion>false</uniqueVersion>
-            <id>172.17.4.67</id>
-            <name>172.17.4.67-releases</name>
-            <url>dav:http://172.17.4.67:8081/artifactory/libs-releases-local</url>
+            <id>172.17.1.236</id>
+            <name>172.17.1.236-releases</name>
+            <url>dav:http://172.17.1.236:8081/artifactory/libs-releases-local</url>
         </repository>
         <snapshotRepository>
             <uniqueVersion>false</uniqueVersion>
-            <id>172.17.4.67</id>
-            <name>172.17.4.67-snapshots</name>
-            <url>dav:http://172.17.4.67:8081/artifactory/libs-snapshots-local</url>
+            <id>172.17.1.236</id>
+            <name>172.17.1.236-snapshots</name>
+            <url>dav:http://172.17.1.236:8081/artifactory/libs-snapshots-local</url>
         </snapshotRepository>
 </distributionManagement>
 

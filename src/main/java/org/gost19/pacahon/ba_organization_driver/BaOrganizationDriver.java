@@ -342,6 +342,46 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
+	public List<Department> getAllDepartments(boolean withActive, String from) throws Exception
+	{
+		recheck_ticket();
+
+		try
+		{
+			List<Department> res = new ArrayList<Department>();
+
+			JSONObject arg = new JSONObject();
+
+			arg.put("@", Predicates.query__any);
+			arg.put(Predicates.swrc__name, Predicates.query__get);
+			arg.put("a", Predicates.docs__unit_card);
+			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
+			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
+			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
+			arg.put(Predicates.docs__unit, Predicates.query__get);
+
+			if (withActive == true)
+				arg.put(Predicates.docs__active, "true");
+
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getAllDepartments");
+			Iterator<JSONObject> subj_it = result.iterator();
+			while (subj_it.hasNext())
+			{
+				JSONObject ss = subj_it.next();
+				Department dep = getDepartmentFromGraph(ss, "ru", from + ":getAllDepartments");
+				if (withActive == true)
+					dep.getAttributes().put("active", "true");
+				res.add(dep);
+			}
+
+			return res;
+		} catch (Exception ex)
+		{
+			throw new Exception("Cannot get department", ex);
+		}
+
+	}
+
 	public JSONArray getAsJSONArray(String uid, String from) throws Exception
 	{
 		recheck_ticket();
