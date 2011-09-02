@@ -139,13 +139,14 @@ public class BaOrganizationDriver extends BaDriver
 
 		try
 		{
-			String departmentId = null;
+			//			String departmentId = null;
+			List<User> res = new ArrayList<User>();
 
 			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getUsersByDepartmentId");
+			if (dd == null)
+				return res;
 
 			//			departmentId = dd.getId();
-
-			List<User> res = new ArrayList<User>();
 
 			// выберем нижеперечисленные предикаты из субьекта с заданными uids
 
@@ -436,6 +437,8 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentByExtId");
+				if (dep != null)
+					dep.setInternalId(externalIdentifer);
 			}
 
 			return dep;
