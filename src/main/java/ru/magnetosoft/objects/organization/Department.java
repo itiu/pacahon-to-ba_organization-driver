@@ -13,15 +13,15 @@ import ru.magnetosoft.bigarch.wsclient.bl.organizationservice.EntityType;
  */
 public class Department implements IOrganizationEntity, Serializable
 {
-	private static final byte _NONE = 0;
-	private static final byte _RU = 1;
-	private static final byte _EN = 2;
+	public static final byte _NONE = 0;
+	public static final byte _RU = 1;
+	public static final byte _EN = 2;
 
-	private static final byte _ORGANIZATION = 0;
-	private static final byte _GROUP = 1;
-	private static final byte _DEPARMENT = 2;
+	public static final byte _ORGANIZATION = 0;
+	public static final byte _GROUP = 1;
+	public static final byte _DEPARTMENT = 2;
 
-	public byte type = _DEPARMENT;
+	public byte type = _DEPARTMENT;
 
 	public String uid;
 	public String unit;
@@ -29,12 +29,17 @@ public class Department implements IOrganizationEntity, Serializable
 	private static final long serialVersionUID = 1;
 	private String name;
 	private String id;
-	private String internalId;
+	private String secondId;
 	private Map<String, String> attributes = new HashMap<String, String>();
 
 	private boolean chosen;
 	private String previousId;
 	private String nameEn;
+
+	private String organizationId;
+
+	public boolean doNotSyncronize;
+	public boolean isActive;
 
 	private static byte getLang(String ss)
 	{
@@ -206,12 +211,27 @@ public class Department implements IOrganizationEntity, Serializable
 
 	public String getInternalId()
 	{
-		return internalId;
+		return secondId;
+	}
+
+	public String getExtId()
+	{
+		return secondId;
 	}
 
 	public void setInternalId(String internalId)
 	{
-		this.internalId = internalId;
+		this.secondId = internalId;
+	}
+
+	public String getOrganizationId()
+	{
+		return organizationId;
+	}
+
+	public void setOrganizationId(String organizationId)
+	{
+		this.organizationId = organizationId;
 	}
 
 	public Map<String, String> getAttributes()
