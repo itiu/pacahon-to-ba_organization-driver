@@ -205,7 +205,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<User> getFullUsersByDepartmentId(String departmentExtId, String locale, String from) throws Exception
+	public List<User> getFullUsersByDepartmentId(String departmentExtId, String locale, String from, boolean withActive) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -224,7 +224,10 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", Predicates.query__any);
 			arg.put("a", Predicates.docs__employee_card);
-			arg.put(Predicates.docs__active, "true");
+			
+			if (withActive == true)
+				arg.put(Predicates.docs__active, "true");
+
 			arg.put(Predicates.docs__parentUnit, dd.unit);
 			arg.put(Predicates.query__all_predicates, "query:get");
 
@@ -236,7 +239,10 @@ public class BaOrganizationDriver extends BaDriver
 				User usr = getUserFromGraph(ss, null, locale, true);
 				if (usr != null)
 				{
-					usr.getAttributes().put("active", "true");
+					if (usr.uid.equals ("zdb:doc_c3db9a38-d580-469d-b95a-5589558ffda9"))
+					{
+						usr.setDepartment(dd);						
+					}
 					usr.setDepartment(dd);
 					usr.getAttributes().put("departmentId", departmentExtId);
 					res.add(usr);
