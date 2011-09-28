@@ -47,6 +47,7 @@ public class ObjectsHelper {
     private static final String fieldSizeMark = "$fieldSize";
     private static final String compositeMark = "$isComposite";
     private static final String tableMark = "$isTable";
+    private static final String gridMode = "$gridMode";
     private static final String compositionMark = "$composition";
     
     // Сюда мы будем складывать значения атрибутов, соответствующих композиции 
@@ -298,6 +299,11 @@ public class ObjectsHelper {
                 }
                 continue;
             }
+            
+            if (ObjectsHelper.gridMode.equals(entry.getKey())) {
+                attr.setGridMode(true);
+                continue;
+            }
             if (ObjectsHelper.withTimeMark.equals(entry.getKey())) {
                 attr.setWithTime(true);
                 continue;
@@ -372,6 +378,10 @@ public class ObjectsHelper {
                 out.append(ObjectsHelper.tableMark);
                 out.append("=");
                 out.append(attr.getAsTableTypeId());
+                out.append(";");
+            }
+            if (attr.getType() == TypeAttributeType.LINK && attr.isGridMode()) {
+                out.append(ObjectsHelper.gridMode);
                 out.append(";");
             }
             if (attr.getType() == TypeAttributeType.DATE && attr.isWithTime()) {
