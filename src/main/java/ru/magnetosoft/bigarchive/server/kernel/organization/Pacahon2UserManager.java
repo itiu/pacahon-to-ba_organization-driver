@@ -12,8 +12,6 @@ import ru.magnetosoft.bigarchive.server.base.composer.ComponentInitializationExc
 import ru.magnetosoft.bigarchive.server.base.exceptions.UserException;
 import ru.magnetosoft.bigarchive.server.base.spi.IInitializable;
 import ru.magnetosoft.bigarchive.server.kernel.cache.EhcacheComponentImpl;
-import ru.magnetosoft.bigarchive.server.kernel.organization.cache.IOrganizationCache;
-import ru.magnetosoft.bigarchive.server.kernel.organization.cache.OrganizationCache;
 //import ru.magnetosoft.magnet.subsystem.logging.ILogger;
 //import ru.magnetosoft.magnet.subsystem.logging.LogManager;
 import ru.magnetosoft.objects.organization.Department;
@@ -30,7 +28,7 @@ public class Pacahon2UserManager implements IUserManagementComponent, IInitializ
 
 	private static final String CACHE_CONFIGURATION_NAME = "ba-server-organization-cache";
 
-	private IOrganizationCache cache = null;
+//	private IOrganizationCache cache = null;
 	private ICacheComponent cacheComponent;
 //	private final ILogger log;
 
@@ -84,23 +82,13 @@ public class Pacahon2UserManager implements IUserManagementComponent, IInitializ
 	 */
 	public String getUserUidByLogin(String login) throws UserException
 	{
-		String result = cache.getUserUidByLogin(login);
-		if (null != result)
-		{
-			return result;
-		}
 		try
 		{
-			result = org_driver.getUserUidByLoginInternal(login, "NewUserManager.getUserUidByLogin");
+			return org_driver.getUserUidByLoginInternal(login, "NewUserManager.getUserUidByLogin");
 		} catch (Exception ex)
 		{
 			throw new UserException("Cannot getUserUidByLogin", ex);
 		}
-		
-		if (result != null)
-		cache.putUserUidByLogin(result, login);
-		
-		return result;
 	}
 
 	/**
@@ -129,7 +117,6 @@ public class Pacahon2UserManager implements IUserManagementComponent, IInitializ
 	public void initialize(InputStream configurationData) throws ComponentInitializationException
 	{
 		cacheComponent = new EhcacheComponentImpl();		
-		cache = new OrganizationCache(cacheComponent.getCache(CACHE_CONFIGURATION_NAME));
 	} // end initialize()
 
 	/**
@@ -137,17 +124,7 @@ public class Pacahon2UserManager implements IUserManagementComponent, IInitializ
 	 */
 	public User selectUserByUid(String uid, String localeName) throws UserException
 	{
-		User result = cache.selectUserByUid(uid, localeName);
-		if (null != result)
-		{
-			return result;
-		}
-		result = selectUserByUidInternal(uid, localeName);
-		
-		if (result != null)
-			cache.putUserByUid(result, uid, localeName);
-		
-		return result;
+		return selectUserByUidInternal(uid, localeName);
 	}
 
 	/**
