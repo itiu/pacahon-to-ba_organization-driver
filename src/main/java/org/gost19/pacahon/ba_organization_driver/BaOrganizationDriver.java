@@ -840,6 +840,45 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end selectUserByUid()
 
+	/**
+	 * Найти пользователя по уникальному идентификатору.
+	 * 
+	 * @param uid
+	 *            уникальный идентификатор
+	 * @param localeName
+	 *            имя локали
+	 * @return пользователь
+	 */
+	public User selectUserByPid(String pid, String locale, String from) throws Exception
+	{
+		recheck_ticket();
+		locale = correct_locale(locale);
+
+		try
+		{
+			JSONObject arg = new JSONObject();
+
+			arg.put("@", Predicates.query__any);
+			arg.put(Predicates.query__all_predicates, Predicates.query__get);
+			arg.put("a", Predicates.docs__employee_card);
+			arg.put(Predicates.gost19__externalIdentifer, pid);
+
+			User usr = null;
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":selectUserByPid");
+			Iterator<JSONObject> subj_it = result.iterator();
+			if (subj_it.hasNext())
+			{
+				JSONObject ss = subj_it.next();
+				usr = getUserFromGraph(ss, null, locale, true);
+			}
+
+			return usr;
+		} catch (Exception ex)
+		{
+			throw new Exception("ex! selectUserByPid", ex);
+		}
+	} // end selectUserByPid()
+
 	public Department getDepartmentByUserUid(String uid, String locale, String from) throws Exception
 	{
 		recheck_ticket();
@@ -1369,7 +1408,7 @@ public class BaOrganizationDriver extends BaDriver
 			if (parent_dep == null)
 			{
 				// такого подразделения еще нет в базе !!! что делать?
-				throw new Exception("хозяин, такого подразделения еще нет в базе !!! не знаю что делать?");
+				throw new Exception("хозяин!, родительского подразделения [" + parentDepartmentId + "] еще нет в базе !!! не знаю что делать?");
 			}
 		}
 
