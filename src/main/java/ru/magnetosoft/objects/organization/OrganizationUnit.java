@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import java.util.HashMap;
 import java.util.Map;
-import ru.magnetosoft.objects.ObjectsHelper;
 
 /**
  * 
@@ -20,7 +19,10 @@ public class OrganizationUnit implements Serializable
 	public Type type = Type.Unknown;
 
 	private static final long serialVersionUID = 7236181962950149947L;
-	
+    public static final String userTag = "user";
+    public static final String deptTag = "department";
+    public static final String posnTag = "position";
+
 	public String uid; 
 	private String id;
 	private String name;
@@ -81,7 +83,7 @@ public class OrganizationUnit implements Serializable
 			tabNomer = 0;
 			hint = "";
 		}
-		tag = ObjectsHelper.userTag;
+		tag = userTag;
 		type = Type.User;
 	}
 
@@ -91,7 +93,7 @@ public class OrganizationUnit implements Serializable
 		name = department.getName();
 		this.department = department.getName(locale);
 		parentNode = department;
-		tag = ObjectsHelper.deptTag;
+		tag = deptTag;
 		attributes = department.getAttributes();
 		attributes.put("id", department.getInternalId());
 		attributes.put("name", name);
@@ -101,7 +103,7 @@ public class OrganizationUnit implements Serializable
 	public OrganizationUnit(String id)
 	{
 		name = id;
-		tag = ObjectsHelper.posnTag;
+		tag = posnTag;
 		attributes.put("name", name);
 		type = Type.Position;
 	}
