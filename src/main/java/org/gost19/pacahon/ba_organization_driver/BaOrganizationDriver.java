@@ -28,6 +28,12 @@ import ru.magnetosoft.objects.organization.User;
  */
 public class BaOrganizationDriver extends BaDriver
 {
+	public static final byte _ORGANIZATION = 0;
+	public static final byte _GROUP = 1;
+	public static final byte _DEPARTMENT = 2;
+	public static final byte _USER = 3;
+	public static final byte _UNKNOWN = -1;
+
 	public BaOrganizationDriver(String endpoint_pretending_organization) throws Exception
 	{
 		super.initailize(endpoint_pretending_organization);
@@ -70,6 +76,7 @@ public class BaOrganizationDriver extends BaDriver
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getOrganizationRoots");
 				dep.getAttributes().put("active", "true");
+				dep.isActive = true;
 				res.add(dep);
 			}
 
@@ -108,6 +115,8 @@ public class BaOrganizationDriver extends BaDriver
 
 			if (withActive == true)
 				arg.put(Predicates.docs__active, "true");
+			else
+				arg.put(Predicates.docs__active, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByParentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -205,7 +214,8 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<User> getFullUsersByDepartmentId(String departmentExtId, String locale, String from, boolean withActive) throws Exception
+	public List<User> getFullUsersByDepartmentId(String departmentExtId, String locale, String from, boolean withActive)
+			throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -224,7 +234,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", Predicates.query__any);
 			arg.put("a", Predicates.docs__employee_card);
-			
+
 			if (withActive == true)
 				arg.put(Predicates.docs__active, "true");
 
@@ -239,9 +249,9 @@ public class BaOrganizationDriver extends BaDriver
 				User usr = getUserFromGraph(ss, null, locale, true);
 				if (usr != null)
 				{
-					if (usr.uid.equals ("zdb:doc_c3db9a38-d580-469d-b95a-5589558ffda9"))
+					if (usr.uid.equals("zdb:doc_c3db9a38-d580-469d-b95a-5589558ffda9"))
 					{
-						usr.setDepartment(dd);						
+						usr.setDepartment(dd);
 					}
 					usr.setDepartment(dd);
 					usr.getAttributes().put("departmentId", departmentExtId);
@@ -361,7 +371,10 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", Predicates.query__any);
 			arg.put(Predicates.swrc__name, Predicates.query__get);
-			arg.put("a", Predicates.docs__unit_card);
+			JSONArray aa = new JSONArray();
+			aa.add(Predicates.docs__unit_card);
+			aa.add(Predicates.query__get);
+			arg.put("a", aa);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
@@ -428,7 +441,10 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", Predicates.query__any);
-			arg.put("a", Predicates.query__get);
+			JSONArray aa = new JSONArray();
+			aa.add(Predicates.docs__department_card);
+			aa.add(Predicates.query__get);
+			arg.put("a", aa);
 			arg.put(Predicates.swrc__name, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
@@ -924,6 +940,54 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	}
 
+	private byte getType(Object rdf_type)
+	{
+		if (rdf_type == null)
+			return _UNKNOWN;
+
+		if (rdf_type instanceof JSONArray)
+		{
+			JSONArray rdf_type_array = (JSONArray) rdf_type;
+
+			for (int i = 0; i < rdf_type_array.size(); i++)
+			{
+				String a = (String) rdf_type_array.get(i);
+				if (a.equals("docs:employee_card"))
+				{
+					return _USER;
+				} else if (a.equals("docs:department_card"))
+				{
+					return _DEPARTMENT;
+				} else if (a.equals("docs:organization_card"))
+				{
+					return _ORGANIZATION;
+				} else if (a.equals("docs:organization_card"))
+				{
+					return _GROUP;
+				}
+
+			}
+		} else if (rdf_type instanceof String)
+		{
+			String a = (String) rdf_type;
+			if (a.equals("docs:employee_card"))
+			{
+				return _USER;
+			} else if (a.equals("docs:department_card"))
+			{
+				return _DEPARTMENT;
+			} else if (a.equals("docs:organization_card"))
+			{
+				return _ORGANIZATION;
+			} else if (a.equals("docs:organization_card"))
+			{
+				return _GROUP;
+			}
+		}
+
+		return _UNKNOWN;
+	}
+
 	private boolean isUser(Object rdf_type)
 	{
 		boolean res = false;
@@ -982,13 +1046,17 @@ public class BaOrganizationDriver extends BaDriver
 	{
 		Object rdf_type = oo.get("a");
 
-		if (rdf_type != null && isUser(rdf_type) == true)
+		byte type = getType(rdf_type);
+
+		if (type != _DEPARTMENT && type != _ORGANIZATION && type == _GROUP)
 			return null;
 
 		recheck_ticket();
 		locale = correct_locale(locale);
 
 		Department dep = new Department();
+
+		dep.type = type;
 
 		String id = (String) oo.get("@");
 		dep.uid = id;
@@ -1060,6 +1128,8 @@ public class BaOrganizationDriver extends BaDriver
 		if (valuez != null)
 		{
 			dep.getAttributes().put("active", (String) valuez);
+			if (valuez.equals("true"))
+				dep.isActive = true;
 		}
 
 		return dep;
@@ -1408,7 +1478,8 @@ public class BaOrganizationDriver extends BaDriver
 			if (parent_dep == null)
 			{
 				// такого подразделения еще нет в базе !!! что делать?
-				throw new Exception("хозяин!, родительского подразделения [" + parentDepartmentId + "] еще нет в базе !!! не знаю что делать?");
+				throw new Exception("хозяин!, родительского подразделения [" + parentDepartmentId
+						+ "] еще нет в базе !!! не знаю что делать?");
 			}
 		}
 

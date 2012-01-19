@@ -238,4 +238,9 @@ public class Department implements IOrganizationEntity, Serializable
 	{
 		return attributes;
 	}
+	
+	public String toString ()
+	{
+		return uid; 
+	}
 }
