@@ -746,6 +746,8 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
+			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
+			
 			arg.put("a", Predicates.docs__employee_card);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByUids");
