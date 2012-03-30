@@ -1,11 +1,11 @@
-package ru.magnetosoft.objects.organization;
+package ru.mndsc.objects.organization;
 
 import java.io.Serializable;
 
 import java.util.HashMap;
 import java.util.Map;
-import ru.magnetosoft.bigarch.wsclient.bl.organizationservice.AttributeType;
-import ru.magnetosoft.bigarch.wsclient.bl.organizationservice.EntityType;
+import ru.mndsc.bigarch.wsclient.bl.organizationservice.AttributeType;
+import ru.mndsc.bigarch.wsclient.bl.organizationservice.EntityType;
 
 /**
  * 

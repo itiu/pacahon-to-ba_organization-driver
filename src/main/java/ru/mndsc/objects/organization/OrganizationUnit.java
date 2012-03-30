@@ -1,4 +1,4 @@
-package ru.magnetosoft.objects.organization;
+package ru.mndsc.objects.organization;
 
 import java.io.Serializable;
 

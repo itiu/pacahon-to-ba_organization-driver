@@ -17,9 +17,9 @@ import org.json.simple.JSONObject;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
-import ru.magnetosoft.objects.organization.Department;
-import ru.magnetosoft.objects.organization.IOrganizationEntity;
-import ru.magnetosoft.objects.organization.User;
+import ru.mndsc.objects.organization.Department;
+import ru.mndsc.objects.organization.IOrganizationEntity;
+import ru.mndsc.objects.organization.User;
 
 /**
  * Менеджер пользователей.
@@ -288,7 +288,10 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject arg = new JSONObject();
 
 			arg.put("@", Predicates.zdb + "doc_" + uid);
-			arg.put("a", Predicates.query__get);
+			JSONArray aa = new JSONArray();
+			aa.add(Predicates.docs__department_card);
+			aa.add(Predicates.query__get);
+			arg.put("a", aa);
 			arg.put(Predicates.swrc__name, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
