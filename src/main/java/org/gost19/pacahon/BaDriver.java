@@ -61,19 +61,22 @@ public class BaDriver
 	 */
 	public static Date string2date(String date)
 	{
-		date = date.replace('T', ' ');
-		date = date.substring(0, date.indexOf('+'));
-		GregorianCalendar gcal = new GregorianCalendar();
-		try
+		if (date != null)
 		{
-			if (date.length() < 22)
-				gcal.setTime(sdf2.parse(date));
-			else
-				gcal.setTime(sdf1.parse(date));
-			return gcal.getTime();
-		} catch (Exception ex)
-		{
-			ex.hashCode();
+			date = date.replace('T', ' ');
+			date = date.substring(0, date.indexOf('+'));
+			GregorianCalendar gcal = new GregorianCalendar();
+			try
+			{
+				if (date.length() < 22)
+					gcal.setTime(sdf2.parse(date));
+				else
+					gcal.setTime(sdf1.parse(date));
+				return gcal.getTime();
+			} catch (Exception ex)
+			{
+				ex.hashCode();
+			}
 		}
 		return null;
 	}
