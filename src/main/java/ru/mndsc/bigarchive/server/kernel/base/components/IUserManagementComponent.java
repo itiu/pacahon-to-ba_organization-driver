@@ -1,4 +1,4 @@
-package ru.mndsc.bigarchive.server.base.components;
+package ru.mndsc.bigarchive.server.kernel.base.components;
 
 import java.util.Collection;
 import java.util.List;

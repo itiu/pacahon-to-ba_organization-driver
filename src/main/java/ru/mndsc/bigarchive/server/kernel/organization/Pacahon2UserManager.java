@@ -1,12 +1,10 @@
 package ru.mndsc.bigarchive.server.kernel.organization;
 
-import java.io.InputStream;
 import java.util.Collection;
 
 import org.gost19.pacahon.ba_organization_driver.BaOrganizationDriver;
 
-//import ru..mndsc.bigarchive.authorization.AuthorizationManagerPool;
-import ru.mndsc.bigarchive.server.base.components.IUserManagementComponent;
+import ru.mndsc.bigarchive.server.kernel.base.components.IUserManagementComponent;
 import ru.mndsc.objects.organization.Department;
 import ru.mndsc.objects.organization.User;
 
