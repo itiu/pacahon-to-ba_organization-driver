@@ -42,7 +42,7 @@
                         </plugin>
                 </plugins>
 
-
+<!--
  <extensions>
         <extension>
           <groupId>org.apache.maven.wagon</groupId>
@@ -50,22 +50,7 @@
           <version>1.0-beta-2</version>
         </extension>
       </extensions>
-
+-->
        </build>
-
-<distributionManagement>
-        <repository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>172.17.1.236</id>
-            <name>172.17.1.236-releases</name>
-            <url>dav:http://172.17.1.236:8081/artifactory/libs-releases-local</url>
-        </repository>
-        <snapshotRepository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>172.17.1.236</id>
-            <name>172.17.1.236-snapshots</name>
-            <url>dav:http://172.17.1.236:8081/artifactory/libs-snapshots-local</url>
-        </snapshotRepository>
-</distributionManagement>
 
 </project>
