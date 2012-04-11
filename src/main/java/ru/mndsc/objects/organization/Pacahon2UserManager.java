@@ -1,19 +1,16 @@
-package ru.mndsc.bigarchive.server.kernel.organization;
+package ru.mndsc.objects.organization;
 
 import java.util.Collection;
 
 import org.gost19.pacahon.ba_organization_driver.BaOrganizationDriver;
 
-import ru.mndsc.bigarchive.server.kernel.base.components.IUserManagementComponent;
-import ru.mndsc.objects.organization.Department;
-import ru.mndsc.objects.organization.User;
 
 /**
  * Менеджер пользователей.
  * 
  * @author BushenevV
  */
-public class Pacahon2UserManager implements IUserManagementComponent
+public class Pacahon2UserManager implements IUserManager
 {
 	private BaOrganizationDriver org_driver;
 

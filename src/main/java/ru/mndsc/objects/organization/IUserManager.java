@@ -1,16 +1,14 @@
-package ru.mndsc.bigarchive.server.kernel.base.components;
+package ru.mndsc.objects.organization;
 
 import java.util.Collection;
-import java.util.List;
-import ru.mndsc.objects.organization.Department;
-import ru.mndsc.objects.organization.User;
+
 
 /**
  * Компонент для работы с пользователями.
  * 
  * @author KodanevY
  */
-public interface IUserManagementComponent {
+public interface IUserManager {
 	/**
 	 * Выборка пользователей по первым буквам имени или фамилии.
 	 * 
@@ -245,4 +243,4 @@ public interface IUserManagementComponent {
 
 //	public void setAuthorizationManagerPool(AuthorizationManagerPool authorizationManagerPool);
 
-} // end IUserManagementComponent
+} // end IUserManager
