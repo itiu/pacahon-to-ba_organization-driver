@@ -223,5 +223,5 @@ public class Pacahon2UserManager implements IUserManager
 		throw new Exception("This method is not implemented.");
 	}
 
-} // end UserManager
+} 
 
