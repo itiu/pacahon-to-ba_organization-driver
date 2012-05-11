@@ -22,7 +22,7 @@ public class User implements IOrganizationEntity, Serializable
 
 	private static final long serialVersionUID = 6L;
 
-	public String uid; 
+	public String uid;
 	private String id;
 	private String name;
 	private String firstName;
@@ -44,7 +44,8 @@ public class User implements IOrganizationEntity, Serializable
 	{
 	}
 
-	public User(String id, String firstName, String secondName, String surName, String position, String department)
+	public User(String id, String firstName, String secondName, String surName,
+			String position, String department)
 	{
 		takeData(id, firstName, secondName, surName, position, department);
 	}
@@ -53,15 +54,17 @@ public class User implements IOrganizationEntity, Serializable
 	{
 		return uid;
 	}
-	
+
 	private static byte getLang(String ss)
 	{
 		if (ss.length() >= 3)
 		{
-			if (ss.charAt(ss.length() - 3) == '@' && ss.charAt(ss.length() - 2) == 'r'
+			if (ss.charAt(ss.length() - 3) == '@'
+					&& ss.charAt(ss.length() - 2) == 'r'
 					&& ss.charAt(ss.length() - 1) == 'u')
 				return _RU;
-			else if (ss.charAt(ss.length() - 3) == '@' && ss.charAt(ss.length() - 2) == 'e'
+			else if (ss.charAt(ss.length() - 3) == '@'
+					&& ss.charAt(ss.length() - 2) == 'e'
 					&& ss.charAt(ss.length() - 1) == 'n')
 				return _EN;
 		}
@@ -72,10 +75,12 @@ public class User implements IOrganizationEntity, Serializable
 	{
 		if (ss.length() >= 3)
 		{
-			if (ss.charAt(ss.length() - 3) == '@' && ss.charAt(ss.length() - 2) == 'r'
+			if (ss.charAt(ss.length() - 3) == '@'
+					&& ss.charAt(ss.length() - 2) == 'r'
 					&& ss.charAt(ss.length() - 1) == 'u')
 				return ss.substring(0, ss.length() - 3);
-			else if (ss.charAt(ss.length() - 3) == '@' && ss.charAt(ss.length() - 2) == 'e'
+			else if (ss.charAt(ss.length() - 3) == '@'
+					&& ss.charAt(ss.length() - 2) == 'e'
 					&& ss.charAt(ss.length() - 1) == 'n')
 				return ss.substring(0, ss.length() - 3);
 		}
@@ -83,8 +88,9 @@ public class User implements IOrganizationEntity, Serializable
 		return ss;
 	}
 
-	public User(String id, String domainName, String firstName, String lastName, String email, String post,
-			String departmentId, String middleName)
+	public User(String id, String domainName, String firstName,
+			String lastName, String email, String post, String departmentId,
+			String middleName)
 	{
 		super();
 		this.id = id;
@@ -137,18 +143,21 @@ public class User implements IOrganizationEntity, Serializable
 	{
 		if (personResponse.department != null)
 		{
-			takeData(personResponse.id, personResponse.firstName, personResponse.middleName, personResponse.lastName,
-					personResponse.position, personResponse.department.getName());
+			takeData(personResponse.id, personResponse.firstName,
+					personResponse.middleName, personResponse.lastName,
+					personResponse.position,
+					personResponse.department.getName());
 		} else
 		{
-			takeData(personResponse.id, personResponse.firstName, personResponse.middleName, personResponse.lastName,
+			takeData(personResponse.id, personResponse.firstName,
+					personResponse.middleName, personResponse.lastName,
 					personResponse.position, personResponse.department_name);
 		}
 
 	}
 
-	public void takeData(String id, String firstName, String secondName, String surName, String position,
-			String department)
+	public void takeData(String id, String firstName, String secondName,
+			String surName, String position, String department)
 	{
 		this.id = id;
 		this.firstName = firstName;
@@ -165,10 +174,13 @@ public class User implements IOrganizationEntity, Serializable
 
 	public String getOrgName()
 	{
-		if (lastName != null && firstName != null && middleName != null && lastName.trim().length() > 0
-				&& firstName.trim().length() > 0 && middleName.trim().length() > 0)
+		if (lastName != null && firstName != null && middleName != null
+				&& lastName.trim().length() > 0
+				&& firstName.trim().length() > 0
+				&& middleName.trim().length() > 0)
 		{
-			return lastName + " " + firstName.trim().substring(1, 2).toUpperCase() + "."
+			return lastName + " "
+					+ firstName.trim().substring(1, 2).toUpperCase() + "."
 					+ middleName.trim().substring(1, 2).toUpperCase() + ".";
 		} else
 		{
@@ -188,12 +200,13 @@ public class User implements IOrganizationEntity, Serializable
 	public String getRepresentatiom()
 	{
 		String name = "";
-		if (lastName != null && firstName != null && lastName.length() > 0 && firstName.length() > 0)
+		if (lastName != null && firstName != null && lastName.length() > 0
+				&& firstName.length() > 0)
 		{
 			if (middleName != null && middleName.length() > 0)
 			{
-				name = lastName + " " + firstName.toUpperCase().charAt(0) + "." + middleName.toUpperCase().charAt(0)
-						+ ".";
+				name = lastName + " " + firstName.toUpperCase().charAt(0) + "."
+						+ middleName.toUpperCase().charAt(0) + ".";
 			} else
 			{
 				name = lastName + " " + firstName.toUpperCase().charAt(0) + ".";
@@ -307,27 +320,32 @@ public class User implements IOrganizationEntity, Serializable
 			setLastName(attributes.get("surnameEn"), locale);
 			setPosition(attributes.get("postEn"), locale);
 			setName(attributes.get("nameEn"));
-			if (attributes.get("firstNameEn") == null || "".equals(attributes.get("firstNameEn"))
+			if (attributes.get("firstNameEn") == null
+					|| "".equals(attributes.get("firstNameEn"))
 					|| "null".equals(attributes.get("firstNameEn")))
 			{
 				setFirstName(attributes.get("firstNameRu"), "Ru");
 			}
-			if (attributes.get("secondNameEn") == null || "".equals(attributes.get("secondNameEn"))
+			if (attributes.get("secondNameEn") == null
+					|| "".equals(attributes.get("secondNameEn"))
 					|| "null".equals(attributes.get("secondNameEn")))
 			{
 				setMiddleName(attributes.get("secondNameRu"), locale);
 			}
-			if (attributes.get("surnameEn") == null || "".equals(attributes.get("surnameEn"))
+			if (attributes.get("surnameEn") == null
+					|| "".equals(attributes.get("surnameEn"))
 					|| "null".equals(attributes.get("surnameEn")))
 			{
 				setLastName(attributes.get("surnameRu"), locale);
 			}
-			if (attributes.get("postEn") == null || "".equals(attributes.get("postEn"))
+			if (attributes.get("postEn") == null
+					|| "".equals(attributes.get("postEn"))
 					|| "null".equals(attributes.get("postEn")))
 			{
 				setPosition(attributes.get("postRu"), locale);
 			}
-			if (attributes.get("nameEn") == null || "".equals(attributes.get("nameEn"))
+			if (attributes.get("nameEn") == null
+					|| "".equals(attributes.get("nameEn"))
 					|| "null".equals(attributes.get("nameEn")))
 			{
 				setName(attributes.get("nameRu"));
@@ -474,16 +492,19 @@ public class User implements IOrganizationEntity, Serializable
 		{
 			return name;
 		}
-		if (getSurName() != null && getFirstName() != null && getSurName().trim().length() > 0
+		if (getSurName() != null && getFirstName() != null
+				&& getSurName().trim().length() > 0
 				&& getFirstName().trim().length() > 0)
 		{
 			if (getSecondName() != null && getSecondName().trim().length() > 0)
 			{
-				name = getSurName() + " " + getFirstName().trim().toUpperCase().charAt(0) + "."
+				name = getSurName() + " "
+						+ getFirstName().trim().toUpperCase().charAt(0) + "."
 						+ getSecondName().trim().toUpperCase().charAt(0) + ".";
 			} else
 			{
-				name = getSurName() + " " + getFirstName().trim().toUpperCase().charAt(0) + ".";
+				name = getSurName() + " "
+						+ getFirstName().trim().toUpperCase().charAt(0) + ".";
 			}
 
 		} else if (getPosition() != null && getPosition().trim().length() > 0)
@@ -781,4 +802,31 @@ public class User implements IOrganizationEntity, Serializable
 		}
 	}
 
+	public void _set__oName(Object valuez, String locale)
+	{
+		if (valuez != null)
+		{
+			if (valuez instanceof JSONArray)
+			{
+				String nm_ru = "";
+				String nm_en = "";
+
+				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
+				while (subj_it.hasNext())
+				{
+					String nm = subj_it.next();
+					byte lang = getLang(nm);
+					nm = stripLang(nm);
+
+					if (lang == _EN)
+						nm_en = nm;
+					if (lang == _RU || lang == _NONE)
+						nm_ru = nm;
+				}
+
+				setName(nm_ru);
+
+			}
+		}
+	}
 }
