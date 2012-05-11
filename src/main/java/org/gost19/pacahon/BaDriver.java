@@ -24,15 +24,10 @@ public class BaDriver
 	public void initailize(String endpoint_pretending_organization) throws Exception
 	{
 		if (pacahon_client == null)
-		{
 			pacahon_client = new PacahonClient(endpoint_pretending_organization);
-			ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
-			start_time_ticket = System.currentTimeMillis();
-		} else
-		{
-			ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
-			start_time_ticket = System.currentTimeMillis();
-		}
+		
+		ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
+		start_time_ticket = System.currentTimeMillis();
 
 	}
 
