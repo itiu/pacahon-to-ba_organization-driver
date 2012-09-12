@@ -140,8 +140,8 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<User> getUsersByDepartmentId(String departmentExtId, String locale, boolean withEmail,
-			boolean withActive, String from) throws Exception
+	public List<User> getUsersByDepartmentId(String departmentExtId, String locale, boolean withEmail, boolean withActive,
+			String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -315,8 +315,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end getDepartmentByUid()
 
-	public List<Department> getDepartmentsByName(String words, String locale, boolean withActive, String from)
-			throws Exception
+	public List<Department> getDepartmentsByName(String words, String locale, boolean withActive, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -616,8 +615,8 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	}
 
-	public List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive,
-			String from) throws Exception
+	public List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive, String from)
+			throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -1342,8 +1341,8 @@ public class BaOrganizationDriver extends BaDriver
 
 			if (iy.containsValue(Predicates.rdf__Statement) == true)
 			{
-				String reif_key = iy.get(Predicates.rdf__subject).hashCode() + ""
-						+ iy.get(Predicates.rdf__predicate).hashCode() + "" + iy.get(Predicates.rdf__object).hashCode();
+				String reif_key = iy.get(Predicates.rdf__subject).hashCode() + "" + iy.get(Predicates.rdf__predicate).hashCode()
+						+ "" + iy.get(Predicates.rdf__object).hashCode();
 				reif_data.put(reif_key, iy);
 			} else
 			{
@@ -1376,8 +1375,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			String parent_untit = parent_dep.unit;
 
-			JSONObject parent_reif_data = generate_reifed_data(uid, Predicates.docs__parentUnit, parent_untit,
-					parent_dep);
+			JSONObject parent_reif_data = generate_reifed_data(uid, Predicates.docs__parentUnit, parent_untit, parent_dep);
 			arg.add(parent_reif_data);
 
 			String val = attributes.get("doNotSynchronize");
@@ -1469,7 +1467,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public void createOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
+	public void createOrganizationEntity(String type, Map<String, String> attributes, String from, String _uid) throws Exception
 	{
 		String parentDepartmentId = null;
 		if (type.equals("contact"))
@@ -1494,8 +1492,14 @@ public class BaOrganizationDriver extends BaDriver
 			}
 		}
 
-		String id = UUID.randomUUID().toString();
+		String id = null;
 		String uid = null;
+
+		if (_uid != null)
+			id = _uid;
+		else
+			id = UUID.randomUUID().toString();
+
 		uid = "zdb:doc_" + id;
 
 		JSONArray arg = new JSONArray();
