@@ -255,7 +255,7 @@ public class BaOrganizationDriver extends BaDriver
 				User usr = getUserFromGraph(ss, null, locale, true);
 				if (usr != null)
 				{
-					if (usr.uid.equals("zdb:doc_c3db9a38-d580-469d-b95a-5589558ffda9"))
+					if (usr.getId().equals("a43e5522-60d5-4ae6-be31-b52b8db223b6"))
 					{
 						usr.setDepartment(dd);
 					}
@@ -396,16 +396,25 @@ public class BaOrganizationDriver extends BaDriver
 			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
-				Department dep = getDepartmentFromGraph(ss, "ru", from + ":getAllDepartments");
-				if (withActive == true)
-					dep.getAttributes().put("active", "true");
-				res.add(dep);
+				try
+				{
+					Department dep = getDepartmentFromGraph(ss, "ru", from + ":getAllDepartments");
+					if (withActive == true)
+						dep.getAttributes().put("active", "true");
+					res.add(dep);
+
+				} catch (Exception ex)
+				{
+					System.out.println("Cannot get department : " + ss);
+					ex.printStackTrace();
+				}
+
 			}
 
 			return res;
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get department", ex);
+			throw new Exception("Cannot get all departments", ex);
 		}
 
 	}
