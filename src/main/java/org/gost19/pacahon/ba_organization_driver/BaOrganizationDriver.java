@@ -1216,6 +1216,7 @@ public class BaOrganizationDriver extends BaDriver
 		if (valuez != null)
 		{
 			usr.setPasswd((String) valuez);
+			usr.getAttributes().put("password", "********");
 		}
 
 		valuez = oo.get(Predicates.swrc__email);
