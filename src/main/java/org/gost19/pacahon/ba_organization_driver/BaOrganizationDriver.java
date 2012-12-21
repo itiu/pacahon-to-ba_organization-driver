@@ -1,5 +1,6 @@
 package org.gost19.pacahon.ba_organization_driver;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,15 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Map.Entry;
 
+import org.apache.commons.codec.binary.Base64;
 import org.gost19.pacahon.BaDriver;
 import org.gost19.pacahon.client.Predicates;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 import ru.mndsc.objects.organization.Department;
 import ru.mndsc.objects.organization.IOrganizationEntity;
@@ -605,6 +603,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.docs__active, "true");
+			arg.put(Predicates.auth__credential, Predicates.query__get);
 			arg.put("a", Predicates.docs__employee_card);
 
 			User usr = null;
@@ -1212,6 +1211,12 @@ public class BaOrganizationDriver extends BaDriver
 			usr.setEmail((String) valuez);
 			usr.getAttributes().put("domainName", (String) valuez);
 		}
+		
+		valuez = oo.get(Predicates.auth__credential);
+		if (valuez != null)
+		{
+			usr.setPasswd((String) valuez);
+		}
 
 		valuez = oo.get(Predicates.swrc__email);
 		if (valuez != null)
@@ -1331,6 +1336,20 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
+	/**
+	 * Calculates SHA from string. Returns base64-ed string.
+	 * 
+	 * @param password
+	 * @return
+	 * @throws Exception
+	 */
+	public static String calculateHash(String password) throws Exception
+	{
+		MessageDigest sha = MessageDigest.getInstance("SHA-1");
+		sha.update(password.getBytes("utf8"));
+		return new String(Base64.encodeBase64(sha.digest()));
+	}
+	
 	public void updateOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
 		String uid = attributes.get("@");
@@ -1387,6 +1406,7 @@ public class BaOrganizationDriver extends BaDriver
 			JSONObject parent_reif_data = generate_reifed_data(uid, Predicates.docs__parentUnit, parent_untit, parent_dep);
 			arg.add(parent_reif_data);
 
+			
 			String val = attributes.get("doNotSynchronize");
 			if (val != null && val.equals("1"))
 				base.put(Predicates.gost19__synchronize, "none");
@@ -1415,6 +1435,16 @@ public class BaOrganizationDriver extends BaDriver
 				base.put(Predicates.gost19__synchronize, "none");
 			else
 				base.remove(Predicates.gost19__synchronize);
+			
+			val = attributes.get("password");
+			if (val != null && val.length() > 3)
+			{
+				if (val.indexOf('*') < 0)
+				{
+					val = calculateHash (val);
+					base.put(Predicates.auth__credential, val);
+				}
+			}
 
 			add_att("phone", attributes, Predicates.gost19__internal_phone, base);
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);

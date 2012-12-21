@@ -37,6 +37,17 @@ public class User implements IOrganizationEntity, Serializable
 	private String internalId;
 	private boolean active;
 	private String department_name;
+	private String passwd;
+
+	public String getPasswd()
+	{
+		return passwd;
+	}
+
+	public void setPasswd(String passwd)
+	{
+		this.passwd = passwd;
+	}
 
 	private Map<String, String> attributes = new HashMap<String, String>();
 
