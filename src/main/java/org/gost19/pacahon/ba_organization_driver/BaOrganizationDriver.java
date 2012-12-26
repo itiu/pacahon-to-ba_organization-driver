@@ -1350,7 +1350,11 @@ public class BaOrganizationDriver extends BaDriver
 		sha.update(password.getBytes("utf8"));
 		return new String(Base64.encodeBase64(sha.digest()));
 	}
-	
+	public void removeOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
+	{
+		attributes.put(Predicates.docs__active, "false");
+	    updateOrganizationEntity(type, attributes, from);
+	}
 	public void updateOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
 		String uid = attributes.get("@");
