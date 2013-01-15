@@ -1199,16 +1199,10 @@ public class BaOrganizationDriver extends BaDriver
 		usr._set__oMiddleName(oo.get(Predicates.gost19__middleName), locale);
 		usr._set__oPosition(oo.get(Predicates.docs__position), locale);
 
-		Object valuez = oo.get(Predicates.auth__login);
+		Object valuez = oo.get(Predicates.auth__login);	
 		if (valuez != null)
 		{
-			usr.setLogin((String) valuez);
-		}
-
-		valuez = oo.get(Predicates.auth__login);
-		if (valuez != null)
-		{
-			usr.setEmail((String) valuez);
+			usr.setDomainName((String)valuez);
 			usr.getAttributes().put("domainName", (String) valuez);
 		}
 		
