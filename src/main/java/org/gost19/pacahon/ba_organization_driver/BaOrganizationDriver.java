@@ -1453,6 +1453,7 @@ public class BaOrganizationDriver extends BaDriver
 		} else
 		{
 			add_lang_att("name", attributes, Predicates.swrc__name, base);
+			add_att("id", attributes, Predicates.gost19__externalIdentifer, base);
 		}
 
 		add_att("active", attributes, Predicates.docs__active, base);
