@@ -1389,7 +1389,7 @@ public class BaOrganizationDriver extends BaDriver
 
 		Department parent_dep = null;
 
-		if (parentDepartmentId.length() == 36)
+		if (parentDepartmentId!=null && parentDepartmentId.length() == 36)
 			parent_dep = getDepartmentByUid(parentDepartmentId, "Ru", from + ":updateOrganizationEntity");
 		else
 			parent_dep = getDepartmentByExtId(parentDepartmentId, "Ru", from + ":updateOrganizationEntity");
