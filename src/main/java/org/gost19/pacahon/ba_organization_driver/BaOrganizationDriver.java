@@ -48,6 +48,11 @@ public class BaOrganizationDriver extends BaDriver
 
 	public synchronized List<Department> getOrganizationRoots(String locale, String from) throws Exception
 	{
+		return getOrganizationRoots(false, locale, from);
+	}
+	
+	public synchronized List<Department> getOrganizationRoots(boolean withActive, String locale, String from) throws Exception
+	{
 		recheck_ticket();
 		locale = correct_locale(locale);
 
@@ -60,7 +65,10 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("@", Predicates.query__any);
 			arg.put("a", Predicates.query__get);
 			arg.put(Predicates.gost19__tag, "root");
-			arg.put(Predicates.docs__active, "true");
+			if (withActive == true)
+				arg.put(Predicates.docs__active, "true");
+			else
+				arg.put(Predicates.docs__active, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.swrc__name, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
@@ -85,7 +93,51 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 	}
+	public List<Department> getDepartmentsByParent(Department dd, String locale, boolean withActive, String from) throws Exception {
+		recheck_ticket();
+		locale = correct_locale(locale);
 
+		try
+		{
+			List<Department> res = new ArrayList<Department>();
+
+			JSONObject arg = new JSONObject();
+
+			arg.put("@", Predicates.query__any);
+			arg.put("a", Predicates.docs__unit_card);
+			arg.put(Predicates.swrc__name, Predicates.query__get);
+			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
+			arg.put(Predicates.docs__parentUnit, dd.unit);
+			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
+			arg.put(Predicates.docs__unit, Predicates.query__get);
+
+			if (withActive == true)
+				arg.put(Predicates.docs__active, "true");
+			else
+				arg.put(Predicates.docs__active, Predicates.query__get);
+
+			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByParentId");
+			Iterator<JSONObject> subj_it = result.iterator();
+			while (subj_it.hasNext())
+			{
+				JSONObject ss = subj_it.next();
+				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByParentId");
+
+				if (withActive == true)
+					dep.getAttributes().put("active", "true");
+
+				if (dep != null)
+					res.add(dep);
+			}
+
+			return res;
+		} catch (Exception ex)
+		{
+			throw new Exception("Cannot get department", ex);
+		}
+	}
+
+	
 	public List<Department> getDepartmentsByParentId(String parentExtId, String locale, boolean withActive, String from)
 			throws Exception
 	{
@@ -146,7 +198,6 @@ public class BaOrganizationDriver extends BaDriver
 
 		try
 		{
-			//			String departmentId = null;
 			List<User> res = new ArrayList<User>();
 
 			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getUsersByDepartmentId");
@@ -1038,26 +1089,6 @@ public class BaOrganizationDriver extends BaDriver
 		return false;
 	}
 
-	/*
-	 * public List<Department> getDepartmentsByIds(Collection<String> ids,
-	 * String locale, String from) throws Exception { try { List<Department> res
-	 * = new ArrayList<Department>();
-	 * 
-	 * Model node = ModelFactory.createDefaultModel();
-	 * node.setNsPrefixes(predicates.getPrefixs());
-	 * 
-	 * StringBuffer sb = new StringBuffer(); sb.append("\"["); boolean first =
-	 * true; for (String id : ids) { if (!first) sb.append(",");
-	 * 
-	 * sb.append("zdb:doc_"); sb.append(id); first = false; } sb.append("\"]");
-	 * 
-	 * Resource r_department = node.createResource(sb.toString());
-	 * 
-	 * dep = getDepartmentFromGraph (result.getGraph(), locale, from);
-	 * 
-	 * }
-	 */
-
 	String doc_prefix = "doc_";
 
 	private Department getDepartmentFromGraph(JSONObject oo, String locale, String from)
@@ -1322,13 +1353,6 @@ public class BaOrganizationDriver extends BaDriver
 		}
 		// это уже излишне для данного документа, так как в карточке
 		// пользователя содержится только одно подразделение
-		/*
-		 * it = gg.find(reifed_ss.asNode(), Node.createURI(predicates.rdf +
-		 * "Object"), null); String object = null; if (it.hasNext()) { Triple tt
-		 * = it.next(); object = (String)
-		 * tt.getObject().getLiteral().getValue(); }
-		 */
-
 	}
 
 	/**
@@ -1400,6 +1424,10 @@ public class BaOrganizationDriver extends BaDriver
 			if (org != null)
 				base.put(Predicates.swrc__organization, org);
 
+			if (parent_dep.unit == null) {
+				parent_dep.unit = "zdb:dep_" + parent_dep.getId(); 
+			}
+			
 			String parent_untit = parent_dep.unit;
 
 			JSONObject parent_reif_data = generate_reifed_data(uid, Predicates.docs__parentUnit, parent_untit, parent_dep);
@@ -1550,6 +1578,10 @@ public class BaOrganizationDriver extends BaDriver
 			if (org != null)
 				base.put(Predicates.swrc__organization, org);
 
+			if (parent_dep.unit == null) {
+				parent_dep.unit = "zdb:dep_" + parent_dep.getId(); 
+			}
+			
 			base.put(Predicates.docs__parentUnit, parent_dep.unit);
 
 			JSONObject dep_info = get_reif_subject(uid, Predicates.docs__parentUnit, parent_dep.unit);
@@ -1618,6 +1650,9 @@ public class BaOrganizationDriver extends BaDriver
 
 	private JSONObject get_reif_subject(String s_target, String p_target, String o_target)
 	{
+		if (s_target==null || p_target==null || o_target==null) {
+			System.out.println("!!!");
+		}
 		String addinfo_subject = Predicates.gost19 + "add_info_" + s_target.hashCode() + "" + p_target.hashCode() + ""
 				+ o_target.hashCode();
 
@@ -1628,8 +1663,6 @@ public class BaOrganizationDriver extends BaDriver
 		one.put(Predicates.rdf__subject, s_target);
 		one.put(Predicates.rdf__predicate, p_target);
 		one.put(Predicates.rdf__object, o_target);
-
-		//		r_department.addProperty(ResourceFactory.createProperty(addInfo_predicate), node.createLiteral(addInfo_value));
 
 		return one;
 	}
@@ -1642,7 +1675,7 @@ public class BaOrganizationDriver extends BaDriver
 
 		users.size();
 
-		List<Department> deps = drv.getOrganizationRoots("ru", "test");
+		List<Department> deps = drv.getOrganizationRoots(true, "ru", "test");
 
 		Iterator<Department> it = deps.iterator();
 
