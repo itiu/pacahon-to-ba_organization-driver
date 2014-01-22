@@ -1,6 +1,8 @@
 package org.gost19.pacahon.ba_organization_driver;
 
 import java.security.MessageDigest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class BaOrganizationDriver extends BaDriver
 	public static final byte _DEPARTMENT = 2;
 	public static final byte _USER = 3;
 	public static final byte _UNKNOWN = -1;
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	public BaOrganizationDriver(String endpoint_pretending_organization) throws Exception
 	{
@@ -233,7 +236,10 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__internal_phone, Predicates.query__get);
 			arg.put(Predicates.swrc__phone, Predicates.query__get);
 			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
-			arg.put(Predicates.gost19__mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__mobile, Predicates.query__get);			
+			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
+			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
+			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.docs + "parentUnit", dd.unit);
 
 			JSONArray aa = new JSONArray();
@@ -241,9 +247,6 @@ public class BaOrganizationDriver extends BaDriver
 				aa.add("true");
 			aa.add(Predicates.query__get);
 			arg.put(Predicates.docs__active, aa);
-
-			//			if (withActive == true)
-			//				arg.put(Predicates.docs__active, "true");
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByDepartmentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -652,6 +655,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__phone, Predicates.query__get);
 			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
+			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
+			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.docs__active, "true");
 			arg.put(Predicates.auth__credential, Predicates.query__get);
@@ -720,6 +726,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__phone, Predicates.query__get);
 			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
+			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
+			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get_reifed);
 			arg.put(Predicates.query__fulltext, str_tokens.toString());
@@ -811,6 +820,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__phone, Predicates.query__get);
 			arg.put(Predicates.gost19__work_mobile, Predicates.query__get);
 			arg.put(Predicates.gost19__mobile, Predicates.query__get);
+			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
+			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
+			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
@@ -1280,6 +1292,35 @@ public class BaOrganizationDriver extends BaDriver
 			usr.getAttributes().put("mobilePrivate", (String) valuez);
 		}
 
+		valuez = oo.get(Predicates.gost19__offlineDateBegin);
+		if (valuez != null)
+		{
+			try {
+				usr.setOfflineDateBegin(sdf.parse((String) valuez));
+			} catch (ParseException e) {
+				usr.setOfflineDateBegin(null);
+			}
+			usr.getAttributes().put("offlineDateBegin", (String) valuez);
+		}
+
+		valuez = oo.get(Predicates.gost19__offlineDateEnd);
+		if (valuez != null)
+		{
+			try {
+				usr.setOfflineDateEnd(sdf.parse((String) valuez));
+			} catch (ParseException e) {
+				usr.setOfflineDateEnd(null);
+			}
+			usr.getAttributes().put("offlineDateEnd", (String) valuez);
+		}
+
+		valuez = oo.get(Predicates.gost19__employeeCategoryR3);
+		if (valuez != null)
+		{
+			usr.setEmployeeCategoryR3((String) valuez);
+			usr.getAttributes().put("employeeCategoryR3", (String) valuez);
+		}
+
 		valuez = oo.get(Predicates.swrc__phone);
 		if (valuez != null)
 		{
@@ -1477,6 +1518,9 @@ public class BaOrganizationDriver extends BaDriver
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
 			add_att("email", attributes, Predicates.swrc__email, base);
 			add_att("mobile", attributes, Predicates.gost19__work_mobile, base);
+			add_att("offlineDateBegin", attributes, Predicates.gost19__offlineDateBegin, base);
+			add_att("offlineDateEnd", attributes, Predicates.gost19__offlineDateEnd, base);
+			add_att("employeeCategoryR3", attributes, Predicates.gost19__employeeCategoryR3, base);
 			//			add_att ("departmentId", attributes, Predicates.docs__parentUnit);
 		} else
 		{
@@ -1613,6 +1657,9 @@ public class BaOrganizationDriver extends BaDriver
 			add_att("phoneExt", attributes, Predicates.swrc__phone, base);
 			add_att("email", attributes, Predicates.swrc__email, base);
 			add_att("mobile", attributes, Predicates.gost19__work_mobile, base);
+			add_att("offlineDateBegin", attributes, Predicates.gost19__offlineDateBegin, base);
+			add_att("offlineDateEnd", attributes, Predicates.gost19__offlineDateEnd, base);
+			add_att("employeeCategoryR3", attributes, Predicates.gost19__employeeCategoryR3, base);
 
 			String val = attributes.get("domainName");
 			if (val != null)

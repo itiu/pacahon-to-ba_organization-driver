@@ -1,6 +1,9 @@
 package ru.mndsc.objects.organization;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -20,6 +23,8 @@ public class User implements IOrganizationEntity, Serializable
 	private static final byte _RU = 1;
 	private static final byte _EN = 2;
 
+	
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private static final long serialVersionUID = 6L;
 
 	public String uid;
@@ -38,6 +43,9 @@ public class User implements IOrganizationEntity, Serializable
 	private boolean active;
 	private String department_name;
 	private String passwd;
+	private Date offlineDateBegin;
+	private Date offlineDateEnd;
+	private String employeeCategoryR3;
 
 	public String getPasswd()
 	{
@@ -56,9 +64,9 @@ public class User implements IOrganizationEntity, Serializable
 	}
 
 	public User(String id, String firstName, String secondName, String surName,
-			String position, String department)
+			String position, String department, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
 	{
-		takeData(id, firstName, secondName, surName, position, department);
+		takeData(id, firstName, secondName, surName, position, department, offlineDateBegin, offlineDateEnd, employeeCategoryR3);
 	}
 
 	public String getUid()
@@ -114,6 +122,18 @@ public class User implements IOrganizationEntity, Serializable
 		this.department = new Department();
 		this.department.setId(departmentId);
 	}
+	
+	public User(String id, String domainName, String firstName,
+			String lastName, String email, String post, String departmentId,
+			String middleName, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
+	{
+		this(id,  domainName,  firstName,
+				 lastName,  email,  post,  departmentId,
+				 middleName);
+		this.offlineDateBegin = offlineDateBegin;
+		this.offlineDateEnd = offlineDateEnd;
+		this.employeeCategoryR3 = employeeCategoryR3;
+	}
 
 	public User(String id)
 	{
@@ -157,24 +177,29 @@ public class User implements IOrganizationEntity, Serializable
 			takeData(personResponse.id, personResponse.firstName,
 					personResponse.middleName, personResponse.lastName,
 					personResponse.position,
-					personResponse.department.getName());
+					personResponse.department.getName(),
+					personResponse.offlineDateBegin, personResponse.offlineDateEnd, personResponse.employeeCategoryR3);
 		} else
 		{
 			takeData(personResponse.id, personResponse.firstName,
 					personResponse.middleName, personResponse.lastName,
-					personResponse.position, personResponse.department_name);
+					personResponse.position, personResponse.department_name,
+					personResponse.offlineDateBegin, personResponse.offlineDateEnd, personResponse.employeeCategoryR3);
 		}
 
 	}
 
 	public void takeData(String id, String firstName, String secondName,
-			String surName, String position, String department)
+			String surName, String position, String department, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
 	{
 		this.id = id;
 		this.firstName = firstName;
 		this.middleName = secondName;
 		this.lastName = surName;
 		this.position = position;
+		this.offlineDateBegin = offlineDateBegin;
+		this.offlineDateEnd = offlineDateEnd;
+		this.employeeCategoryR3 = employeeCategoryR3;
 
 		if (this.department != null)
 			this.department.setName(department);
@@ -304,6 +329,23 @@ public class User implements IOrganizationEntity, Serializable
 				} else if (a.getName().equalsIgnoreCase("name" + locale))
 				{
 					setName(a.getValue());
+				} else if (a.getName().equalsIgnoreCase("offlineDateBegin"))
+				{
+					try {
+						setOfflineDateBegin(sdf.parse(a.getValue()));
+					} catch (ParseException e) {
+						setOfflineDateBegin(null);
+					}
+				} else if (a.getName().equalsIgnoreCase("offlineDateEnd"))
+				{
+					try {
+						setOfflineDateEnd(sdf.parse(a.getValue()));
+					} catch (ParseException e) {
+						setOfflineDateEnd(null);
+					}
+				} else if (a.getName().equalsIgnoreCase("employeeCategoryR3"))
+				{
+					setEmployeeCategoryR3(a.getValue());
 				}
 			}
 		}
@@ -487,16 +529,6 @@ public class User implements IOrganizationEntity, Serializable
 		this.login = login;
 	}
 
-	/*
-	 * public String getName() { if (lastName != null && firstName != null &&
-	 * lastName.length() > 0 && firstName.length() > 0) { if (middleName != null
-	 * && middleName.length() > 0) { name = lastName + " " +
-	 * firstName.toUpperCase().charAt(0) + "." +
-	 * middleName.toUpperCase().charAt(0) + "."; } else { name = lastName + " "
-	 * + firstName.toUpperCase().charAt(0) + "."; } } else if (position != null
-	 * && position.length() > 0) { name = position; } else { name = login; }
-	 * return name; }
-	 */
 	public String getName()
 	{
 		if (name != null)
@@ -654,6 +686,30 @@ public class User implements IOrganizationEntity, Serializable
 	public Map<String, String> getAttributes()
 	{
 		return attributes;
+	}
+
+	public Date getOfflineDateBegin() {
+		return offlineDateBegin;
+	}
+
+	public void setOfflineDateBegin(Date offlineDateBegin) {
+		this.offlineDateBegin = offlineDateBegin;
+	}
+
+	public Date getOfflineDateEnd() {
+		return offlineDateEnd;
+	}
+
+	public void setOfflineDateEnd(Date offlineDateEnd) {
+		this.offlineDateEnd = offlineDateEnd;
+	}
+
+	public String getEmployeeCategoryR3() {
+		return employeeCategoryR3;
+	}
+
+	public void setEmployeeCategoryR3(String employeeCategoryR3) {
+		this.employeeCategoryR3 = employeeCategoryR3;
 	}
 
 	public void _set__oFirstName(Object namez, String locale)
