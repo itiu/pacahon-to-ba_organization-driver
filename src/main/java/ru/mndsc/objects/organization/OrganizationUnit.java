@@ -44,6 +44,19 @@ public class OrganizationUnit implements Serializable
 	{
 		type = _type;
 	}
+	
+	public String getByComposition(String composition)
+	{
+		if (composition!=null) {
+			if (name!=null) composition = composition.replace("{name}", name);
+			if (position!=null) composition = composition.replace("{position}", position);
+			if (department!=null) composition = composition.replace("{department}", department);
+			if (email!=null) composition = composition.replace("{email}", email);
+			if (tabNomer>0) composition = composition.replace("{tabNomer}", ""+tabNomer);
+			if (telephone!=null) composition = composition.replace("{telephone}", telephone);
+		}
+		return composition;
+	}
 
 	public OrganizationUnit(User user, String locale)
 	{
