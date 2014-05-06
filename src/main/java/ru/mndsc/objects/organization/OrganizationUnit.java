@@ -48,12 +48,12 @@ public class OrganizationUnit implements Serializable
 	public String getByComposition(String composition)
 	{
 		if (composition!=null) {
-			if (name!=null) composition = composition.replace("{name}", name);
-			if (position!=null) composition = composition.replace("{position}", position);
-			if (department!=null) composition = composition.replace("{department}", department);
-			if (email!=null) composition = composition.replace("{email}", email);
-			if (tabNomer>0) composition = composition.replace("{tabNomer}", ""+tabNomer);
-			if (telephone!=null) composition = composition.replace("{telephone}", telephone);
+			composition = composition.replace("{name}", name!=null?name:"");
+			composition = composition.replace("{position}", position!=null?position:"");
+			composition = composition.replace("{department}", department!=null?department:"");
+			composition = composition.replace("{email}", email!=null?email:"");
+			composition = composition.replace("{tabNomer}", (tabNomer!=0)?(""+tabNomer):"");
+			composition = composition.replace("{telephone}", telephone!=null?telephone:"");
 		}
 		return composition;
 	}
