@@ -34,6 +34,7 @@ public class OrganizationUnit implements Serializable
 	private long tabNomer;
 	private String telephone;
 	private String hint = "";
+	private String composition;
 	private Map<String, String> attributes = new HashMap<String, String>();
 
 	public OrganizationUnit()
@@ -55,6 +56,7 @@ public class OrganizationUnit implements Serializable
 			composition = composition.replace("{tabNomer}", (tabNomer!=0)?(""+tabNomer):"");
 			composition = composition.replace("{telephone}", telephone!=null?telephone:"");
 		}
+		this.composition = composition;
 		return composition;
 	}
 
@@ -262,5 +264,13 @@ public class OrganizationUnit implements Serializable
 	public void setParentNode(Department parentNode)
 	{
 		this.parentNode = parentNode;
+	}
+
+	public String getComposition() {
+		return composition;
+	}
+
+	public void setComposition(String composition) {
+		this.composition = composition;
 	}
 }
