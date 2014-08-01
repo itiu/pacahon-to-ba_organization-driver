@@ -142,6 +142,17 @@ public class User implements IOrganizationEntity, Serializable
 		this.department = new Department();
 	}
 
+
+	public void setDepartment(String department_name, String locale)
+	{
+		this.department.setName(department_name, locale);
+	}
+	
+	public void setDepartment(String department_name)
+	{
+		this.department.setName(department_name, "Ru");
+	}
+	
 	public void setDepartmentName(String _department)
 	{
 		// super.setDepartmentName(department);
@@ -597,11 +608,6 @@ public class User implements IOrganizationEntity, Serializable
 	public void setDepartment(Department department)
 	{
 		this.department = department;
-	}
-
-	public void setDepartment(String department_name)
-	{
-		this.department.setName(department_name, "Ru");
 	}
 
 	public long getTabNomer()
