@@ -19,61 +19,12 @@ import ru.mndsc.bigarch.wsclient.bl.organizationservice.EntityType;
  */
 public class User implements IOrganizationEntity, Serializable
 {
+	private static final byte _EN = 2;
 	private static final byte _NONE = 0;
 	private static final byte _RU = 1;
-	private static final byte _EN = 2;
 
-	
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private static final long serialVersionUID = 6L;
-
-	public String uid;
-	private String id;
-	private String name;
-	private String firstName;
-	private String middleName;
-	private String lastName;
-	private String position;
-	private Department department;
-	private String email;
-	private String login;
-	private long tabNomer;
-	private String telephone;
-	private String internalId;
-	private boolean active;
-	private String department_name;
-	private String passwd;
-	private Date offlineDateBegin;
-	private Date offlineDateEnd;
-	private String employeeCategoryR3;
-
-	public String getPasswd()
-	{
-		return passwd;
-	}
-
-	public void setPasswd(String passwd)
-	{
-		this.passwd = passwd;
-	}
-
-	private Map<String, String> attributes = new HashMap<String, String>();
-
-	public User()
-	{
-	}
-
-	public User(String id, String firstName, String secondName, String surName,
-			String position, String department, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
-	{
-		takeData(id, firstName, secondName, surName, position, department, offlineDateBegin, offlineDateEnd, employeeCategoryR3);
-	}
-
-	public String getUid()
-	{
-		return uid;
-	}
-
+	
 	private static byte getLang(String ss)
 	{
 		if (ss.length() >= 3)
@@ -106,23 +57,64 @@ public class User implements IOrganizationEntity, Serializable
 
 		return ss;
 	}
+	
+	
+	private Map<String, String> attributes = new HashMap<String, String>();
+	private String currentLocale = "Ru";
+	private Department department = new Department();
+	private String id;
+	private String name;
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+	public User()
+	{
+	}
+
+	public User(EntityType blObject, String locale)
+	{
+		setId(blObject.getUid());
+
+		currentLocale = correct_locale(locale);
+		
+		if (blObject.getAttributes() != null)
+		{
+			for (AttributeType a : blObject.getAttributes().getAttributeList())
+			{
+				attributes.put(a.getName(), a.getValue());
+			}
+		}
+	}
+
+	public User(String id)
+	{
+		super();
+		this.setId(id);
+		this.setDepartment(new Department());
+	}
+	
+	public User(String id, String firstName, String secondName, String surName,
+			String position, String department, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
+	{
+		takeData(id, firstName, secondName, surName, position, department, offlineDateBegin, offlineDateEnd, employeeCategoryR3);
+	}
 
 	public User(String id, String domainName, String firstName,
 			String lastName, String email, String post, String departmentId,
 			String middleName)
 	{
 		super();
-		this.id = id;
-		this.login = domainName;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.middleName = middleName;
-		this.email = email;
-		this.position = post;
-		this.department = new Department();
-		this.department.setId(departmentId);
+		this.setId(id);
+		this.setLogin(domainName);
+		this.setFirstName(firstName);
+		this.setLastName(lastName);
+		this.setMiddleName(middleName);
+		this.setEmail(email);
+		this.setPosition(post);
+		this.setDepartment(new Department());
+		this.getDepartment().setId(departmentId);
 	}
-	
+
+
 	public User(String id, String domainName, String firstName,
 			String lastName, String email, String post, String departmentId,
 			String middleName, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
@@ -130,331 +122,11 @@ public class User implements IOrganizationEntity, Serializable
 		this(id,  domainName,  firstName,
 				 lastName,  email,  post,  departmentId,
 				 middleName);
-		this.offlineDateBegin = offlineDateBegin;
-		this.offlineDateEnd = offlineDateEnd;
-		this.employeeCategoryR3 = employeeCategoryR3;
-	}
-
-	public User(String id)
-	{
-		super();
-		this.id = id;
-		this.department = new Department();
-	}
-
-
-	public void setDepartment(String department_name, String locale)
-	{
-		this.department.setName(department_name, locale);
+		this.setOfflineDateBegin(offlineDateBegin);
+		this.setOfflineDateEnd(offlineDateEnd);
+		this.setEmployeeCategoryR3(employeeCategoryR3);
 	}
 	
-	public void setDepartment(String department_name)
-	{
-		this.department.setName(department_name, "Ru");
-	}
-	
-	public void setDepartmentName(String _department)
-	{
-		// super.setDepartmentName(department);
-		department_name = _department;
-	}
-
-	public String getDepartmentName()
-	{
-		// return super.getDepartmentName();
-		return department_name;
-
-	}
-
-	public boolean isActive()
-	{
-		return active;
-	}
-
-	public void setOtherAttributes(Map<String, String> otherAttributes)
-	{
-		this.attributes = otherAttributes;
-	}
-
-	public Map<String, String> getOtherAttributes()
-	{
-		return attributes;
-	}
-
-	public void takeData(User personResponse)
-	{
-		if (personResponse.department != null)
-		{
-			takeData(personResponse.id, personResponse.firstName,
-					personResponse.middleName, personResponse.lastName,
-					personResponse.position,
-					personResponse.department.getName(),
-					personResponse.offlineDateBegin, personResponse.offlineDateEnd, personResponse.employeeCategoryR3);
-		} else
-		{
-			takeData(personResponse.id, personResponse.firstName,
-					personResponse.middleName, personResponse.lastName,
-					personResponse.position, personResponse.department_name,
-					personResponse.offlineDateBegin, personResponse.offlineDateEnd, personResponse.employeeCategoryR3);
-		}
-
-	}
-
-	public void takeData(String id, String firstName, String secondName,
-			String surName, String position, String department, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
-	{
-		this.id = id;
-		this.firstName = firstName;
-		this.middleName = secondName;
-		this.lastName = surName;
-		this.position = position;
-		this.offlineDateBegin = offlineDateBegin;
-		this.offlineDateEnd = offlineDateEnd;
-		this.employeeCategoryR3 = employeeCategoryR3;
-
-		if (this.department != null)
-			this.department.setName(department);
-		else
-			this.department_name = department;
-
-	}
-
-	public String getOrgName()
-	{
-		if (lastName != null && firstName != null && middleName != null
-				&& lastName.trim().length() > 0
-				&& firstName.trim().length() > 0
-				&& middleName.trim().length() > 0)
-		{
-			return lastName + " "
-					+ firstName.trim().substring(1, 2).toUpperCase() + "."
-					+ middleName.trim().substring(1, 2).toUpperCase() + ".";
-		} else
-		{
-			return login;
-		}
-	}
-
-	private String correct_locale(String locale)
-	{
-		if (locale == "ru")
-			locale = "Ru";
-		if (locale == "en")
-			locale = "En";
-		return locale;
-	}
-
-	public String getRepresentatiom()
-	{
-		String name = "";
-		if (lastName != null && firstName != null && lastName.length() > 0
-				&& firstName.length() > 0)
-		{
-			if (middleName != null && middleName.length() > 0)
-			{
-				name = lastName + " " + firstName.toUpperCase().charAt(0) + "."
-						+ middleName.toUpperCase().charAt(0) + ".";
-			} else
-			{
-				name = lastName + " " + firstName.toUpperCase().charAt(0) + ".";
-			}
-		} else if (position != null && position.length() > 0)
-		{
-			name = position;
-		} else
-		{
-			name = login;
-		}
-		return name;
-	}
-
-	public boolean getActive()
-	{
-		return active;
-	} // end getActive()
-
-	public void setActive(boolean active)
-	{
-		this.active = active;
-	} // end setActive()
-
-	public String getDomainName()
-	{
-		return login;
-	} // end getDomainName()
-
-	public void setDomainName(String domainName)
-	{
-		this.login = domainName;
-	} // end setDomainName()
-
-	public String getDepartmentId()
-	{
-		return department.getId();
-	} // end getDepartmentId()
-
-	public void setDepartmentId(String departmentId)
-	{
-		if (department == null)
-			department = new Department();
-
-		this.department.setId(departmentId);
-	} // end setDepartmentId()
-
-	public User(EntityType blObject, String locale)
-	{
-		setId(blObject.getUid());
-
-		if (blObject.getAttributes() != null)
-		{
-			for (AttributeType a : blObject.getAttributes().getAttributeList())
-			{
-				attributes.put(a.getName(), a.getValue());
-				if (a.getName().equalsIgnoreCase("firstName" + locale))
-				{
-					setFirstName(a.getValue(), locale);
-				} else if (a.getName().equalsIgnoreCase("secondName" + locale))
-				{
-					setMiddleName(a.getValue(), locale);
-				} else if (a.getName().equalsIgnoreCase("surname" + locale))
-				{
-					setLastName(a.getValue(), locale);
-				} else if (a.getName().equals("domainName"))
-				{
-					setLogin(a.getValue());
-				} else if (a.getName().equals("email"))
-				{
-					setEmail(a.getValue());
-				} else if (a.getName().equalsIgnoreCase("post" + locale))
-				{
-					setPosition(a.getValue(), locale);
-				} else if (a.getName().equalsIgnoreCase("pid"))
-				{
-					setTabNomer(a.getValue());
-				} else if (a.getName().equalsIgnoreCase("phone"))
-				{
-					setTelephone(a.getValue());
-				} else if (a.getName().equalsIgnoreCase("id"))
-				{
-					setInternalId(a.getValue());
-				} else if (a.getName().equalsIgnoreCase("name" + locale))
-				{
-					setName(a.getValue());
-				} else if (a.getName().equalsIgnoreCase("offlineDateBegin"))
-				{
-					try {
-						setOfflineDateBegin(sdf.parse(a.getValue()));
-					} catch (ParseException e) {
-						setOfflineDateBegin(null);
-					}
-				} else if (a.getName().equalsIgnoreCase("offlineDateEnd"))
-				{
-					try {
-						setOfflineDateEnd(sdf.parse(a.getValue()));
-					} catch (ParseException e) {
-						setOfflineDateEnd(null);
-					}
-				} else if (a.getName().equalsIgnoreCase("employeeCategoryR3"))
-				{
-					setEmployeeCategoryR3(a.getValue());
-				}
-			}
-		}
-	}
-
-	public String getHint()
-	{
-		String result = "";
-		result = lastName != null ? result += lastName + " " : result;
-		result = firstName != null ? result += firstName + " " : result;
-		result = middleName != null ? result += middleName + " \n" : result;
-		result = position != null ? result += position + " \n" : result;
-		result = email != null ? result += email + " \n" : result;
-		result = telephone != null ? result += telephone : result;
-		return result;
-	}
-
-	public void changeLocale(String locale)
-	{
-		name = null;
-		if ("en".equals(locale))
-		{
-			setFirstName(attributes.get("firstNameEn"), "En");
-			setMiddleName(attributes.get("secondNameEn"), locale);
-			setLastName(attributes.get("surnameEn"), locale);
-			setPosition(attributes.get("postEn"), locale);
-			setName(attributes.get("nameEn"));
-			if (attributes.get("firstNameEn") == null
-					|| "".equals(attributes.get("firstNameEn"))
-					|| "null".equals(attributes.get("firstNameEn")))
-			{
-				setFirstName(attributes.get("firstNameRu"), "Ru");
-			}
-			if (attributes.get("secondNameEn") == null
-					|| "".equals(attributes.get("secondNameEn"))
-					|| "null".equals(attributes.get("secondNameEn")))
-			{
-				setMiddleName(attributes.get("secondNameRu"), locale);
-			}
-			if (attributes.get("surnameEn") == null
-					|| "".equals(attributes.get("surnameEn"))
-					|| "null".equals(attributes.get("surnameEn")))
-			{
-				setLastName(attributes.get("surnameRu"), locale);
-			}
-			if (attributes.get("postEn") == null
-					|| "".equals(attributes.get("postEn"))
-					|| "null".equals(attributes.get("postEn")))
-			{
-				setPosition(attributes.get("postRu"), locale);
-			}
-			if (attributes.get("nameEn") == null
-					|| "".equals(attributes.get("nameEn"))
-					|| "null".equals(attributes.get("nameEn")))
-			{
-				setName(attributes.get("nameRu"));
-			}
-		} else if ("ru".equals(locale))
-		{
-			setFirstName(attributes.get("firstNameRu"), "Ru");
-			setMiddleName(attributes.get("secondNameRu"), "Ru");
-			setLastName(attributes.get("surnameRu"), "Ru");
-			setPosition(attributes.get("postRu"), "Ru");
-			setName(attributes.get("nameRu"));
-		}
-	}
-
-	public String getEmail()
-	{
-		return email;
-	}
-
-	public void setEmail(String email)
-	{
-		this.email = email;
-	}
-
-	public String getFirstName()
-	{
-		return firstName;
-	}
-
-	public void setFirstName(String firstName, String locale)
-	{
-		locale = correct_locale(locale);
-
-		attributes.put("firstName" + locale, firstName);
-
-		this.firstName = firstName;
-	}
-
-	public void setFirstName(String firstName)
-	{
-		attributes.put("firstNameRu", firstName);
-
-		this.firstName = firstName;
-	}
-
 	public void _set__FirstName(String nm)
 	{
 		byte lang = getLang(nm);
@@ -465,7 +137,7 @@ public class User implements IOrganizationEntity, Serializable
 		if (lang == _RU || lang == _NONE)
 			setFirstName(nm, "Ru");
 	}
-
+	
 	public void _set__LastName(String nm)
 	{
 		byte lang = getLang(nm);
@@ -486,236 +158,6 @@ public class User implements IOrganizationEntity, Serializable
 			setMiddleName(nm, "Ru");
 		if (lang == _EN)
 			setMiddleName(nm, "En");
-	}
-
-	public void _set__Position(String nm)
-	{
-		byte lang = getLang(nm);
-		nm = stripLang(nm);
-
-		if (lang == _RU || lang == _NONE)
-			setPosition(nm, "Ru");
-		if (lang == _EN)
-			setPosition(nm, "En");
-	}
-
-	public String getId()
-	{
-		return id;
-	}
-
-	public void setId(String id)
-	{
-		this.id = id;
-	}
-
-	public String getLastName()
-	{
-		return lastName;
-	}
-
-	public void setLastName(String lastName, String locale)
-	{
-		locale = correct_locale(locale);
-
-		attributes.put("surname" + locale, lastName);
-
-		this.lastName = lastName;
-	}
-
-	public void setLastName(String lastName)
-	{
-		attributes.put("surnameRu", lastName);
-
-		this.lastName = lastName;
-	}
-
-	public String getLogin()
-	{
-		return login;
-	}
-
-	public void setLogin(String login)
-	{
-		this.login = login;
-	}
-
-	public String getName()
-	{
-		if (name != null)
-		{
-			return name;
-		}
-		if (getSurName() != null && getFirstName() != null
-				&& getSurName().trim().length() > 0
-				&& getFirstName().trim().length() > 0)
-		{
-			if (getSecondName() != null && getSecondName().trim().length() > 0)
-			{
-				name = getSurName() + " "
-						+ getFirstName().trim().toUpperCase().charAt(0) + "."
-						+ getSecondName().trim().toUpperCase().charAt(0) + ".";
-			} else
-			{
-				name = getSurName() + " "
-						+ getFirstName().trim().toUpperCase().charAt(0) + ".";
-			}
-
-		} else if (getPosition() != null && getPosition().trim().length() > 0)
-		{
-			name = getPosition();
-		} else if (getLogin() != null)
-		{
-			name = getLogin();
-		} else
-		{
-			name = " ";
-		}
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
-	public String getPosition()
-	{
-		return position;
-	}
-
-	public void setPosition(String position, String locale)
-	{
-		locale = correct_locale(locale);
-
-		attributes.put("post" + locale, position);
-
-		this.position = position;
-	}
-
-	public void setPosition(String position)
-	{
-		attributes.put("postRu", position);
-
-		this.position = position;
-	}
-
-	public Department getDepartment()
-	{
-		return department;
-	}
-
-	public void setDepartment(Department department)
-	{
-		this.department = department;
-	}
-
-	public long getTabNomer()
-	{
-		return tabNomer;
-	}
-
-	public void setTabNomer(String tabNomer)
-	{
-		try
-		{
-			this.tabNomer = new Long(tabNomer);
-		} catch (Exception ex)
-		{
-			this.tabNomer = 0;
-		}
-	}
-
-	public String getMiddleName()
-	{
-		return middleName;
-	}
-
-	public void setMiddleName(String middleName, String locale)
-	{
-		locale = correct_locale(locale);
-
-		attributes.put("secondName" + locale, middleName);
-
-		this.middleName = middleName;
-	}
-
-	public void setSurName(String lastName)
-	{
-		attributes.put("lastNameRu", lastName);
-
-		this.lastName = lastName;
-	}
-
-	public String getSurName()
-	{
-		return this.lastName;
-	}
-
-	public void setSecondName(String middleName)
-	{
-		attributes.put("secondNameRu", middleName);
-
-		this.middleName = middleName;
-	}
-
-	public String getSecondName()
-	{
-		return this.middleName;
-	}
-
-	public String getTelephone()
-	{
-		return telephone;
-	}
-
-	public String getPhone()
-	{
-		return telephone;
-	}
-
-	public void setTelephone(String telephone)
-	{
-		this.telephone = telephone;
-	}
-
-	public String getInternalId()
-	{
-		return internalId;
-	}
-
-	public void setInternalId(String internalId)
-	{
-		this.internalId = internalId;
-	}
-
-	public Map<String, String> getAttributes()
-	{
-		return attributes;
-	}
-
-	public Date getOfflineDateBegin() {
-		return offlineDateBegin;
-	}
-
-	public void setOfflineDateBegin(Date offlineDateBegin) {
-		this.offlineDateBegin = offlineDateBegin;
-	}
-
-	public Date getOfflineDateEnd() {
-		return offlineDateEnd;
-	}
-
-	public void setOfflineDateEnd(Date offlineDateEnd) {
-		this.offlineDateEnd = offlineDateEnd;
-	}
-
-	public String getEmployeeCategoryR3() {
-		return employeeCategoryR3;
-	}
-
-	public void setEmployeeCategoryR3(String employeeCategoryR3) {
-		this.employeeCategoryR3 = employeeCategoryR3;
 	}
 
 	public void _set__oFirstName(Object namez, String locale)
@@ -836,6 +278,34 @@ public class User implements IOrganizationEntity, Serializable
 		}
 	}
 
+	public void _set__oName(Object valuez, String locale)
+	{
+		if (valuez != null)
+		{
+			if (valuez instanceof JSONArray)
+			{
+				String nm_ru = "";
+				String nm_en = "";
+
+				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
+				while (subj_it.hasNext())
+				{
+					String nm = subj_it.next();
+					byte lang = getLang(nm);
+					nm = stripLang(nm);
+
+					if (lang == _EN)
+						nm_en = nm;
+					if (lang == _RU || lang == _NONE)
+						nm_ru = nm;
+				}
+
+				setName(nm_ru);
+
+			}
+		}
+	}
+
 	public void _set__oPosition(Object valuez, String locale)
 	{
 		if (valuez != null)
@@ -875,31 +345,471 @@ public class User implements IOrganizationEntity, Serializable
 		}
 	}
 
-	public void _set__oName(Object valuez, String locale)
+	public void _set__Position(String nm)
 	{
-		if (valuez != null)
+		byte lang = getLang(nm);
+		nm = stripLang(nm);
+
+		if (lang == _RU || lang == _NONE)
+			setPosition(nm, "Ru");
+		if (lang == _EN)
+			setPosition(nm, "En");
+	}
+
+	public void changeLocale(String locale)
+	{
+		currentLocale = correct_locale(locale);
+		setName(null);		
+	}	
+	
+	
+	private String correct_locale(String locale)
+	{
+		if (locale == "ru")
+			locale = "Ru";
+		if (locale == "en")
+			locale = "En";
+		return locale;
+	}
+
+	public boolean getActive()
+	{
+		return isActive();
+	}
+	
+	public Map<String, String> getAttributes()
+	{
+		return attributes;
+	}
+
+	public Department getDepartment()
+	{
+		if (department==null) department = new Department();
+		return department;
+	}
+
+	public String getDepartmentId()
+	{
+		return department.getId();
+	}
+
+	public String getDomainName()
+	{
+		return attributes.get("domainName");
+	}
+
+	public String getEmail()
+	{
+		return attributes.get("email");
+	}
+
+	public String getEmployeeCategoryR3() {
+		return attributes.get("employeeCategoryR3");
+	}
+
+	public String getFirstName()
+	{
+		return getFirstName(currentLocale);
+	}
+
+	public String getFirstName(String locale)
+	{
+		return attributes.get("firstName" + locale);
+	}
+
+	public String getHint()
+	{
+		String result = "";
+		result = getLastName() != null ? result += getLastName() + " " : result;
+		result = getFirstName() != null ? result += getFirstName() + " " : result;
+		result = getMiddleName() != null ? result += getMiddleName() + " \n" : result;
+		result = getPosition() != null ? result += getPosition() + " \n" : result;
+		result = getEmail() != null ? result += getEmail() + " \n" : result;
+		result = getTelephone() != null ? result += getTelephone() : result;
+		return result;
+	}
+
+	public String getId()
+	{
+		return id;
+	}
+
+	public String getInternalId()
+	{
+		return attributes.get("id");
+	}
+
+	public String getLastName()
+	{
+		return getLastName(currentLocale);
+	}
+	
+	public String getLastName(String locale)
+	{
+		return attributes.get("surname"+locale);
+	}
+
+	public String getLogin()
+	{
+		return attributes.get("domainName");
+	}
+
+	public String getMiddleName()
+	{
+		return getMiddleName(currentLocale);
+	}
+
+	public String getMiddleName(String locale)
+	{
+		return attributes.get("secondName"+locale);
+	}
+
+	public String getName()
+	{
+		if (name != null)
 		{
-			if (valuez instanceof JSONArray)
-			{
-				String nm_ru = "";
-				String nm_en = "";
-
-				Iterator<String> subj_it = ((JSONArray) valuez).iterator();
-				while (subj_it.hasNext())
-				{
-					String nm = subj_it.next();
-					byte lang = getLang(nm);
-					nm = stripLang(nm);
-
-					if (lang == _EN)
-						nm_en = nm;
-					if (lang == _RU || lang == _NONE)
-						nm_ru = nm;
-				}
-
-				setName(nm_ru);
-
-			}
+			return name;
 		}
+		if (getSurName() != null && getFirstName() != null
+				&& getSurName().trim().length() > 0
+				&& getFirstName().trim().length() > 0)
+		{
+			if (getSecondName() != null && getSecondName().trim().length() > 0)
+			{
+				name = getSurName() + " "
+						+ getFirstName().trim().toUpperCase().charAt(0) + "."
+						+ getSecondName().trim().toUpperCase().charAt(0) + ".";
+			} else
+			{
+				name = getSurName() + " "
+						+ getFirstName().trim().toUpperCase().charAt(0) + ".";
+			}
+
+		} else if (getPosition() != null && getPosition().trim().length() > 0)
+		{
+			name = getPosition();
+		} else if (getLogin() != null)
+		{
+			name = getLogin();
+		} else
+		{
+			name = " ";
+		}
+		return name;
+	}
+
+	public Date getOfflineDateBegin() {
+		try {
+			return sdf.parse(attributes.get("offlineDateBegin"));
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public Date getOfflineDateEnd() {
+		try {
+			return sdf.parse(attributes.get("offlineDateEnd"));
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public String getOrgName()
+	{
+		if (getLastName() != null && getFirstName() != null && getMiddleName() != null
+				&& getLastName().trim().length() > 0
+				&& getFirstName().trim().length() > 0
+				&& getMiddleName().trim().length() > 0)
+		{
+			return getLastName() + " "
+					+ getFirstName().trim().substring(1, 2).toUpperCase() + "."
+					+ getMiddleName().trim().substring(1, 2).toUpperCase() + ".";
+		} else
+		{
+			return getLogin();
+		}
+	}
+
+	public Map<String, String> getOtherAttributes()
+	{
+		return attributes;
+	}
+
+	public String getPasswd()
+	{
+		return attributes.get("password");
+	}
+
+	public String getPhone()
+	{
+		return attributes.get("phone");
+	}
+
+	public String getPosition()
+	{
+		return getPosition(currentLocale);
+	}
+	
+	public String getPosition(String locale)
+	{
+		return attributes.get("post"+locale);
+	}
+
+	public String getRepresentatiom()
+	{
+		String name = "";
+		if (getLastName() != null && getFirstName() != null && getLastName().length() > 0
+				&& getFirstName().length() > 0)
+		{
+			if (getMiddleName() != null && getMiddleName().length() > 0)
+			{
+				name = getLastName() + " " + getFirstName().toUpperCase().charAt(0) + "."
+						+ getMiddleName().toUpperCase().charAt(0) + ".";
+			} else
+			{
+				name = getLastName() + " " + getFirstName().toUpperCase().charAt(0) + ".";
+			}
+		} else if (getPosition() != null && getPosition().length() > 0)
+		{
+			name = getPosition();
+		} else
+		{
+			name = getLogin();
+		}
+		return name;
+	}
+
+	public String getSecondName()
+	{
+		return getSecondName(currentLocale);
+	}
+	
+	public String getSecondName(String locale)
+	{
+		return attributes.get("secondName"+locale);
+	}
+
+	public String getSurName()
+	{
+		return getSurName(currentLocale);
+	}
+	
+	public String getSurName(String locale)
+	{
+		return attributes.get("surname"+locale);
+	}
+
+	public long getTabNomer()
+	{
+		try
+		{
+			return Long.parseLong(attributes.get("pid"));
+		} catch (Exception ex)
+		{
+			return 0;
+		}
+	}
+
+	public String getTelephone()
+	{
+		return getPhone();
+	}
+
+	public String getUid()
+	{
+		return attributes.get("@");
+	}
+
+	public boolean isActive()
+	{
+		return attributes.get("active").equalsIgnoreCase("true");
+	}
+	
+	public void setActive(boolean active)
+	{
+		attributes.put("active", Boolean.toString(active));
+	}
+
+	public void setDepartment(Department department)
+	{
+		this.department = department;
+		if (department.getId()!=null) {
+			attributes.put("departmentId", department.getId());
+		}
+	}
+
+	public void setDepartment(String department_name)
+	{		
+		setDepartment(department_name, currentLocale);
+	}
+	
+	public void setDepartment(String department_name, String locale)
+	{		
+		this.getDepartment().setName(department_name, locale);
+	}
+	
+	public void setDepartmentId(String departmentId)
+	{
+		if (department == null)
+			department = new Department();
+
+		this.department.setId(departmentId);
+		attributes.put("departmentId", departmentId);
+	}
+
+	public void setDomainName(String domainName)
+	{
+		attributes.put("domainName", domainName);
+	}
+
+
+	public void setEmail(String email)
+	{
+		attributes.put("email", email);
+	}
+
+	public void setEmployeeCategoryR3(String employeeCategoryR3) {
+		attributes.put("employeeCategoryR3",employeeCategoryR3);
+	}
+	
+	public void setFirstName(String firstName)
+	{
+		setFirstName(firstName, currentLocale);
+	}
+
+	public void setFirstName(String firstName, String locale)
+	{
+		attributes.put("firstName" + locale, firstName);
+	}
+	
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
+	public void setInternalId(String internalId)
+	{
+		attributes.put("id", internalId);
+	}
+
+	public void setLastName(String lastName)
+	{
+		setLastName(lastName, currentLocale);
+	}
+
+	public void setLastName(String lastName, String locale)
+	{
+		attributes.put("surname" + locale, lastName);
+	}
+
+	public void setLogin(String login)
+	{
+		attributes.put("domainName", login);
+	}
+
+	public void setMiddleName(String middleName)
+	{
+		setMiddleName(middleName, currentLocale);
+	}
+	
+	public void setMiddleName(String middleName, String locale)
+	{
+		attributes.put("secondName" + locale, middleName);
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public void setOfflineDateBegin(Date offlineDateBegin) {
+		attributes.put("offlineDateBegin",sdf.format(offlineDateBegin));
+	}
+
+	public void setOfflineDateEnd(Date offlineDateEnd) {
+		attributes.put("offlineDateEnd",sdf.format(offlineDateEnd));
+	}
+
+	public void setOtherAttributes(Map<String, String> otherAttributes)
+	{
+		this.attributes = otherAttributes;
+	}
+
+	public void setPasswd(String passwd)
+	{
+		attributes.put("password", passwd);
+	}
+
+	public void setPosition(String position)
+	{
+		setPosition(position, currentLocale);
+	}
+	
+	public void setPosition(String position, String locale)
+	{
+		attributes.put("post" + locale, position);
+	}
+
+	public void setSecondName(String middleName)
+	{
+		setSecondName(middleName, currentLocale);
+	}
+
+	private void setSecondName(String middleName, String locale)
+	{
+		attributes.put("secondName"+locale, middleName);
+	}
+
+	public void setSurName(String lastName)
+	{
+		setSurName(lastName, currentLocale);
+	}
+	
+	public void setSurName(String lastName, String locale)
+	{
+		attributes.put("surname"+locale, lastName);
+	}
+
+	public void setTabNomer(String tabNomer)
+	{
+		attributes.put("pid", tabNomer);
+	}
+
+	public void setTelephone(String telephone)
+	{
+		attributes.put("phone", telephone);
+	}
+
+	public void setUid(String uid)
+	{
+		attributes.put("@", uid);
+	}
+
+	public void takeData(String id, String firstName, String secondName,
+			String surName, String position, String department, Date offlineDateBegin, Date offlineDateEnd, String employeeCategoryR3)
+	{
+		this.id = id;
+		this.setFirstName(firstName);
+		this.setMiddleName(secondName);
+		this.setLastName(surName);
+		this.setPosition(position);		
+		if (offlineDateBegin!=null) this.setOfflineDateBegin(offlineDateBegin);
+		if (offlineDateEnd!=null) this.setOfflineDateEnd(offlineDateEnd);
+		this.setEmployeeCategoryR3(employeeCategoryR3);
+
+		if (this.department != null)
+			this.department.setName(department);
+		else
+			this.setDepartment(department);
+
+	}
+
+	public void takeData(User personResponse)
+	{
+		takeData(personResponse.id, personResponse.getFirstName(),
+				personResponse.getMiddleName(), personResponse.getLastName(),
+				personResponse.getPosition(),
+				personResponse.department.getName(),
+				personResponse.getOfflineDateBegin(), personResponse.getOfflineDateEnd(), personResponse.getEmployeeCategoryR3());
 	}
 }

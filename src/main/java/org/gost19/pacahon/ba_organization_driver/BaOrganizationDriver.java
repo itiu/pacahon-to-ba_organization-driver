@@ -1235,7 +1235,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 		usr.setId(id);
-		usr.uid = uid;
+		usr.setUid(uid);
 
 		usr._set__oFirstName(oo.get(Predicates.swrc__firstName), locale);
 		usr._set__oLastName(oo.get(Predicates.swrc__lastName), locale);
@@ -1349,7 +1349,6 @@ public class BaOrganizationDriver extends BaDriver
 			usr.getAttributes().put("pid", externalIdentifer);
 		}
 
-		usr.getAttributes().put("@", usr.uid);
 		if (rdf_type != null)
 			usr.getAttributes().put("a", rdf_type.toString());
 
