@@ -1246,21 +1246,18 @@ public class BaOrganizationDriver extends BaDriver
 		if (valuez != null)
 		{
 			usr.setDomainName((String)valuez);
-			usr.getAttributes().put("domainName", (String) valuez);
 		}
 		
 		valuez = oo.get(Predicates.auth__credential);
 		if (valuez != null)
 		{
 			usr.setPasswd((String) valuez);
-			usr.getAttributes().put("password", "********");
 		}
 
 		valuez = oo.get(Predicates.swrc__email);
 		if (valuez != null)
 		{
 			usr.setEmail((String) valuez);
-			usr.getAttributes().put("email", (String) valuez);
 		}
 
 		valuez = oo.get(Predicates.gost19__synchronize);
@@ -1273,13 +1270,11 @@ public class BaOrganizationDriver extends BaDriver
 		if (valuez != null)
 		{
 			usr.setTelephone((String) valuez);
-			usr.getAttributes().put("phone", (String) valuez);
 		}
 
 		valuez = oo.get(Predicates.docs__active);
 		if (valuez != null)
 		{
-			usr.getAttributes().put("active", (String) valuez);
 			if (((String) valuez).equalsIgnoreCase("true"))
 				usr.setActive(true);
 			else
@@ -1300,7 +1295,6 @@ public class BaOrganizationDriver extends BaDriver
 			} catch (ParseException e) {
 				usr.setOfflineDateBegin(null);
 			}
-			usr.getAttributes().put("offlineDateBegin", (String) valuez);
 		}
 
 		valuez = oo.get(Predicates.gost19__offlineDateEnd);
@@ -1311,14 +1305,12 @@ public class BaOrganizationDriver extends BaDriver
 			} catch (ParseException e) {
 				usr.setOfflineDateEnd(null);
 			}
-			usr.getAttributes().put("offlineDateEnd", (String) valuez);
 		}
 
 		valuez = oo.get(Predicates.gost19__employeeCategoryR3);
 		if (valuez != null)
 		{
 			usr.setEmployeeCategoryR3((String) valuez);
-			usr.getAttributes().put("employeeCategoryR3", (String) valuez);
 		}
 
 		valuez = oo.get(Predicates.swrc__phone);
@@ -1339,14 +1331,12 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			String val = parentDepartment.substring(parentDepartment.indexOf("_") + 1, parentDepartment.length());
 			usr.setDepartmentId(val);
-			usr.getAttributes().put("departmentId", val);
 		}
 
 		String externalIdentifer = (String) oo.get(Predicates.gost19__externalIdentifer);
 		if (externalIdentifer != null)
 		{
 			usr.setTabNomer(externalIdentifer);
-			usr.getAttributes().put("pid", externalIdentifer);
 		}
 
 		if (rdf_type != null)

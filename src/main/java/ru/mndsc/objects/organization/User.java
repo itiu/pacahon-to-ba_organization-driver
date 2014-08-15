@@ -537,6 +537,11 @@ public class User implements IOrganizationEntity, Serializable
 
 	public String getPasswd()
 	{
+		return attributes.get("password")==null?"":"******";
+	}
+	
+	public String getUncryptedPasswd()
+	{
 		return attributes.get("password");
 	}
 
