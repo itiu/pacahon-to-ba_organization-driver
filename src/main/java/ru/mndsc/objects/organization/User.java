@@ -365,11 +365,11 @@ public class User implements IOrganizationEntity, Serializable
 	
 	private String correct_locale(String locale)
 	{
-		if (locale == "ru")
-			locale = "Ru";
-		if (locale == "en")
-			locale = "En";
-		return locale;
+		if (locale.equals("ru"))
+			return "Ru";
+		if (locale.equals("en"))
+			return "En";
+		return "Ru";
 	}
 
 	public boolean getActive()
