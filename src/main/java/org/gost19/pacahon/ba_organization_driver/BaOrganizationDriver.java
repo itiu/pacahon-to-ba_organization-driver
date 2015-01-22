@@ -96,7 +96,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 
 	}
-	public List<Department> getDepartmentsByParent(Department dd, String locale, boolean withActive, String from) throws Exception {
+	public synchronized List<Department> getDepartmentsByParent(Department dd, String locale, boolean withActive, String from) throws Exception {
 		recheck_ticket();
 		locale = correct_locale(locale);
 
@@ -141,7 +141,7 @@ public class BaOrganizationDriver extends BaDriver
 	}
 
 	
-	public List<Department> getDepartmentsByParentId(String parentExtId, String locale, boolean withActive, String from)
+	public synchronized List<Department> getDepartmentsByParentId(String parentExtId, String locale, boolean withActive, String from)
 			throws Exception
 	{
 		recheck_ticket();
@@ -193,7 +193,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<User> getUsersByDepartmentId(String departmentExtId, String locale, boolean withEmail, boolean withActive,
+	public synchronized List<User> getUsersByDepartmentId(String departmentExtId, String locale, boolean withEmail, boolean withActive,
 			String from) throws Exception
 	{
 		recheck_ticket();
@@ -272,7 +272,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<User> getFullUsersByDepartmentId(String departmentExtId, String locale, String from, boolean withActive)
+	public synchronized List<User> getFullUsersByDepartmentId(String departmentExtId, String locale, String from, boolean withActive)
 			throws Exception
 	{
 		recheck_ticket();
@@ -324,7 +324,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public Department getDepartmentByUid(String uid, String locale, String from) throws Exception
+	public synchronized Department getDepartmentByUid(String uid, String locale, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -367,7 +367,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end getDepartmentByUid()
 
-	public List<Department> getDepartmentsByName(String words, String locale, boolean withActive, String from) throws Exception
+	public synchronized List<Department> getDepartmentsByName(String words, String locale, boolean withActive, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -419,7 +419,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public List<Department> getAllDepartments(boolean withActive, String from) throws Exception
+	public synchronized List<Department> getAllDepartments(boolean withActive, String from) throws Exception
 	{
 		recheck_ticket();
 
@@ -471,7 +471,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public JSONArray getAsJSONArray(String uid, String from) throws Exception
+	public synchronized JSONArray getAsJSONArray(String uid, String from) throws Exception
 	{
 		recheck_ticket();
 
@@ -495,7 +495,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end getDepartmentByUid()
 
-	public Department getDepartmentByExtId(String externalIdentifer, String locale, String from) throws Exception
+	public synchronized Department getDepartmentByExtId(String externalIdentifer, String locale, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -539,7 +539,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end getDepartmentByUid()
 
-	public String getDepartmentUidByUserUid(String uid, String from) throws Exception
+	public synchronized String getDepartmentUidByUserUid(String uid, String from) throws Exception
 	{
 		recheck_ticket();
 		try
@@ -580,7 +580,7 @@ public class BaOrganizationDriver extends BaDriver
 	 *            имя учетной записи
 	 * @return уникальный идентификатор пользователя
 	 */
-	public String getUserUidByLoginInternal(String login, String from) throws Exception
+	public synchronized String getUserUidByLoginInternal(String login, String from) throws Exception
 	{
 		if (login == null || login.length() < 1)
 			return null;
@@ -620,7 +620,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end getUserUidByLogin()
 
-	public User getUserByLogin(String login, String locale, String from) throws Exception
+	public synchronized User getUserByLogin(String login, String locale, String from) throws Exception
 	{
 		if (login == null || login.length() < 1)
 			return null;
@@ -680,7 +680,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	}
 
-	public List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive, String from)
+	public synchronized List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive, String from)
 			throws Exception
 	{
 		recheck_ticket();
@@ -773,7 +773,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	}
 
-	public List<User> getUsersByUids(Collection<String> ids, String locale, String from) throws Exception
+	public synchronized List<User> getUsersByUids(Collection<String> ids, String locale, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -859,7 +859,7 @@ public class BaOrganizationDriver extends BaDriver
 	 *            имя локали
 	 * @return пользователь
 	 */
-	public IOrganizationEntity selectUnitByUidInternal(String uid, String locale, String from) throws Exception
+	public synchronized IOrganizationEntity selectUnitByUidInternal(String uid, String locale, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -900,7 +900,7 @@ public class BaOrganizationDriver extends BaDriver
 	 *            имя локали
 	 * @return пользователь
 	 */
-	public User selectUserByUidInternal(String uid, String locale, String from) throws Exception
+	public synchronized User selectUserByUidInternal(String uid, String locale, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -946,7 +946,7 @@ public class BaOrganizationDriver extends BaDriver
 	 *            имя локали
 	 * @return пользователь
 	 */
-	public User selectUserByPid(String pid, String locale, String from) throws Exception
+	public synchronized User selectUserByPid(String pid, String locale, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -976,7 +976,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end selectUserByPid()
 
-	public Department getDepartmentByUserUid(String uid, String locale, String from) throws Exception
+	public synchronized Department getDepartmentByUserUid(String uid, String locale, String from) throws Exception
 	{
 		recheck_ticket();
 		locale = correct_locale(locale);
@@ -1398,12 +1398,12 @@ public class BaOrganizationDriver extends BaDriver
 		sha.update(password.getBytes("utf8"));
 		return new String(Base64.encodeBase64(sha.digest()));
 	}
-	public void removeOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
+	public synchronized void removeOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
 		attributes.put(Predicates.docs__active, "false");
 	    updateOrganizationEntity(type, attributes, from);
 	}
-	public void updateOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
+	public synchronized void updateOrganizationEntity(String type, Map<String, String> attributes, String from) throws Exception
 	{
 		String uid = attributes.get("@");
 
@@ -1567,7 +1567,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public void createOrganizationEntity(String type, Map<String, String> attributes, String from, String _uid) throws Exception
+	public synchronized void createOrganizationEntity(String type, Map<String, String> attributes, String from, String _uid) throws Exception
 	{
 		String parentDepartmentId = null;
 		if (type.equals("contact"))
