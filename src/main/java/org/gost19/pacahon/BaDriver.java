@@ -21,17 +21,16 @@ public class BaDriver
 		return pacahon_client.remove_subject(ticket, subject_id, from);
 	}
 
-	public void initailize(String endpoint_pretending_organization) throws Exception
+	public synchronized void initailize(String endpoint_pretending_organization) throws Exception
 	{
 		if (pacahon_client == null)
 			pacahon_client = new PacahonClient(endpoint_pretending_organization);
 		
 		ticket = pacahon_client.get_ticket("user", "9cXsvbvu8=", "BaOrganizationDriver.constructor");
 		start_time_ticket = System.currentTimeMillis();
-
 	}
 
-	public void recheck_ticket()
+	public synchronized void recheck_ticket()
 	{
 		try
 		{

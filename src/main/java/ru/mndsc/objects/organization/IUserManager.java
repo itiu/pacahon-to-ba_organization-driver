@@ -8,7 +8,8 @@ import java.util.Collection;
  * 
  * @author KodanevY
  */
-public interface IUserManager {
+public interface IUserManager
+{
 	/**
 	 * Выборка пользователей по первым буквам имени или фамилии.
 	 * 
@@ -16,21 +17,18 @@ public interface IUserManager {
 	 *            список строк для поиска
 	 * @param localeName
 	 *            имя локали
-	 * @return коллекция пользователей
-	 * @throws Exception ошибка
+	 * @return коллекция пользователей @ ошибка
 	 */
-	Collection<User> selectUsersByName(Collection<String> input,
-			String localeName) throws Exception;
-	
+	Collection<User> selectUsersByName(Collection<String> input, String localeName);
+
 	/**
 	 * Выборка пользователей являющихся админами приложения.
 	 * 
 	 * @param localeName
 	 *            имя локали
-	 * @return коллекция идэнтификаторов и логинов пользователей
-	 * @throws Exception ошибка
+	 * @return коллекция идэнтификаторов и логинов пользователей @ ошибка
 	 */
-//	List<String> getAllAdmins(String localeName) throws Exception;
+	// List<String> getAllAdmins(String localeName) ;
 
 	/**
 	 * Выборка пользователей по первым буквам должности.
@@ -39,11 +37,9 @@ public interface IUserManager {
 	 *            список строк для поиска
 	 * @param localeName
 	 *            имя локали
-	 * @return коллекция пользователей 
-	 * @throws Exception ошибка
+	 * @return коллекция пользователей @ ошибка
 	 */
-	Collection<User> selectUsersByPost(Collection<String> input,
-			String localeName) throws Exception;
+	Collection<User> selectUsersByPost(Collection<String> input, String localeName);
 
 	/**
 	 * Выборка пользователей по первым буквам названия подразделения.
@@ -52,11 +48,9 @@ public interface IUserManager {
 	 *            список строк для поиска
 	 * @param localeName
 	 *            имя локали
-	 * @return коллекция пользователей 
-	 * @throws Exception ошибка
+	 * @return коллекция пользователей @ ошибка
 	 */
-	Collection<User> selectUsersByDepartmentUids(Collection<String> input,
-			String localeName) throws Exception;
+	Collection<User> selectUsersByDepartmentUids(Collection<String> input, String localeName);
 
 	/**
 	 * Поиск пользователя по доменному имени.
@@ -65,11 +59,9 @@ public interface IUserManager {
 	 *            доменное имя
 	 * @param localeName
 	 *            имя локали
-	 * @return пользователь
-	 * @throws Exception ошибка
+	 * @return пользователь @ ошибка
 	 */
-	User selectUserByLogin(String login, String localeName)
-			throws Exception;
+	User selectUserByLogin(String login, String localeName);
 
 	/**
 	 * Поиск пользователя по UID.
@@ -78,30 +70,27 @@ public interface IUserManager {
 	 *            уникальный идентификатор пользователя
 	 * @param localeName
 	 *            имя локали
-	 * @return пользователь
-	 * @throws Exception ошибка
+	 * @return пользователь @ ошибка
 	 */
-	User selectUserByUid(String uid, String localeName) throws Exception;
+	User selectUserByUid(String uid, String localeName);
 
 	/**
 	 * Получение UID пользователя по доменному мени.
 	 * 
 	 * @param login
 	 *            доменное имя
-	 * @return идентификатор пользователя
-	 * @throws Exception ошибка
+	 * @return идентификатор пользователя @ ошибка
 	 */
-	String getUserUidByLogin(String login) throws Exception;
+	String getUserUidByLogin(String login);
 
 	/**
 	 * Получение UID подразделения по UID пользователя.
 	 * 
 	 * @param uid
 	 *            уникальный идентификатор пользователя
-	 * @return идентификатор подразделения
-	 * @throws Exception ошибка
+	 * @return идентификатор подразделения @ ошибка
 	 */
-	String getDepartmentUidByUserUid(String uid) throws Exception;
+	String getDepartmentUidByUserUid(String uid);
 
 	/**
 	 * Получение пользователей по их UID-ам.
@@ -110,21 +99,18 @@ public interface IUserManager {
 	 *            список UID-ов пользователей
 	 * @param localeName
 	 *            локаль
-	 * @return коллекция пользователей
-	 * @throws Exception ошибка
+	 * @return коллекция пользователей @ ошибка
 	 */
-	Collection<User> selectUsersByUids(Collection<String> input,
-			String localeName) throws Exception;
+	Collection<User> selectUsersByUids(Collection<String> input, String localeName);
 
 	/**
 	 * Получение всех пользователей.
 	 * 
 	 * @param localeName
 	 *            локаль
-	 * @return коллекция пользователей
-	 * @throws Exception ошибка
+	 * @return коллекция пользователей @ ошибка
 	 */
-	Collection<User> selectAllUsers(String localeName) throws Exception;
+	Collection<User> selectAllUsers(String localeName);
 
 	/**
 	 * Получение дочерних подразделений.
@@ -133,11 +119,9 @@ public interface IUserManager {
 	 *            уникальный идентификатор подразделения
 	 * @param localeName
 	 *            имя локали
-	 * @return коллекция подразделений
-	 * @throws Exception ошибка
+	 * @return коллекция подразделений @ ошибка
 	 */
-	Collection<Department> getChildDepartments(String uid, String localeName)
-			throws Exception;
+	Collection<Department> getChildDepartments(String uid, String localeName);
 
 	/**
 	 * Получение списка подразделений, образующих дерево поиска.
@@ -146,21 +130,18 @@ public interface IUserManager {
 	 *            идентификаторы пользователя
 	 * @param localeName
 	 *            имя локали
-	 * @return коллекция подразделений
-	 * @throws Exception ошибка
+	 * @return коллекция подразделений @ ошибка
 	 */
-	Collection<Department> getDepartmentTree(Collection<String> input,
-			String localeName) throws Exception;
+	Collection<Department> getDepartmentTree(Collection<String> input, String localeName);
 
 	/**
 	 * Получение коневого подразделения.
 	 * 
 	 * @param localeName
 	 *            имя локали
-	 * @return подразделение
-	 * @throws Exception ошибка
+	 * @return подразделение @ ошибка
 	 */
-	Department getRootDepartment(String localeName) throws Exception;
+	Department getRootDepartment(String localeName);
 
 	/**
 	 * Получение получение подразделения по его UID.
@@ -169,11 +150,10 @@ public interface IUserManager {
 	 *            уникальный идентификатор подразделения
 	 * @param localeName
 	 *            имя локали
-	 * @return подразделение
-	 * @throws Exception ошибка
+	 * @return подразделение @ ошибка
+	 * @throws UserException 
 	 */
-	Department getDepartmentByUid(String uid, String localeName)
-			throws Exception;
+	Department getDepartmentByUid(String uid, String localeName);
 
 	/**
 	 * Получение списка подразделений по их UID-ам.
@@ -182,11 +162,9 @@ public interface IUserManager {
 	 *            список UID-ов подразделений
 	 * @param localeName
 	 *            имя локали
-	 * @return колекция подразделений
-	 * @throws Exception ошибка
+	 * @return колекция подразделений @ ошибка
 	 */
-	Collection<Department> getDepartmentsByUids(Collection<String> input,
-			String localeName) throws Exception;
+	Collection<Department> getDepartmentsByUids(Collection<String> input, String localeName);
 
 	/**
 	 * Получение списка подразделений по ключевым словам.
@@ -195,27 +173,23 @@ public interface IUserManager {
 	 *            список ключевых слов
 	 * @param localeName
 	 *            имя локали
-	 * @return колекция подразделений
-	 * @throws Exception ошибка
+	 * @return колекция подразделений @ ошибка
 	 */
-	Collection<Department> getDepartmentsByName(Collection<String> input,
-			String localeName) throws Exception;
+	Collection<Department> getDepartmentsByName(Collection<String> input, String localeName);
 
 	/**
 	 * Получение версии.
 	 * 
-	 * @return версия в формате groupId:artifactId:version
-	 * @throws Exception ошибка
+	 * @return версия в формате groupId:artifactId:version @ ошибка
 	 */
-	String getVersion() throws Exception;
+	String getVersion();
 
 	/**
 	 * Получение версий используемых сервисов.
 	 * 
-	 * @return список версий в формате groupId:artifactId:version
-	 * @throws Exception ошибка
+	 * @return список версий в формате groupId:artifactId:version @ ошибка
 	 */
-	Collection<String> getDependVersions() throws Exception;
+	Collection<String> getDependVersions();
 
 	/**
 	 * Получение пути от указанного подразделения к корневому.
@@ -224,11 +198,9 @@ public interface IUserManager {
 	 *            уникальный идентификатор подразделения
 	 * @param localeName
 	 *            имя локали
-	 * @return колекция подразделений
-	 * @throws Exception ошибка
+	 * @return колекция подразделений @ ошибка
 	 */
-	Collection<Department> getDepartmentTreePath(String uid, String localeName)
-			throws Exception;
+	Collection<Department> getDepartmentTreePath(String uid, String localeName);
 
 	/**
 	 * Проверить является ли данный пользователь админом.
@@ -239,8 +211,9 @@ public interface IUserManager {
 	 * @throws AuthorizationException
 	 *             ошибка авторизации
 	 */
-//	boolean isAdmin(SessionTicket ticket);
+	// boolean isAdmin(SessionTicket ticket);
 
-//	public void setAuthorizationManagerPool(AuthorizationManagerPool authorizationManagerPool);
+	// public void setAuthorizationManagerPool(AuthorizationManagerPool
+	// authorizationManagerPool);
 
 } // end IUserManager

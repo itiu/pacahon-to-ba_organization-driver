@@ -38,21 +38,21 @@ public class Pacahon2UserManager implements IUserManager
 	/**
 	 * {@inheritDoc} @@@
 	 */
-	public Department getDepartmentByUid(String uid, String localeName) throws Exception
+	public Department getDepartmentByUid(String uid, String localeName)
 	{
 		try
 		{
 			return org_driver.getDepartmentByUid(uid, localeName, "NewUserManager.getDepartmentByUid");
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get department", ex);
+			throw new IllegalStateException("Cannot get department", ex);
 		}
 	} // end getDepartmentByUid()
 
 	/**
 	 * {@inheritDoc} @@@
 	 */
-	public String getDepartmentUidByUserUid(String uid) throws Exception
+	public String getDepartmentUidByUserUid(String uid)
 	{
 		try
 		{
@@ -60,7 +60,7 @@ public class Pacahon2UserManager implements IUserManager
 
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get root department", ex);
+			throw new IllegalStateException("Cannot get root department", ex);
 		}
 
 	} // end getDepartmentUidByUserUid()
@@ -68,14 +68,14 @@ public class Pacahon2UserManager implements IUserManager
 	/**
 	 * {@inheritDoc} @@@
 	 */
-	public String getUserUidByLogin(String login) throws Exception
+	public String getUserUidByLogin(String login)
 	{
 		try
 		{
 			return org_driver.getUserUidByLoginInternal(login, "NewUserManager.getUserUidByLogin");
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot getUserUidByLogin", ex);
+			throw new IllegalStateException("Cannot getUserUidByLogin", ex);
 		}
 	}
 
@@ -88,14 +88,14 @@ public class Pacahon2UserManager implements IUserManager
 	 * @throws Exception
 	 *             в случае ошибки
 	 */
-	protected String getUserUidByLoginInternal(String login) throws Exception
+	protected String getUserUidByLoginInternal(String login)
 	{
 		try
 		{
 			return org_driver.getUserUidByLoginInternal(login, "NewUserManager.getUserUidByLoginInternal");
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get user", ex);
+			throw new IllegalStateException("Cannot get user", ex);
 		}
 	} // end getUserUidByLogin()
 
@@ -110,7 +110,7 @@ public class Pacahon2UserManager implements IUserManager
 	/**
 	 * {@inheritDoc} @@@
 	 */
-	public User selectUserByUid(String uid, String localeName) throws Exception
+	public User selectUserByUid(String uid, String localeName)
 	{
 		return selectUserByUidInternal(uid, localeName);
 	}
@@ -126,101 +126,85 @@ public class Pacahon2UserManager implements IUserManager
 	 * @throws Exception
 	 *             в случае ошибки
 	 */
-	protected User selectUserByUidInternal(String uid, String localeName) throws Exception
+	protected User selectUserByUidInternal(String uid, String localeName)
 	{
 		try
 		{
 			return org_driver.selectUserByUidInternal(uid, localeName, "NewUserManager.selectUserByUidInternal");
 		} catch (Exception ex)
 		{
-			throw new Exception("Cannot get root department", ex);
+			throw new IllegalStateException("Cannot get root department", ex);
 		}
-	} // end selectUserByUid()
-
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	public void setAuthorizationManagerPool(AuthorizationManagerPool authorizationManagerPool)
-//	{
-//		return;
-//	}
-
-//	public void setCacheComponent(ICacheComponent cacheComponent) throws Exception
-//	{
-//		this.cacheComponent = cacheComponent;
-//	}
-
-	public Collection<Department> getDepartmentTreePath(String uid, String localeName) throws Exception
-	{
-		throw new Exception("This method is not implemented.");
 	}
 
-	public Collection<String> getDependVersions() throws Exception
+	public Collection<Department> getDepartmentTreePath(String uid, String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public String getVersion() throws Exception
+	public Collection<String> getDependVersions()
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
+	}
+
+	public String getVersion()
+	{
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
 	public Collection<Department> getDepartmentsByName(Collection<String> input, String localeName)
-			throws Exception
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
 	public Collection<Department> getDepartmentsByUids(Collection<String> input, String localeName)
-			throws Exception
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public Department getRootDepartment(String localeName) throws Exception
+	public Department getRootDepartment(String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public Collection<Department> getDepartmentTree(Collection<String> input, String localeName) throws Exception
+	public Collection<Department> getDepartmentTree(Collection<String> input, String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public Collection<Department> getChildDepartments(String uid, String localeName) throws Exception
+	public Collection<Department> getChildDepartments(String uid, String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public Collection<User> selectAllUsers(String localeName) throws Exception
+	public Collection<User> selectAllUsers(String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public Collection<User> selectUsersByUids(Collection<String> input, String localeName) throws Exception
+	public Collection<User> selectUsersByUids(Collection<String> input, String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public User selectUserByLogin(String login, String localeName) throws Exception
+	public User selectUserByLogin(String login, String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
 	public Collection<User> selectUsersByDepartmentUids(Collection<String> input, String localeName)
-			throws Exception
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public Collection<User> selectUsersByPost(Collection<String> input, String localeName) throws Exception
+	public Collection<User> selectUsersByPost(Collection<String> input, String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
-	public Collection<User> selectUsersByName(Collection<String> input, String localeName) throws Exception
+	public Collection<User> selectUsersByName(Collection<String> input, String localeName)
 	{
-		throw new Exception("This method is not implemented.");
+		throw new IllegalStateException("This method is not implemented.");
 	}
 
 } 
