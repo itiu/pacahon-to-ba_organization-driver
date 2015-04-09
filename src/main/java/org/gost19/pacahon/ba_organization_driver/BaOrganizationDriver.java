@@ -622,6 +622,11 @@ public class BaOrganizationDriver extends BaDriver
 
 	public synchronized User getUserByLogin(String login, String locale, String from) throws Exception
 	{
+		return getUserByLogin(login, locale, from, true);
+	}
+	
+	public synchronized User getUserByLogin(String login, String locale, String from, boolean active) throws Exception
+	{
 		if (login == null || login.length() < 1)
 			return null;
 
@@ -659,7 +664,9 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
-			arg.put(Predicates.docs__active, "true");
+			if (active) {
+				arg.put(Predicates.docs__active, "true");
+			}
 			arg.put(Predicates.auth__credential, Predicates.query__get);
 			arg.put("a", Predicates.docs__employee_card);
 
