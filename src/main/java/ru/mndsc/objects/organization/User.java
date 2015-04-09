@@ -627,7 +627,7 @@ public class User implements IOrganizationEntity, Serializable
 
 	public boolean isActive()
 	{
-		return attributes.get("active").equalsIgnoreCase("true");
+		return attributes.get("active")!=null?attributes.get("active").equalsIgnoreCase("true"):false;
 	}
 	
 	public void setActive(boolean active)
