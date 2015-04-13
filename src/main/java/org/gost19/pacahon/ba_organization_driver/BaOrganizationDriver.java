@@ -1327,7 +1327,11 @@ public class BaOrganizationDriver extends BaDriver
 		valuez = oo.get(Predicates.gost19__blocked);
 		if (valuez != null)
 		{
-			usr.setBlocked((String) valuez);
+			if (((String) valuez).equalsIgnoreCase("true")) {
+				usr.setBlocked(true);
+			} else {
+				usr.setBlocked(false);
+			}
 		}
 
 		valuez = oo.get(Predicates.swrc__phone);
