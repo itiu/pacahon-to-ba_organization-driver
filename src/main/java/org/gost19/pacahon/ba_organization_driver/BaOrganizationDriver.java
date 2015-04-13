@@ -240,6 +240,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
 			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
+			arg.put(Predicates.gost19__blocked, Predicates.query__get);
 			arg.put(Predicates.docs + "parentUnit", dd.unit);
 
 			JSONArray aa = new JSONArray();
@@ -663,6 +664,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
 			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
+			arg.put(Predicates.gost19__blocked, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			if (active) {
 				arg.put(Predicates.docs__active, "true");
@@ -736,6 +738,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
 			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
+			arg.put(Predicates.gost19__blocked, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get_reifed);
 			arg.put(Predicates.query__fulltext, str_tokens.toString());
@@ -830,6 +833,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__offlineDateBegin, Predicates.query__get);
 			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
+			arg.put(Predicates.gost19__blocked, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
@@ -1319,6 +1323,12 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			usr.setEmployeeCategoryR3((String) valuez);
 		}
+		
+		valuez = oo.get(Predicates.gost19__blocked);
+		if (valuez != null)
+		{
+			usr.setBlocked((String) valuez);
+		}
 
 		valuez = oo.get(Predicates.swrc__phone);
 		if (valuez != null)
@@ -1517,6 +1527,7 @@ public class BaOrganizationDriver extends BaDriver
 			add_att("offlineDateBegin", attributes, Predicates.gost19__offlineDateBegin, base);
 			add_att("offlineDateEnd", attributes, Predicates.gost19__offlineDateEnd, base);
 			add_att("employeeCategoryR3", attributes, Predicates.gost19__employeeCategoryR3, base);
+			add_att("blocked", attributes, Predicates.gost19__blocked, base);
 			//			add_att ("departmentId", attributes, Predicates.docs__parentUnit);
 		} else
 		{
@@ -1656,6 +1667,7 @@ public class BaOrganizationDriver extends BaDriver
 			add_att("offlineDateBegin", attributes, Predicates.gost19__offlineDateBegin, base);
 			add_att("offlineDateEnd", attributes, Predicates.gost19__offlineDateEnd, base);
 			add_att("employeeCategoryR3", attributes, Predicates.gost19__employeeCategoryR3, base);
+			add_att("blocked", attributes, Predicates.gost19__blocked, base);
 
 			String val = attributes.get("domainName");
 			if (val != null)

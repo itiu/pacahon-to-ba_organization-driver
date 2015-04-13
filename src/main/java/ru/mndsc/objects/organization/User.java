@@ -407,6 +407,14 @@ public class User implements IOrganizationEntity, Serializable
 		return attributes.get("employeeCategoryR3");
 	}
 
+	public boolean getBlocked() {
+		return attributes.get("blocked")!=null?attributes.get("blocked").equalsIgnoreCase("true"):false;
+	}
+
+	public void setBlocked(boolean blocked) {
+		attributes.put("blocked", blocked?"true":"false");
+	}
+
 	public String getFirstName()
 	{
 		return getFirstName(currentLocale);
