@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +20,8 @@ import org.json.simple.JSONObject;
 
 import ru.mndsc.objects.organization.Department;
 import ru.mndsc.objects.organization.IOrganizationEntity;
+import ru.mndsc.objects.organization.OrganizationUnit;
+import ru.mndsc.objects.organization.OrganizationUnit.Type;
 import ru.mndsc.objects.organization.User;
 
 /**
@@ -1557,6 +1560,7 @@ public class BaOrganizationDriver extends BaDriver
 	private void add_att(String att_name, Map<String, String> attributes, String predicate, JSONObject dest)
 	{
 		String val = attributes.get(att_name);
+		System.out.println(att_name+ " >  "+val);
 
 		if (val != null)
 			dest.put(predicate, val);
@@ -1696,6 +1700,58 @@ public class BaOrganizationDriver extends BaDriver
 
 		pacahon_client.put(ticket, arg, from + ":createOrganizationEntity");
 
+	}
+	
+	public synchronized boolean inSubHierarchy(String rootDepartmentId, String organizationUnitId) {
+		try
+		{
+			Department d = getDepartmentByUid(organizationUnitId, "ru", "inSubHierarchy");
+			if (d!=null) {
+				return inSubHierarchy(rootDepartmentId, d);
+			}
+			List<User> users = getUsersByUids(Arrays.asList(organizationUnitId), "ru", "inSubHierarchy");
+			if (users!=null && users.size()>0) {
+				return inSubHierarchy(rootDepartmentId, users.get(0));
+			}
+		} catch (Exception e)
+		{
+			e.printStackTrace();			
+		}
+		return false;
+	}
+	
+	public synchronized boolean inSubHierarchy(String rootDepartmentId, User u) {
+		if (u==null || rootDepartmentId==null) return false;
+		if (u.getDepartment()!=null && u.getDepartment().getId()!=null) {
+			return inSubHierarchy(rootDepartmentId, u.getDepartment());
+		} else {
+			try
+			{
+				Department d = getDepartmentByUserUid(u.getUid(), "ru", "inSubHierarchy");				
+				return inSubHierarchy(rootDepartmentId, d);
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+	
+	public synchronized boolean inSubHierarchy(String rootDepartmentId, Department d) {
+		if (d==null || rootDepartmentId==null) return false;
+		if (rootDepartmentId.equals(d.getId())) {
+			return true;
+		} else {
+			try
+			{
+				Department prevd = getDepartmentByUid(d.getPreviousId(), "ru", "inSubHierarchy");
+				return inSubHierarchy(rootDepartmentId, prevd);
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
 	}
 
 	private JSONObject generate_reifed_data(String subject, String predicate, String object, Department dep)
