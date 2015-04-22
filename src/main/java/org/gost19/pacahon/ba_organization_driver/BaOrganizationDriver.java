@@ -71,10 +71,8 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("@", Predicates.query__any);
 			arg.put("a", Predicates.query__get);
 			arg.put(Predicates.gost19__tag, "root");
-			if (withActive == true)
-				arg.put(Predicates.docs__active, "true");
-			else
-				arg.put(Predicates.docs__active, Predicates.query__get);
+			
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.swrc__name, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
@@ -87,8 +85,6 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getOrganizationRoots");
-				dep.getAttributes().put("active", "true");
-				dep.isActive = true;
 				res.add(dep);
 			}
 
@@ -116,11 +112,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.docs__parentUnit, dd.unit);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
-
-			if (withActive == true)
-				arg.put(Predicates.docs__active, "true");
-			else
-				arg.put(Predicates.docs__active, Predicates.query__get);
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByParentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -128,9 +120,6 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByParentId");
-
-				if (withActive == true)
-					dep.getAttributes().put("active", "true");
 
 				if (dep != null)
 					res.add(dep);
@@ -168,11 +157,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.docs__parentUnit, dd.unit);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
-
-			if (withActive == true)
-				arg.put(Predicates.docs__active, "true");
-			else
-				arg.put(Predicates.docs__active, Predicates.query__get);
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByParentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -180,10 +165,6 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByParentId");
-
-				if (withActive == true)
-					dep.getAttributes().put("active", "true");
-
 				if (dep != null)
 					res.add(dep);
 			}
@@ -245,12 +226,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.gost19__HRactive, Predicates.query__get);
 			arg.put(Predicates.docs + "parentUnit", dd.unit);
-
-			JSONArray aa = new JSONArray();
-			if (withActive == true)
-				aa.add("true");
-			aa.add(Predicates.query__get);
-			arg.put(Predicates.docs__active, aa);
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByDepartmentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -261,10 +237,6 @@ public class BaOrganizationDriver extends BaDriver
 				if (usr != null)
 				{
 					usr.setDepartment(dd);
-
-					if (withActive == true)
-						usr.getAttributes().put("active", "true");
-
 					res.add(usr);
 				}
 			}
@@ -284,11 +256,7 @@ public class BaOrganizationDriver extends BaDriver
 
 		try
 		{
-			//			String departmentId = null;
-
 			Department dd = getDepartmentByExtId(departmentExtId, locale, from + ":getFullUsersByDepartmentId");
-
-			//			departmentId = dd.getId();
 
 			List<User> res = new ArrayList<User>();
 
@@ -296,10 +264,7 @@ public class BaOrganizationDriver extends BaDriver
 
 			arg.put("@", Predicates.query__any);
 			arg.put("a", Predicates.docs__employee_card);
-
-			if (withActive == true)
-				arg.put(Predicates.docs__active, "true");
-
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
 			arg.put(Predicates.docs__parentUnit, dd.unit);
 			arg.put(Predicates.query__all_predicates, "query:get");
 
@@ -400,9 +365,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
-
-			if (withActive == true)
-				arg.put(Predicates.docs__active, "true");
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByName (FT)");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -410,9 +373,7 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				Department dep = getDepartmentFromGraph(ss, locale, from + ":getDepartmentsByName (FT)");
-				if (withActive == true)
-					dep.getAttributes().put("active", "true");
-				res.add(dep);
+				if (dep!=null) res.add(dep);
 			}
 
 			return res;
@@ -443,9 +404,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
-
-			if (withActive == true)
-				arg.put(Predicates.docs__active, "true");
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getAllDepartments");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -455,9 +414,7 @@ public class BaOrganizationDriver extends BaDriver
 				try
 				{
 					Department dep = getDepartmentFromGraph(ss, "ru", from + ":getAllDepartments");
-					if (withActive == true)
-						dep.getAttributes().put("active", "true");
-					res.add(dep);
+					if (dep!=null) res.add(dep);
 
 				} catch (Exception ex)
 				{
@@ -658,7 +615,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__email, Predicates.query__get);
 			arg.put(Predicates.docs__position, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
-			arg.put(Predicates.auth__login, login.toUpperCase());
+			arg.put(Predicates.auth__login,  new XJSONArray(login.toUpperCase(), Predicates.query__get));
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.gost19__internal_phone, Predicates.query__get);
 			arg.put(Predicates.swrc__phone, Predicates.query__get);
@@ -669,9 +626,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.gost19__HRactive, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
-			if (active) {
-				arg.put(Predicates.docs__active, "true");
-			}
+			arg.put(Predicates.docs__active, new XJSONArray(active?"true":null, Predicates.query__get));
 			arg.put(Predicates.auth__credential, Predicates.query__get);
 			arg.put("a", Predicates.docs__employee_card);
 
@@ -682,8 +637,6 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				JSONObject ss = subj_it.next();
 				usr = getUserFromGraph(ss, null, locale, true);
-				usr.getAttributes().put("active", "true");
-				usr.setLogin(login);
 			}
 			return usr;
 		} catch (Exception ex)
@@ -692,7 +645,7 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	}
 
-	public synchronized List<User> getUsersByFullTextSearch(String words, String locale, boolean withEmail, boolean withActive, String from)
+	public synchronized List<User> getUsersByFullTextSearch(String words, String locale, boolean withHRActive, boolean withActive, String from)
 			throws Exception
 	{
 		recheck_ticket();
@@ -746,9 +699,8 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get_reifed);
 			arg.put(Predicates.query__fulltext, str_tokens.toString());
 			arg.put("a", Predicates.docs__employee_card);
-
-			if (withActive == true)
-				arg.put(Predicates.docs__active, "true");
+			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
+			arg.put(Predicates.gost19__HRactive, new XJSONArray(withHRActive?"true":null, Predicates.query__get));
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByFullTextSearch");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -767,15 +719,7 @@ public class BaOrganizationDriver extends BaDriver
 
 				if (usr != null)
 				{
-					if (withActive == true)
-						usr.getAttributes().put("active", "true");
-
-					if (withEmail == true)
-					{
-						if (usr.getLogin() != null && usr.getLogin().length() > 1)
-							res.put(usr.getId(), usr);
-					} else
-						res.put(usr.getId(), usr);
+					res.put(usr.getId(), usr);
 				}
 			}
 			return new ArrayList<User>(res.values());
@@ -1750,6 +1694,17 @@ public class BaOrganizationDriver extends BaDriver
 			{
 				e.printStackTrace();
 				return false;
+			}
+		}
+	}
+	
+	private static class XJSONArray extends JSONArray {
+		public XJSONArray(String... args) {
+			super();
+			for (int i=0; i<args.length; i++) {
+				if (args[i]!=null) {
+					this.add(args[i]);
+				}
 			}
 		}
 	}
