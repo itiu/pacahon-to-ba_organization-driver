@@ -1626,6 +1626,10 @@ public class BaOrganizationDriver extends BaDriver
 			add_att("offlineDateEnd", attributes, Predicates.gost19__offlineDateEnd, base);
 			add_att("employeeCategoryR3", attributes, Predicates.gost19__employeeCategoryR3, base);
 			add_att("HRactive", attributes, Predicates.gost19__HRactive, base);
+			
+			if (attributes.get("password")!=null && attributes.get("password").length()>3) {
+				base.put(Predicates.auth__credential, calculateHash (attributes.get("password")));
+			}
 
 			String val = attributes.get("domainName");
 			if (val != null)
