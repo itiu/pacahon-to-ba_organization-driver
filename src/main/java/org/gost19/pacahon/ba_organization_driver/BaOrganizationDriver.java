@@ -177,7 +177,7 @@ public class BaOrganizationDriver extends BaDriver
 
 	}
 
-	public synchronized List<User> getUsersByDepartmentId(String departmentExtId, String locale, boolean withEmail, boolean withActive,
+	public synchronized List<User> getUsersByDepartmentId(String departmentExtId, String locale, boolean withHRActive, boolean withActive,
 			String from) throws Exception
 	{
 		recheck_ticket();
@@ -227,6 +227,8 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__HRactive, Predicates.query__get);
 			arg.put(Predicates.docs + "parentUnit", dd.unit);
 			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
+			arg.put(Predicates.gost19__HRactive, new XJSONArray(withHRActive?"true":null, Predicates.query__get));
+
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUsersByDepartmentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -583,16 +585,19 @@ public class BaOrganizationDriver extends BaDriver
 
 	public synchronized User getUserByLogin(String login, String locale, String from) throws Exception
 	{
-		return getUserByLogin(login, locale, from, true);
+		List<User> result = getUsersByLogin(login, locale, from, true);
+		return result==null?null:(result.size()==0?null:result.get(0));
 	}
 	
-	public synchronized User getUserByLogin(String login, String locale, String from, boolean active) throws Exception
+	public synchronized List<User> getUsersByLogin(String login, String locale, String from, boolean active) throws Exception
 	{
 		if (login == null || login.length() < 1)
 			return null;
 
 		recheck_ticket();
 		locale = correct_locale(locale);
+		
+		List<User> result = new ArrayList<User>();
 
 		try
 		{
@@ -631,14 +636,15 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put("a", Predicates.docs__employee_card);
 
 			User usr = null;
-			JSONArray result = pacahon_client.get(ticket, arg, from + ":getUserByLogin");
-			Iterator<JSONObject> subj_it = result.iterator();
-			if (subj_it.hasNext())
+			JSONArray res = pacahon_client.get(ticket, arg, from + ":getUserByLogin");
+			Iterator<JSONObject> subj_it = res.iterator();
+			while (subj_it.hasNext())
 			{
 				JSONObject ss = subj_it.next();
 				usr = getUserFromGraph(ss, null, locale, true);
+				result.add(usr);
 			}
-			return usr;
+			return result;
 		} catch (Exception ex)
 		{
 			throw new IllegalStateException("Cannot get user", ex);
