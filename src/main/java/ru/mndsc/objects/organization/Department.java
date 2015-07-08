@@ -35,6 +35,7 @@ public class Department implements IOrganizationEntity, Serializable
 	private boolean chosen;
 	private String previousId;
 	private String nameEn;
+	private String headId;
 
 	private String organizationId;
 
@@ -84,6 +85,16 @@ public class Department implements IOrganizationEntity, Serializable
 		return nameEn;
 	} // end getName_en()
 
+	public String getHeadId()
+	{
+		return headId;
+	}
+
+	public void setHeadId(String headId)
+	{
+		this.headId = headId;
+	}
+
 	public void setNameEn(String nameEn)
 	{
 		this.nameEn = nameEn;
@@ -132,6 +143,9 @@ public class Department implements IOrganizationEntity, Serializable
 				} else if (a.getName().equalsIgnoreCase("id"))
 				{
 					setInternalId(a.getValue());
+				} else if (a.getName().equalsIgnoreCase("headId"))
+				{
+					setHeadId(a.getValue());
 				}
 			}
 		}

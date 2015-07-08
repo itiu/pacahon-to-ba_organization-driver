@@ -322,6 +322,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.swrc__organization, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.docs__active, Predicates.query__get);
+			arg.put(Predicates.gost19__headId, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByUid");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -484,6 +485,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__externalIdentifer, externalIdentifer);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.docs__active, Predicates.query__get);
+			arg.put(Predicates.gost19__headId, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentByExtId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -734,6 +736,14 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			throw new Exception("Cannot get users", ex);
 		}
+	}
+	
+	public synchronized User getUserByUid(String id, String locale, String from) throws Exception
+	{
+		Collection<String> request = new ArrayList<String>(1);
+		request.add(id);
+		List<User> response = getUsersByUids(request, locale, from);
+		return response.get(0);
 	}
 
 	public synchronized List<User> getUsersByUids(Collection<String> ids, String locale, String from) throws Exception
@@ -1644,7 +1654,7 @@ public class BaOrganizationDriver extends BaDriver
 			base.put("a", rdf_type_content);
 			base.put(Predicates.docs__active, "true");
 			base.put(Predicates.gost19__externalIdentifer, attributes.get("id"));
-
+			base.put(Predicates.gost19__headId, attributes.get("headId"));
 			base.put(Predicates.docs__unit, "zdb:dep_" + id);
 
 			add_lang_att("name", attributes, Predicates.swrc__name, base);
@@ -1766,6 +1776,16 @@ public class BaOrganizationDriver extends BaDriver
 
 		}
 
+	}
+
+	public User getDepartmentHeadHierarchical(String userId) throws Exception
+	{
+		Department department = getDepartmentByUserUid(userId, "ru", "getDepartmentHeadHierarchical");
+		while (department.getHeadId()==null && department.getPreviousId()!=null) {
+			// Пока не указан начальник и есть родительское - переходим на родительское
+			department = getDepartmentByUid(department.getId(), "ru", "getDepartmentHeadHierarchical");
+		}		
+		return (department.getHeadId()==null)?null:getUserByUid(department.getHeadId(), "ru", "getDepartmentHeadHierarchical");
 	}
 
 }
