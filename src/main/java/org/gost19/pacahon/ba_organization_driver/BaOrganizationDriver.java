@@ -113,6 +113,8 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
+			arg.put(Predicates.gost19__headId, Predicates.query__get);
+			
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByParentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -158,6 +160,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
+			arg.put(Predicates.gost19__headId, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByParentId");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -369,6 +372,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
+			arg.put(Predicates.gost19__headId, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getDepartmentsByName (FT)");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -408,6 +412,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
 			arg.put(Predicates.docs__unit, Predicates.query__get);
 			arg.put(Predicates.docs__active, new XJSONArray(withActive?"true":null, Predicates.query__get));
+			arg.put(Predicates.gost19__headId, Predicates.query__get);
 
 			JSONArray result = pacahon_client.get(ticket, arg, from + ":getAllDepartments");
 			Iterator<JSONObject> subj_it = result.iterator();
@@ -1146,6 +1151,12 @@ public class BaOrganizationDriver extends BaDriver
 		{
 			dep.getAttributes().put(Predicates.swrc__organization, organization);
 		}
+		
+		String headId = (String) oo.get(Predicates.gost19__headId);
+		if (headId != null)
+		{
+			dep.getAttributes().put("headId", headId);
+		}
 
 		String unit = (String) oo.get(Predicates.docs__unit);
 		if (unit != null)
@@ -1498,6 +1509,7 @@ public class BaOrganizationDriver extends BaDriver
 			//			add_att ("departmentId", attributes, Predicates.docs__parentUnit);
 		} else
 		{
+			add_att("headId", attributes, Predicates.gost19__headId, base);
 			add_lang_att("name", attributes, Predicates.swrc__name, base);
 			add_att("id", attributes, Predicates.gost19__externalIdentifer, base);
 		}
