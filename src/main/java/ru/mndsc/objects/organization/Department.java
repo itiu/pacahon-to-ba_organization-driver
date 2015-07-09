@@ -93,6 +93,7 @@ public class Department implements IOrganizationEntity, Serializable
 	public void setHeadId(String headId)
 	{
 		this.headId = headId;
+		attributes.put("headId", headId);
 	}
 
 	public void setNameEn(String nameEn)
