@@ -1798,13 +1798,9 @@ public class BaOrganizationDriver extends BaDriver
 		User userByUid = getUserByUid(userId, "ru", "getDepartmentHeadHierarchical");
 		Department department = getDepartmentByUid(userByUid.getDepartmentId(), "ru", "getDepartmentHeadHierarchical"); 
 		if (department==null) { throw new IllegalStateException("Cant get depertment by UserID : "+userId); }
-		System.out.println(department.getId());
-		System.out.println(department.getHeadId());
 		while (department.getHeadId()==null && department.getPreviousId()!=null) {
 			// Пока не указан начальник и есть родительское - переходим на родительское
 			department = getDepartmentByUid(department.getPreviousId(), "ru", "getDepartmentHeadHierarchical");
-			System.out.println(department.getId());
-			System.out.println(department.getHeadId());
 			if (department==null) { throw new IllegalStateException("Cant get depertment by Id : "+department.getPreviousId()); }
 		}		
 		return (department.getHeadId()==null)?null:selectUserByUidInternal(department.getHeadId(), "ru", "getDepartmentHeadHierarchical");
