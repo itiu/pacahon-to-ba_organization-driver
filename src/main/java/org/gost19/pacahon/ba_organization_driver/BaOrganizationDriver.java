@@ -802,6 +802,7 @@ public class BaOrganizationDriver extends BaDriver
 			arg.put(Predicates.gost19__offlineDateEnd, Predicates.query__get);
 			arg.put(Predicates.gost19__employeeCategoryR3, Predicates.query__get);
 			arg.put(Predicates.gost19__HRactive, Predicates.query__get);
+			arg.put(Predicates.docs__active, Predicates.query__get);
 			arg.put(Predicates.gost19__synchronize, Predicates.query__get);
 			arg.put(Predicates.docs__parentUnit, Predicates.query__get);
 			arg.put(Predicates.gost19__externalIdentifer, Predicates.query__get);
@@ -955,6 +956,8 @@ public class BaOrganizationDriver extends BaDriver
 		}
 	} // end selectUserByPid()
 
+	// Кажется этот метод не пашет. С другой стороны он и не вызывается нигде, помечу ка я его как депрекатед, а чинить не буду. 2015-07-09. Ксюп.
+	@Deprecated
 	public synchronized Department getDepartmentByUserUid(String uid, String locale, String from) throws Exception
 	{
 		recheck_ticket();
@@ -1792,12 +1795,19 @@ public class BaOrganizationDriver extends BaDriver
 
 	public User getDepartmentHeadHierarchical(String userId) throws Exception
 	{
-		Department department = getDepartmentByUserUid(userId, "ru", "getDepartmentHeadHierarchical");
+		User userByUid = getUserByUid(userId, "ru", "getDepartmentHeadHierarchical");
+		Department department = getDepartmentByUid(userByUid.getDepartmentId(), "ru", "getDepartmentHeadHierarchical"); 
+		if (department==null) { throw new IllegalStateException("Cant get depertment by UserID : "+userId); }
+		System.out.println(department.getId());
+		System.out.println(department.getHeadId());
 		while (department.getHeadId()==null && department.getPreviousId()!=null) {
 			// Пока не указан начальник и есть родительское - переходим на родительское
-			department = getDepartmentByUid(department.getId(), "ru", "getDepartmentHeadHierarchical");
+			department = getDepartmentByUid(department.getPreviousId(), "ru", "getDepartmentHeadHierarchical");
+			System.out.println(department.getId());
+			System.out.println(department.getHeadId());
+			if (department==null) { throw new IllegalStateException("Cant get depertment by Id : "+department.getPreviousId()); }
 		}		
-		return (department.getHeadId()==null)?null:getUserByUid(department.getHeadId(), "ru", "getDepartmentHeadHierarchical");
+		return (department.getHeadId()==null)?null:selectUserByUidInternal(department.getHeadId(), "ru", "getDepartmentHeadHierarchical");
 	}
 
 }

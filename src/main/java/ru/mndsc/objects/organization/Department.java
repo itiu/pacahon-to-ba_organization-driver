@@ -35,7 +35,6 @@ public class Department implements IOrganizationEntity, Serializable
 	private boolean chosen;
 	private String previousId;
 	private String nameEn;
-	private String headId;
 
 	private String organizationId;
 
@@ -87,12 +86,11 @@ public class Department implements IOrganizationEntity, Serializable
 
 	public String getHeadId()
 	{
-		return headId;
+		return attributes.get("headId");
 	}
 
 	public void setHeadId(String headId)
 	{
-		this.headId = headId;
 		attributes.put("headId", headId);
 	}
 
