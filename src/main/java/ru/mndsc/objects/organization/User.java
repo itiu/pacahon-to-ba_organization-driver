@@ -557,6 +557,10 @@ public class User implements IOrganizationEntity, Serializable
 	{
 		return attributes.get("phone");
 	}
+	
+	public String getPhoneExt() {
+		return attributes.get("phoneExt");		
+	}
 
 	public String getPosition()
 	{
@@ -627,7 +631,7 @@ public class User implements IOrganizationEntity, Serializable
 	{
 		return getPhone();
 	}
-
+	
 	public String getUid()
 	{
 		return attributes.get("@");
