@@ -111,6 +111,7 @@ public class Department implements IOrganizationEntity, Serializable
 
 	public void setParentDepartmentId(String previousId)
 	{
+		attributes.put("parentId", previousId);
 		this.previousId = previousId;
 	} // end setPreviousId()
 
@@ -234,6 +235,7 @@ public class Department implements IOrganizationEntity, Serializable
 
 	public void setInternalId(String internalId)
 	{
+		attributes.put("id", internalId);
 		this.secondId = internalId;
 	}
 
@@ -244,6 +246,7 @@ public class Department implements IOrganizationEntity, Serializable
 
 	public void setOrganizationId(String organizationId)
 	{
+		attributes.put("id", organizationId);
 		this.organizationId = organizationId;
 	}
 

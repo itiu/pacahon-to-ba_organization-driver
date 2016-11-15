@@ -1804,6 +1804,5 @@ public class BaOrganizationDriver extends BaDriver
 			if (department==null) { throw new IllegalStateException("Cant get depertment by Id : "+department.getPreviousId()); }
 		}		
 		return (department.getHeadId()==null)?null:selectUserByUidInternal(department.getHeadId(), "ru", "getDepartmentHeadHierarchical");
-	}
-
+	} 
 }
